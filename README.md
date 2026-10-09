@@ -93,7 +93,7 @@ nginx -t && systemctl reload nginx
 4. Upload an application icon.
 5. Set the Web App URL to your domain:
 ```text
-[https://your-subdomain.domain.com](https://your-subdomain.domain.com)
+https://your-subdomain.domain.com
 
 ```
 
@@ -108,7 +108,7 @@ nginx -t && systemctl reload nginx
 * **Via Web Dashboard:** If an update is detected on GitHub, an **Update** badge appears in the header. Clicking it will pull changes and restart the daemon.
 * **Via CLI:** Run the install command and select option `1` to pull the latest version:
 ```bash
-bash <(curl -fsSL [https://raw.githubusercontent.com/h4m1dr/ward/main/install.sh](https://raw.githubusercontent.com/h4m1dr/ward/main/install.sh))
+bash <(curl -fsSL https://raw.githubusercontent.com/h4m1dr/ward/main/install.sh)
 
 ```
 
