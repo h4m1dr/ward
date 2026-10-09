@@ -352,6 +352,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "authenticated": self.is_authenticated(),
                 "panel_name": cfg.get("panel_name", "WARD")
             }).encode("utf-8"))
+
+        elif self.path == "/api/system/apply-update":
+            def do_up():
+                time.sleep(1)
+                inst_dir = os.path.dirname(os.path.abspath(__file__))
+                subprocess.run(f"bash {inst_dir}/update.sh", shell=True)
+            threading.Thread(target=do_up, daemon=True).start()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status":"updating"}')
             return
 
         if not self.is_authenticated() and self.path not in ["/", "/index.html"]:
@@ -429,6 +440,16 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(b'{"status": "error", "message": "Invalid Password"}')
+        elif self.path == "/api/system/apply-update":
+            def do_up():
+                time.sleep(1)
+                inst_dir = os.path.dirname(os.path.abspath(__file__))
+                subprocess.run(f"bash {inst_dir}/update.sh", shell=True)
+            threading.Thread(target=do_up, daemon=True).start()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status":"updating"}')
             return
 
         if self.path == "/api/auth/logout":
