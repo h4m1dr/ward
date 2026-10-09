@@ -3,26 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WARD - Sentinel Dashboard</title>
+<title>WARD Precision Dashboard</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
   --bg: #0b0e14; --card: #151921; --border: #222733; --text: #d1d5db; --muted: #848d97;
-  --blue: #3b82f6; --green: #10b981; --purple: #8b5cf6; --red: #ef4444;
+  --blue: #3b82f6; --green: #10b981; --purple: #8b5cf6; --red: #ef4444; --cyan: #06b6d4;
 }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; font-size: 13px; }
-
-/* Login Modal Overlay */
-#login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #07090e; display: flex; align-items: center; justify-content: center; z-index: 10000; }
-.login-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 280px; box-shadow: 0 8px 30px rgba(0,0,0,0.7); text-align: center; }
-.login-box h3 { margin: 0 0 16px 0; color: #fff; font-size: 17px; }
-.login-box input { width: 100%; box-sizing: border-box; background: #0b0e14; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; text-align: center; }
-.login-box button { width: 100%; background: var(--blue); color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; }
+#login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #07090e; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.login-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 280px; text-align: center; }
+.login-box h3 { margin: 0 0 16px 0; color: #fff; }
+.login-box input { width: 100%; box-sizing: border-box; background: #0b0e14; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
+.login-box button { width: 100%; background: var(--blue); color: #fff; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 .login-err { color: var(--red); font-size: 11px; margin-top: 8px; display: none; }
-
 .header { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
 .tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
-.tab-btn { padding: 6px 14px; border: 1px solid var(--border); background: var(--card); color: var(--muted); border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tab-btn { padding: 6px 14px; border: 1px solid var(--border); background: var(--card); color: var(--muted); border-radius: 6px; cursor: pointer; white-space: nowrap; }
 .tab-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -31,32 +28,33 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 @media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; cursor: grab; user-select: none; }
 .card.dragging { opacity: 0.4; border: 2px dashed var(--blue); }
-.card-top { height: 120px; }
-.card-wide { grid-column: span 2; height: 160px; }
+.card-top { height: 130px; }
+.card-wide { grid-column: span 2; height: 165px; }
 @media (max-width: 500px) { .card-wide { grid-column: span 1; } }
 .c-head { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; }
-.c-val { font-size: 18px; font-weight: 800; color: #fff; margin: 4px 0; }
+.c-val { font-size: 18px; font-weight: 800; color: #fff; margin: 3px 0; }
 .c-sub { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
-.chart-sm { width: 100%; height: 45px; }
+.chart-sm { width: 100%; height: 50px; }
 .chart-lg { width: 100%; height: 95px; }
 canvas { width: 100%; height: 100%; display: block; }
-.list-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 8px; }
-.list-table th, .list-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
-.list-table th { background: #11141b; font-size: 11px; color: var(--muted); }
-.btn { background: var(--blue); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+.list-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.list-table th, .list-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 12px; }
+.list-table th { background: #11141b; color: var(--muted); user-select: none; }
+.th-sort { cursor: pointer; transition: color 0.2s; }
+.th-sort:hover { color: #fff; }
+.btn { background: var(--blue); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
 .btn-green { background: var(--green); }
 .btn-red { background: transparent; border: none; color: var(--red); cursor: pointer; font-weight: bold; }
 .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
 .badge-up { background: rgba(16,185,129,0.15); color: var(--green); }
 .badge-down { background: rgba(239,68,68,0.15); color: var(--red); }
 .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 999; }
-.modal-body { background: var(--card); border: 1px solid var(--border); border-radius: 8px; max-width: 750px; margin: 40px auto; max-height: 80vh; display: flex; flex-direction: column; }
+.modal-body { background: var(--card); border: 1px solid var(--border); border-radius: 8px; max-width: 800px; margin: 30px auto; max-height: 85vh; display: flex; flex-direction: column; }
 .modal-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.modal-content { padding: 12px; overflow-y: auto; }
+.modal-content { padding: 12px; overflow-y: auto; flex: 1; }
 </style>
 </head>
 <body>
-
 <div id="login-overlay">
   <div class="login-box">
     <h3 id="login-title">WARD System</h3>
@@ -69,13 +67,12 @@ canvas { width: 100%; height: 100%; display: block; }
 <div class="header">
   <div>
     <b style="font-size: 15px; color:#fff;" id="p-name">WARD</b> <span style="color:var(--green); font-size:11px;">v1.0.0</span>
-    <span id="update-badge" style="display:none; margin-left:8px;"><button class="btn btn-green" onclick="applyUpdate()">Update</button></span>
     <div style="font-size: 11px; color: var(--muted); margin-top: 2px;" id="h-specs">Probing system...</div>
   </div>
   <div style="text-align: right; font-size: 11px; color: var(--muted);">
     <div>Net: <b id="h-net" style="color:#fff;">0 GiB</b></div>
     <div>Load: <b id="h-load" style="color:#fff;">0.0</b></div>
-    <div style="margin-top:2px;"><a href="javascript:void(0)" onclick="doLogout()" style="color:var(--muted); text-decoration:none;">[Logout]</a></div>
+    <div style="margin-top:2px;"><a href="javascript:void(0)" onclick="doLogout()" style="color:var(--muted); text-decoration:none;">Logout</a></div>
   </div>
 </div>
 
@@ -87,6 +84,7 @@ canvas { width: 100%; height: 100%; display: block; }
   <button class="tab-btn" onclick="switchTab('dir', this)">Storage</button>
 </div>
 
+<!-- Tab: Overview -->
 <div id="res" class="tab-content active">
   <div class="grid" id="drag-grid">
     <div class="card card-top" draggable="true" id="c-cpu">
@@ -98,24 +96,24 @@ canvas { width: 100%; height: 100%; display: block; }
     <div class="card card-top" draggable="true" id="c-ram">
       <div class="c-head"><span>RAM</span><span id="ram-stat">Avg: 0%</span></div>
       <div class="c-val" id="ram-val">0%</div>
-      <div class="c-sub"><span id="ram-sub">0 / 0 MB</span><span id="ram-free">Free: 0 MB</span></div>
+      <div class="c-sub"><span id="ram-sub">0/0 MB</span><span id="ram-free">Free: 0 MB</span></div>
       <div class="chart-sm"><canvas id="cv-ram"></canvas></div>
     </div>
     <div class="card card-top" draggable="true" id="c-swap">
       <div class="c-head"><span>SWAP</span><span>Virtual</span></div>
       <div class="c-val" id="swap-val">0%</div>
-      <div class="c-sub"><span id="swap-sub">0 / 0 MB</span><span>Swap</span></div>
+      <div class="c-sub"><span id="swap-sub">0/0 MB</span><span>Swap</span></div>
       <div class="chart-sm"><canvas id="cv-swap"></canvas></div>
     </div>
     <div class="card card-top" draggable="true" id="c-disk">
       <div class="c-head"><span>STORAGE</span><span id="disk-free" style="color:var(--green);">0 GB Free</span></div>
       <div class="c-val" id="disk-val">0%</div>
-      <div class="c-sub"><span id="disk-sub">0 / 0 GB</span><span>Root FS</span></div>
+      <div class="c-sub"><span id="disk-sub">0/0 GB</span><span>Root FS</span></div>
       <div class="chart-sm"><canvas id="cv-disk"></canvas></div>
     </div>
     <div class="card card-wide" draggable="true" id="c-net">
       <div class="c-head"><span>NETWORK TRAFFIC</span><span id="net-speeds" style="color:#fff;">▲ 0 MB/s ▼ 0 MB/s</span></div>
-      <div class="c-sub"><span>Interface eth0/all</span><span>Live Rate</span></div>
+      <div class="c-sub"><span>Live Interface Rate</span><span>Peak Scale</span></div>
       <div class="chart-lg"><canvas id="cv-net"></canvas></div>
     </div>
     <div class="card card-wide" draggable="true" id="c-conn">
@@ -126,79 +124,200 @@ canvas { width: 100%; height: 100%; display: block; }
   </div>
 </div>
 
+<!-- Tab: Apps -->
 <div id="apps" class="tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
     <b>Pinned Watched Applications</b>
     <button class="btn btn-green" onclick="openTaskManager()">⚡ Open Live Task Manager</button>
   </div>
   <table class="list-table">
-    <thead><tr><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Status</th><th>Unpin</th></tr></thead>
+    <thead>
+      <tr>
+        <th class="th-sort" onclick="sortPinned('name')">Application ⬍</th>
+        <th class="th-sort" onclick="sortPinned('cpu_pct')">CPU % ⬍</th>
+        <th class="th-sort" onclick="sortPinned('memory_mb')">RAM (MB) ⬍</th>
+        <th class="th-sort" onclick="sortPinned('threads')">Threads ⬍</th>
+        <th class="th-sort" onclick="sortPinned('status')">Status ⬍</th>
+        <th>Unpin</th>
+      </tr>
+    </thead>
     <tbody id="app-tbody"></tbody>
   </table>
 </div>
 
+<!-- Tab: Services -->
 <div id="srv" class="tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
     <b>Monitored Systemd Services</b>
-    <div>
+    <div style="display:flex; gap:6px;">
+      <button class="btn btn-green" onclick="openServicesScanner()">⚡ Live System Services Scan</button>
       <input type="text" id="in-srv" placeholder="e.g. nginx" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px;">
-      <button class="btn" onclick="addCfg('service', document.getElementById('in-srv').value)">Add Service</button>
+      <button class="btn" onclick="addCfg('service', document.getElementById('in-srv').value); document.getElementById('in-srv').value='';">Add Service</button>
     </div>
   </div>
   <table class="list-table">
-    <thead><tr><th>Service</th><th>State</th><th>Journalctl Logs</th><th>Action</th></tr></thead>
+    <thead>
+      <tr>
+        <th class="th-sort" onclick="sortServices('name')">Service ⬍</th>
+        <th class="th-sort" onclick="sortServices('state')">State ⬍</th>
+        <th>Journalctl Logs</th>
+        <th>Action</th>
+      </tr>
+    </thead>
     <tbody id="srv-tbody"></tbody>
   </table>
 </div>
 
+<!-- Tab: Ports -->
 <div id="net" class="tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
     <b>Monitored Open Ports</b>
-    <div>
-      <input type="number" id="in-port" placeholder="Port" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; width:70px; border-radius:4px;">
-      <button class="btn" onclick="addCfg('port', document.getElementById('in-port').value)">Watch</button>
+    <div style="display:flex; gap:6px;">
+      <button class="btn btn-green" onclick="openPortsScanner()">⚡ Live Active Ports Scan</button>
+      <input type="number" id="in-port" placeholder="Port" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px; width:90px;">
+      <button class="btn" onclick="addCfg('port', document.getElementById('in-port').value); document.getElementById('in-port').value='';">Watch</button>
     </div>
   </div>
   <table class="list-table">
-    <thead><tr><th>Port</th><th>Status</th><th>Action</th></tr></thead>
+    <thead>
+      <tr>
+        <th class="th-sort" onclick="sortPorts('port')">Port ⬍</th>
+        <th class="th-sort" onclick="sortPorts('status')">Status ⬍</th>
+        <th>Action</th>
+      </tr>
+    </thead>
     <tbody id="port-tbody"></tbody>
   </table>
-  <h4 style="margin:16px 0 6px 0; color:var(--red);">⚠️ Monitored Blocked Ports (Telegram Alert if Opened)</h4>
+  <h4 style="margin:16px 0 6px 0; color:var(--red);">🚨 Monitored Blocked Ports (Telegram Alert if Opened)</h4>
   <div style="display:flex; gap:6px; margin-bottom:10px;">
-    <input type="number" id="in-bport" placeholder="Port" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; width:90px; border-radius:4px;">
-    <button class="btn btn-green" onclick="addCfg('blocked_port', document.getElementById('in-bport').value)">Trap Port</button>
+    <input type="number" id="in-bport" placeholder="Port (e.g. 3306)" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px; width:120px;">
+    <button class="btn btn-green" onclick="addCfg('blocked_port', document.getElementById('in-bport').value); document.getElementById('in-bport').value='';">Trap Port</button>
   </div>
   <div id="blocked-tags" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
 </div>
 
+<!-- Tab: Storage -->
 <div id="dir" class="tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
     <b>Storage Folders Tracker</b>
-    <div>
-      <input type="text" id="dir-name" placeholder="Label" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; width:80px; border-radius:4px;">
+    <div style="display:flex; gap:6px;">
+      <button class="btn btn-green" onclick="openTreeExplorer()">🌳 Explore Folder Tree</button>
+      <input type="text" id="dir-name" placeholder="Label" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px; width:100px;">
       <input type="text" id="dir-path" placeholder="/path/to/folder" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px;">
       <button class="btn" onclick="addFolder()">Track Folder</button>
     </div>
   </div>
   <table class="list-table">
-    <thead><tr><th>Label</th><th>Path</th><th>Size</th><th>Action</th></tr></thead>
+    <thead>
+      <tr>
+        <th class="th-sort" onclick="sortDirs('name')">Label ⬍</th>
+        <th class="th-sort" onclick="sortDirs('path')">Path ⬍</th>
+        <th class="th-sort" onclick="sortDirs('size_mb')">Size ⬍</th>
+        <th>Action</th>
+      </tr>
+    </thead>
     <tbody id="dir-tbody"></tbody>
   </table>
 </div>
 
+<!-- Modals -->
 <div id="tm-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
       <b>⚡ Live Process Snapshot</b>
       <div>
         <button class="btn" onclick="openTaskManager()">Refresh</button>
-        <button class="btn-red" onclick="document.getElementById('tm-modal').style.display='none'">X</button>
+        <button class="btn-red" onclick="document.getElementById('tm-modal').style.display='none'">✕</button>
       </div>
     </div>
     <div class="modal-content">
       <table class="list-table">
-        <thead><tr><th>PID</th><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Pin to Watchlist</th></tr></thead>
+        <thead>
+          <tr>
+            <th class="th-sort" onclick="sortSnapshot('pid')">PID ⬍</th>
+            <th class="th-sort" onclick="sortSnapshot('name')">Application ⬍</th>
+            <th class="th-sort" onclick="sortSnapshot('cpu_pct')">CPU % ⬍</th>
+            <th class="th-sort" onclick="sortSnapshot('memory_mb')">RAM (MB) ⬍</th>
+            <th class="th-sort" onclick="sortSnapshot('threads')">Threads ⬍</th>
+            <th>Pin to Watchlist</th>
+          </tr>
+        </thead>
         <tbody id="tm-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="srv-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <b>⚡ All Active Systemd Services</b>
+      <div>
+        <button class="btn" onclick="openServicesScanner()">Refresh</button>
+        <button class="btn-red" onclick="document.getElementById('srv-modal').style.display='none'">✕</button>
+      </div>
+    </div>
+    <div class="modal-content">
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>Service Name</th>
+            <th>State</th>
+            <th>Active Sub</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="srv-scan-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="port-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <b>⚡ All Open & Listening Ports</b>
+      <div>
+        <button class="btn" onclick="openPortsScanner()">Refresh</button>
+        <button class="btn-red" onclick="document.getElementById('port-modal').style.display='none'">✕</button>
+      </div>
+    </div>
+    <div class="modal-content">
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>Port Number</th>
+            <th>Current Socket Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="port-scan-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="tree-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <b>🌳 Subfolder Tree Explorer</b>
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="tree-search-path" value="/var" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:3px 8px; border-radius:4px;">
+        <button class="btn" onclick="fetchTreeData(document.getElementById('tree-search-path').value)">Inspect</button>
+        <button class="btn-red" onclick="document.getElementById('tree-modal').style.display='none'">✕</button>
+      </div>
+    </div>
+    <div class="modal-content">
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>Folder Name</th>
+            <th>Exact Path</th>
+            <th>Size (MB)</th>
+            <th>Track Folder</th>
+          </tr>
+        </thead>
+        <tbody id="tree-tbody"></tbody>
       </table>
     </div>
   </div>
@@ -208,14 +327,17 @@ canvas { width: 100%; height: 100%; display: block; }
   <div class="modal-body">
     <div class="modal-head">
       <b id="log-title">Service Logs</b>
-      <button class="btn-red" onclick="document.getElementById('log-modal').style.display='none'">X</button>
+      <button class="btn-red" onclick="document.getElementById('log-modal').style.display='none'">✕</button>
     </div>
-    <div class="modal-content"><pre id="log-content" style="background:#05070a; padding:10px; border-radius:4px; font-size:11px; white-space:pre-wrap;"></pre></div>
+    <div class="modal-content"><pre id="log-content" style="background:#05070a; padding:10px; border-radius:4px; font-size:11px; color:#848d97; overflow:auto;"></pre></div>
   </div>
 </div>
 
 <script>
 let sessionToken = localStorage.getItem('ward_token') || '';
+let globalData = null;
+let snapshotData = [];
+let sortStates = {};
 
 async function checkAuth() {
   try {
@@ -226,7 +348,6 @@ async function checkAuth() {
     if (d.authenticated) {
       document.getElementById('login-overlay').style.display = 'none';
       fetchStatus();
-      checkUpdate();
     } else {
       document.getElementById('login-overlay').style.display = 'flex';
     }
@@ -246,7 +367,6 @@ async function doLogin() {
     localStorage.setItem('ward_token', d.token);
     document.getElementById('login-overlay').style.display = 'none';
     fetchStatus();
-    checkUpdate();
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
@@ -265,6 +385,7 @@ function switchTab(id, el) {
   el.classList.add('active');
 }
 
+// Drag & Drop
 const grid = document.getElementById('drag-grid');
 let dragged = null;
 grid.addEventListener('dragstart', (e) => { dragged = e.target.closest('.card'); if (dragged) dragged.classList.add('dragging'); });
@@ -281,34 +402,63 @@ grid.addEventListener('dragover', (e) => {
 function saveOrder() { localStorage.setItem('ward_order', JSON.stringify([...grid.children].map(c => c.id))); }
 function restoreOrder() {
   const saved = localStorage.getItem('ward_order');
-  if (saved) try { JSON.parse(saved).forEach(id => { const el = document.getElementById(id); if (el) grid.appendChild(el); }); } catch(e){}
+  if (saved) try { JSON.parse(saved).forEach(id => { const el = document.getElementById(id); if (el) grid.appendChild(el); }); } catch(e) {}
 }
 restoreOrder();
 
+// Plotters with Vertical Grid Lines & Percentage Scales
 const pLen = 25;
 const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
 
+function drawGrid(ctx, w, h, maxScale, isPct = true) {
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 3]);
+  const levels = [0.25, 0.5, 0.75, 1.0];
+  ctx.fillStyle = 'rgba(132, 141, 151, 0.45)';
+  ctx.font = '9px sans-serif';
+  levels.forEach(lvl => {
+    const y = h - (lvl * (h - 6)) - 3;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+    if (isPct) {
+      ctx.fillText(`${Math.round(lvl * maxScale)}%`, 3, y - 2);
+    }
+  });
+  ctx.setLineDash([]);
+}
+
 function plotSingle(id, arr, maxScale, color, fill) {
   const cvs = document.getElementById(id); if (!cvs) return;
   const ctx = cvs.getContext('2d'), w = cvs.width = cvs.clientWidth, h = cvs.height = cvs.clientHeight;
-  ctx.clearRect(0,0,w,h);
-  ctx.strokeStyle = '#222733'; ctx.setLineDash([2,2]);
-  ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke(); ctx.setLineDash([]);
+  ctx.clearRect(0, 0, w, h);
+  drawGrid(ctx, w, h, maxScale, true);
+
   ctx.beginPath();
   const step = w / (arr.length - 1);
   arr.forEach((val, i) => {
-    const y = h - ((Math.min(val / maxScale, 1)) * (h - 4)) - 2;
+    const y = h - ((Math.min(val / maxScale, 1)) * (h - 6)) - 3;
     i === 0 ? ctx.moveTo(0, y) : ctx.lineTo(i * step, y);
   });
-  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.strokeStyle = color; ctx.lineWidth = 1.6; ctx.stroke();
   if (fill) { ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); }
 }
 
-function plotDouble(id, arr1, arr2, maxScale, c1, c2) {
+function plotDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   const cvs = document.getElementById(id); if (!cvs) return;
   const ctx = cvs.getContext('2d'), w = cvs.width = cvs.clientWidth, h = cvs.height = cvs.clientHeight;
-  ctx.clearRect(0,0,w,h);
+  ctx.clearRect(0, 0, w, h);
+  drawGrid(ctx, w, h, maxScale, false);
+
+  // Labels for non-percentage charts
+  ctx.fillStyle = 'rgba(132, 141, 151, 0.45)';
+  ctx.font = '9px sans-serif';
+  ctx.fillText(`${Math.round(maxScale)}${unit}`, 3, 10);
+  ctx.fillText(`${Math.round(maxScale / 2)}${unit}`, 3, h / 2);
+
   const step = w / (arr1.length - 1);
   [arr1, arr2].forEach((arr, idx) => {
     ctx.beginPath();
@@ -316,7 +466,7 @@ function plotDouble(id, arr1, arr2, maxScale, c1, c2) {
       const y = h - ((Math.min(val / maxScale, 1)) * (h - 6)) - 3;
       i === 0 ? ctx.moveTo(0, y) : ctx.lineTo(i * step, y);
     });
-    ctx.strokeStyle = idx === 0 ? c1 : c2; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = idx === 0 ? c1 : c2; ctx.lineWidth = 1.6; ctx.stroke();
   });
 }
 
@@ -325,6 +475,8 @@ async function fetchStatus() {
     const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
     if (res.status === 401) { checkAuth(); return; }
     const d = await res.json();
+    globalData = d;
+
     document.getElementById('p-name').innerText = d.panel_name || 'WARD';
     document.getElementById('h-specs').innerText = `CPU: ${d.cpu.model} (${d.cpu.cores} Core) | Uptime: ${d.uptime}`;
     document.getElementById('h-load').innerText = d.load_avg;
@@ -357,79 +509,160 @@ async function fetchStatus() {
     document.getElementById('net-speeds').innerText = `▲ ${d.network.speed_tx_mb} MB/s ▼ ${d.network.speed_rx_mb} MB/s`;
     d_tx.shift(); d_tx.push(d.network.speed_tx_mb);
     d_rx.shift(); d_rx.push(d.network.speed_rx_mb);
-    plotDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#3b82f6', '#10b981');
+    plotDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#3b82f6', '#10b981', 'M');
 
     document.getElementById('conn-totals').innerText = `${d.connections.tcp + d.connections.udp} Open Sockets`;
     document.getElementById('conn-sub').innerText = `TCP: ${d.connections.tcp} | UDP: ${d.connections.udp}`;
     d_tcp.shift(); d_tcp.push(d.connections.tcp);
     d_udp.shift(); d_udp.push(d.connections.udp);
-    plotDouble('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#10b981', '#8b5cf6');
+    plotDouble('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#10b981', '#8b5cf6', '');
 
-    // Apps Watchlist
-    let aH = '';
-    d.apps.forEach(a => {
-      aH += `<tr><td><b>${a.name}</b></td><td>${a.cpu_pct}%</td><td>${a.memory_mb} MB</td><td>${a.threads}</td><td><span class="badge ${a.status==='Active'?'badge-up':'badge-down'}">${a.status}</span></td><td><button class="btn-red" onclick="remCfg('app', '${a.name}')">X</button></td></tr>`;
-    });
-    document.getElementById('app-tbody').innerHTML = aH;
-
-    // Services
-    let sH = '';
-    for (const [k, v] of Object.entries(d.services)) {
-      sH += `<tr><td><b>${k}</b></td><td><span class="badge ${v==='Running'?'badge-up':'badge-down'}">${v}</span></td><td><button class="btn" onclick="viewLogs('${k}')">Logs</button></td><td><button class="btn-red" onclick="remCfg('service', '${k}')">X</button></td></tr>`;
-    }
-    document.getElementById('srv-tbody').innerHTML = sH;
-
-    // Ports
-    let pH = '';
-    for (const [k, v] of Object.entries(d.ports)) {
-      pH += `<tr><td><b>Port ${k}</b></td><td><span class="badge ${v==='Listening'?'badge-up':'badge-down'}">${v}</span></td><td><button class="btn-red" onclick="remCfg('port', '${k}')">X</button></td></tr>`;
-    }
-    document.getElementById('port-tbody').innerHTML = pH;
-
-    // Blocked Ports Tags
-    let bH = '';
-    d.blocked_ports.forEach(bp => {
-      bH += `<span class="badge badge-down" style="padding:4px 8px;">Port ${bp} <b style="cursor:pointer;" onclick="remCfg('blocked_port', '${bp}')">×</b></span>`;
-    });
-    document.getElementById('blocked-tags').innerHTML = bH;
-
-    // Folders
-    let dH = '';
-    for (const [k, v] of Object.entries(d.caches)) {
-      dH += `<tr><td><b>${k}</b></td><td>${v.path}</td><td><b>${v.size_mb} MB</b></td><td><button class="btn-red" onclick="remCfg('directory', '${k}')">X</button></td></tr>`;
-    }
-    document.getElementById('dir-tbody').innerHTML = dH;
+    renderPinnedTable();
+    renderServicesTable();
+    renderPortsTable();
+    renderDirsTable();
   } catch(e) {}
 }
 
-async function checkUpdate() {
-  try {
-    const res = await fetch('/api/system/check-update', { headers: { 'X-Session-Token': sessionToken } });
-    const d = await res.json();
-    if (d.has_update) {
-      document.getElementById('update-badge').style.display = 'inline-block';
-    }
-  } catch(e) {}
+// Table Renders & Dynamic Sorters
+function genericSort(arr, key, stateKey) {
+  sortStates[stateKey] = !sortStates[stateKey];
+  const asc = sortStates[stateKey];
+  return arr.sort((a, b) => {
+    let v1 = a[key], v2 = b[key];
+    if (typeof v1 === 'string') return asc ? v1.localeCompare(v2) : v2.localeCompare(v1);
+    return asc ? (v1 - v2) : (v2 - v1);
+  });
 }
 
-async function applyUpdate() {
-  if (confirm("Apply update from GitHub and restart daemon?")) {
-    await fetch('/api/system/apply-update', { method: 'POST', headers: { 'X-Session-Token': sessionToken }, body: '{}' });
-    alert("Updating in background... Page will reload shortly.");
-    setTimeout(() => location.reload(), 4000);
+function renderPinnedTable() {
+  if (!globalData) return;
+  let html = '';
+  globalData.apps.forEach(a => {
+    html += `<tr><td><b>${a.name}</b></td><td>${a.cpu_pct}%</td><td>${a.memory_mb} MB</td><td>${a.threads}</td><td><span class="badge ${a.status==='Active'?'badge-up':'badge-down'}">${a.status}</span></td><td><button class="btn-red" onclick="remCfg('app', '${a.name}')">✕</button></td></tr>`;
+  });
+  document.getElementById('app-tbody').innerHTML = html;
+}
+function sortPinned(k) { if (globalData) { genericSort(globalData.apps, k, 'pinned_' + k); renderPinnedTable(); } }
+
+function renderServicesTable() {
+  if (!globalData) return;
+  let html = '';
+  for (const [k, v] of Object.entries(globalData.services)) {
+    html += `<tr><td><b>${k}</b></td><td><span class="badge ${v==='Running'?'badge-up':'badge-down'}">${v}</span></td><td><button class="btn" onclick="viewLogs('${k}')">Logs</button></td><td><button class="btn-red" onclick="remCfg('service', '${k}')">✕</button></td></tr>`;
   }
+  document.getElementById('srv-tbody').innerHTML = html;
+}
+function sortServices(k) {
+  if (!globalData) return;
+  const list = Object.entries(globalData.services).map(([name, state]) => ({ name, state }));
+  genericSort(list, k, 'srv_' + k);
+  const remapped = {};
+  list.forEach(i => remapped[i.name] = i.state);
+  globalData.services = remapped;
+  renderServicesTable();
 }
 
+function renderPortsTable() {
+  if (!globalData) return;
+  let html = '';
+  for (const [k, v] of Object.entries(globalData.ports)) {
+    html += `<tr><td><b>Port ${k}</b></td><td><span class="badge ${v==='Listening'?'badge-up':'badge-down'}">${v}</span></td><td><button class="btn-red" onclick="remCfg('port', '${k}')">✕</button></td></tr>`;
+  }
+  document.getElementById('port-tbody').innerHTML = html;
+  let bH = '';
+  globalData.blocked_ports.forEach(bp => {
+    bH += `<span class="badge badge-down" style="padding:4px 8px;">Port ${bp} <b style="cursor:pointer;" onclick="remCfg('blocked_port', '${bp}')">✕</b></span>`;
+  });
+  document.getElementById('blocked-tags').innerHTML = bH;
+}
+function sortPorts(k) {
+  if (!globalData) return;
+  const list = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status }));
+  genericSort(list, k, 'port_' + k);
+  const remapped = {};
+  list.forEach(i => remapped[i.port] = i.status);
+  globalData.ports = remapped;
+  renderPortsTable();
+}
+
+function renderDirsTable() {
+  if (!globalData) return;
+  let html = '';
+  for (const [k, v] of Object.entries(globalData.caches)) {
+    html += `<tr><td><b>${k}</b></td><td>${v.path}</td><td><b>${v.size_mb} MB</b></td><td><button class="btn-red" onclick="remCfg('directory', '${k}')">✕</button></td></tr>`;
+  }
+  document.getElementById('dir-tbody').innerHTML = html;
+}
+function sortDirs(k) {
+  if (!globalData) return;
+  const list = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb }));
+  genericSort(list, k, 'dir_' + k);
+  const remapped = {};
+  list.forEach(i => remapped[i.name] = { path: i.path, size_mb: i.size_mb });
+  globalData.caches = remapped;
+  renderDirsTable();
+}
+
+// Live Snapshots
 async function openTaskManager() {
   document.getElementById('tm-modal').style.display = 'block';
-  document.getElementById('tm-tbody').innerHTML = '<tr><td colspan="6">Scanning running processes...</td></tr>';
+  document.getElementById('tm-tbody').innerHTML = '<tr><td colspan="6">Scanning live processes...</td></tr>';
   const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } });
   const d = await res.json();
+  snapshotData = d.processes;
+  renderSnapshotTable();
+}
+function renderSnapshotTable() {
   let html = '';
-  d.processes.forEach(p => {
-    html += `<tr><td>${p.pid}</td><td><b>${p.name}</b></td><td>${p.cpu_pct}%</td><td>${p.memory_mb} MB</td><td>${p.threads}</td><td><button class="btn" onclick="addCfg('app', '${p.name}')">+ Watch</button></td></tr>`;
+  snapshotData.forEach(p => {
+    html += `<tr><td>${p.pid}</td><td><b>${p.name}</b></td><td>${p.cpu_pct}%</td><td>${p.memory_mb} MB</td><td>${p.threads}</td><td><button class="btn btn-green" onclick="addCfg('app', '${p.name}')">+ Watch</button></td></tr>`;
   });
   document.getElementById('tm-tbody').innerHTML = html;
+}
+function sortSnapshot(k) { genericSort(snapshotData, k, 'snap_' + k); renderSnapshotTable(); }
+
+async function openServicesScanner() {
+  document.getElementById('srv-modal').style.display = 'block';
+  document.getElementById('srv-scan-tbody').innerHTML = '<tr><td colspan="4">Scanning systemd daemons...</td></tr>';
+  const res = await fetch('/api/services/snapshot', { headers: { 'X-Session-Token': sessionToken } });
+  const d = await res.json();
+  let html = '';
+  d.services.forEach(s => {
+    html += `<tr><td><b>${s.name}</b></td><td><span class="badge ${s.state==='active'?'badge-up':'badge-down'}">${s.state}</span></td><td>${s.sub}</td><td><button class="btn btn-green" onclick="addCfg('service', '${s.name}')">+ Track</button></td></tr>`;
+  });
+  document.getElementById('srv-scan-tbody').innerHTML = html;
+}
+
+async function openPortsScanner() {
+  document.getElementById('port-modal').style.display = 'block';
+  document.getElementById('port-scan-tbody').innerHTML = '<tr><td colspan="3">Probing listening sockets...</td></tr>';
+  const res = await fetch('/api/ports/snapshot', { headers: { 'X-Session-Token': sessionToken } });
+  const d = await res.json();
+  let html = '';
+  d.ports.forEach(p => {
+    html += `<tr><td><b>Port ${p}</b></td><td><span class="badge badge-up">Listening</span></td><td><button class="btn btn-green" onclick="addCfg('port', '${p}')">+ Watch</button></td></tr>`;
+  });
+  document.getElementById('port-scan-tbody').innerHTML = html;
+}
+
+async function openTreeExplorer() {
+  document.getElementById('tree-modal').style.display = 'block';
+  fetchTreeData(document.getElementById('tree-search-path').value);
+}
+async function fetchTreeData(p) {
+  document.getElementById('tree-tbody').innerHTML = '<tr><td colspan="4">Calculating folder sizes...</td></tr>';
+  const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(p)}`, { headers: { 'X-Session-Token': sessionToken } });
+  const d = await res.json();
+  let html = '';
+  d.items.forEach(item => {
+    html += `<tr><td><b>${item.name}</b></td><td>${item.path}</td><td>${item.size_mb} MB</td><td><button class="btn btn-green" onclick="trackDiscoveredDir('${item.name}', '${item.path}')">+ Track Folder</button></td></tr>`;
+  });
+  document.getElementById('tree-tbody').innerHTML = html || '<tr><td colspan="4">No accessible subfolders found.</td></tr>';
+}
+function trackDiscoveredDir(name, path) {
+  addCfgDirectory(name, path);
+  alert(`Added ${name} (${path}) to watchlist.`);
 }
 
 async function viewLogs(service) {
@@ -442,21 +675,22 @@ async function viewLogs(service) {
 
 async function addCfg(type, value) {
   if (!value) return;
-  await fetch('/api/config/add', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-Session-Token': sessionToken}, body: JSON.stringify({ type, value }) });
+  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
   fetchStatus();
 }
-
 async function remCfg(type, value) {
-  await fetch('/api/config/remove', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-Session-Token': sessionToken}, body: JSON.stringify({ type, value }) });
+  await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
   fetchStatus();
 }
-
+async function addCfgDirectory(name, path) {
+  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name, value: path }) });
+  fetchStatus();
+}
 async function addFolder() {
   const name = document.getElementById('dir-name').value, path = document.getElementById('dir-path').value;
   if (!name || !path) return;
-  await fetch('/api/config/add', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-Session-Token': sessionToken}, body: JSON.stringify({ type: 'directory', name, value: path }) });
+  await addCfgDirectory(name, path);
   document.getElementById('dir-name').value = ''; document.getElementById('dir-path').value = '';
-  fetchStatus();
 }
 
 checkAuth();
