@@ -66,7 +66,8 @@ canvas { width: 100%; height: 100%; display: block; }
 
 <div class="header">
   <div>
-    <b style="font-size: 15px; color:#fff;" id="p-name">WARD</b> <span style="color:var(--green); font-size:11px;">v1.0.0</span>
+    <b style="font-size: 15px; color:#fff;" id="p-name">WARD</b> <span style="color:var(--green); font-size:11px;" id="panel-ver">v1.0.0</span>
+    <span id="update-badge" style="display:none; margin-left:8px;"></span>
     <div style="font-size: 11px; color: var(--muted); margin-top: 2px;" id="h-specs">Probing system...</div>
   </div>
   <div style="text-align: right; font-size: 11px; color: var(--muted);">
@@ -150,7 +151,7 @@ canvas { width: 100%; height: 100%; display: block; }
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
     <b>Monitored Systemd Services</b>
     <div style="display:flex; gap:6px;">
-      <button class="btn btn-green" onclick="openServicesScanner()">⚡ Live System Services Scan</button>
+      <button class="btn btn-green" onclick="openServicesScanner()">⚡ Live Services Scan</button>
       <input type="text" id="in-srv" placeholder="e.g. nginx" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px;">
       <button class="btn" onclick="addCfg('service', document.getElementById('in-srv').value); document.getElementById('in-srv').value='';">Add Service</button>
     </div>
@@ -173,7 +174,7 @@ canvas { width: 100%; height: 100%; display: block; }
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
     <b>Monitored Open Ports</b>
     <div style="display:flex; gap:6px;">
-      <button class="btn btn-green" onclick="openPortsScanner()">⚡ Live Active Ports Scan</button>
+      <button class="btn btn-green" onclick="openPortsScanner()">⚡ Live Ports Scan</button>
       <input type="number" id="in-port" placeholder="Port" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px; width:90px;">
       <button class="btn" onclick="addCfg('port', document.getElementById('in-port').value); document.getElementById('in-port').value='';">Watch</button>
     </div>
@@ -323,6 +324,27 @@ canvas { width: 100%; height: 100%; display: block; }
   </div>
 </div>
 
+<div id="update-modal" class="modal">
+  <div class="modal-body" style="max-width:500px;">
+    <div class="modal-head">
+      <b>🚀 WARD System Update Available</b>
+      <button class="btn-red" onclick="document.getElementById('update-modal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-content" style="line-height:1.6;">
+      <p id="up-msg">A new version is ready to install.</p>
+      <div style="background:#07090e; border:1px solid var(--border); padding:10px; border-radius:6px; margin:12px 0;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Update via Server Terminal:</div>
+        <code style="color:var(--green); font-size:13px;">ward-update</code>
+        <div style="font-size:10px; color:var(--muted); margin-top:4px;">Or: bash /opt/ward/update.sh</div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+        <button class="btn" onclick="document.getElementById('update-modal').style.display='none'">Close</button>
+        <button class="btn btn-green" onclick="applyUpdateNow()">Apply Update Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="log-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
@@ -348,6 +370,7 @@ async function checkAuth() {
     if (d.authenticated) {
       document.getElementById('login-overlay').style.display = 'none';
       fetchStatus();
+      checkUpdate();
     } else {
       document.getElementById('login-overlay').style.display = 'flex';
     }
@@ -367,6 +390,7 @@ async function doLogin() {
     localStorage.setItem('ward_token', d.token);
     document.getElementById('login-overlay').style.display = 'none';
     fetchStatus();
+    checkUpdate();
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
@@ -406,7 +430,7 @@ function restoreOrder() {
 }
 restoreOrder();
 
-// Plotters with Vertical Grid Lines & Percentage Scales
+// Accurate Plotters with Dotted Grids
 const pLen = 25;
 const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
@@ -453,7 +477,6 @@ function plotDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   ctx.clearRect(0, 0, w, h);
   drawGrid(ctx, w, h, maxScale, false);
 
-  // Labels for non-percentage charts
   ctx.fillStyle = 'rgba(132, 141, 151, 0.45)';
   ctx.font = '9px sans-serif';
   ctx.fillText(`${Math.round(maxScale)}${unit}`, 3, 10);
@@ -524,7 +547,7 @@ async function fetchStatus() {
   } catch(e) {}
 }
 
-// Table Renders & Dynamic Sorters
+// Sorters
 function genericSort(arr, key, stateKey) {
   sortStates[stateKey] = !sortStates[stateKey];
   const asc = sortStates[stateKey];
@@ -604,7 +627,7 @@ function sortDirs(k) {
   renderDirsTable();
 }
 
-// Live Snapshots
+// Scanners
 async function openTaskManager() {
   document.getElementById('tm-modal').style.display = 'block';
   document.getElementById('tm-tbody').innerHTML = '<tr><td colspan="6">Scanning live processes...</td></tr>';
@@ -656,7 +679,7 @@ async function fetchTreeData(p) {
   const d = await res.json();
   let html = '';
   d.items.forEach(item => {
-    html += `<tr><td><b>${item.name}</b></td><td>${item.path}</td><td>${item.size_mb} MB</td><td><button class="btn btn-green" onclick="trackDiscoveredDir('${item.name}', '${item.path}')">+ Track Folder</button></td></tr>`;
+    html += `<tr><td><b>${item.name}</b></td><td>${item.path}</td><td>${item.size_mb} MB</td><td><button class="btn btn-green" onclick="trackDiscoveredDir('${item.name}', '${item.path}')">+ Track</button></td></tr>`;
   });
   document.getElementById('tree-tbody').innerHTML = html || '<tr><td colspan="4">No accessible subfolders found.</td></tr>';
 }
@@ -673,6 +696,33 @@ async function viewLogs(service) {
   document.getElementById('log-content').innerText = await res.text();
 }
 
+// Updater
+async function checkUpdate() {
+  try {
+    const res = await fetch('/api/system/check-update', { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    document.getElementById('panel-ver').innerText = `v${d.current}`;
+    if (d.has_update) {
+      const b = document.getElementById('update-badge');
+      b.style.display = 'inline-block';
+      b.innerHTML = `<button class="btn btn-green" onclick="showUpdateModal('${d.latest}', '${d.current}')">⬆ Update (${d.latest})</button>`;
+    }
+  } catch(e) {}
+}
+
+function showUpdateModal(latest, current) {
+  document.getElementById('up-msg').innerText = `A new version (v${latest}) is available on GitHub! Your current version is v${current}.`;
+  document.getElementById('update-modal').style.display = 'block';
+}
+
+async function applyUpdateNow() {
+  document.getElementById('update-modal').style.display = 'none';
+  await fetch('/api/system/apply-update', { method: 'POST', headers: { 'X-Session-Token': sessionToken } });
+  alert("Updating in background... The page will refresh in 5 seconds.");
+  setTimeout(() => location.reload(), 5000);
+}
+
+// Config Helpers
 async function addCfg(type, value) {
   if (!value) return;
   await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
