@@ -14,6 +14,7 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# Check if the script is run as root
 check_root() {
     if [ "$EUID" -ne 0 ]; then
         echo -e "${RED}[-] Error: Please run this script as root.${NC}"
@@ -21,6 +22,7 @@ check_root() {
     fi
 }
 
+# Get the current installation directory from systemd or use default
 get_install_dir() {
     if [ -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
         DIR=$(grep "WorkingDirectory=" "/etc/systemd/system/${SERVICE_NAME}.service" | cut -d'=' -f2 | tr -d ' ')
@@ -32,6 +34,7 @@ get_install_dir() {
     echo "$DEFAULT_INSTALL_DIR"
 }
 
+# Generate or update the systemd service file
 generate_service_file() {
     local target_dir="$1"
     cat << EOF > "/etc/systemd/system/${SERVICE_NAME}.service"
@@ -51,6 +54,32 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
     systemctl daemon-reload
+}
+
+# Safe helper function to update JSON config without shell injection risks
+update_config() {
+    local config_file="$1"
+    local key="$2"
+    local value="$3"
+    local is_int="$4" # "true" if the value should be an integer
+
+    python3 -c '
+import json, sys
+try:
+    with open(sys.argv[1], "r") as f:
+        data = json.load(f)
+    
+    if sys.argv[4] == "true":
+        data[sys.argv[2]] = int(sys.argv[3])
+    else:
+        data[sys.argv[2]] = sys.argv[3]
+        
+    with open(sys.argv[1], "w") as f:
+        json.dump(data, f, indent=2)
+except Exception as e:
+    print("Error updating config:", e)
+    sys.exit(1)
+' "$config_file" "$key" "$value" "$is_int"
 }
 
 # 1. Full Automated Installation
@@ -79,10 +108,12 @@ install_ward() {
     echo ""
     ADMIN_PASS=${ADMIN_PASS:-"admin1234"}
 
+    # Clone or reset repository
     if [ -d "$INSTALL_DIR/.git" ]; then
         echo -e "${CYAN}[+] Resetting local directory in ${INSTALL_DIR}...${NC}"
         cd "$INSTALL_DIR"
-        git reset --hard HEAD
+        git fetch origin main
+        git reset --hard origin/main
         git pull origin main
     else
         echo -e "${CYAN}[+] Cloning repository into ${INSTALL_DIR}...${NC}"
@@ -91,34 +122,30 @@ install_ward() {
         cd "$INSTALL_DIR"
     fi
 
+    # Generate password hash
     PASS_HASH=$(echo -n "$ADMIN_PASS" | sha256sum | awk '{print $1}')
 
-    echo -e "${CYAN}[+] Generating config.json...${NC}"
-    cat << CONFIG_EOF > "$INSTALL_DIR/config.json"
-{
-  "panel_name": "$CUSTOM_NAME",
-  "panel_port": $CUSTOM_PORT,
-  "domain": "$CUSTOM_DOMAIN",
-  "auth_enabled": true,
-  "admin_password_hash": "$PASS_HASH",
-  "telegram": {
-    "bot_token": "",
-    "chat_id": ""
-  },
-  "monitored_services": ["nginx", "ssh"],
-  "monitored_ports": [80, 443, 22],
-  "blocked_ports_trigger": [21, 23, 3306, 5432, 6379],
-  "monitored_directories": {
-    "system_cache": "/var/cache",
-    "tmp": "/tmp"
-  },
-  "monitored_apps": [
-    "dockerd",
-    "xray"
-  ],
-  "scheduled_tasks": []
+    # Safely generate config.json using Python to avoid heredoc escaping issues
+    echo -e "${CYAN}[+] Generating config.json safely...${NC}"
+    python3 -c '
+import json, sys, hashlib
+config = {
+    "panel_name": sys.argv[1],
+    "panel_port": int(sys.argv[2]),
+    "domain": sys.argv[3],
+    "auth_enabled": True,
+    "admin_password_hash": sys.argv[4],
+    "telegram": {"bot_token": "", "chat_id": ""},
+    "monitored_services": ["nginx", "ssh"],
+    "monitored_ports": [80, 443, 22],
+    "blocked_ports_trigger": [21, 23, 3306, 5432, 6379],
+    "monitored_directories": {"system_cache": "/var/cache", "tmp": "/tmp"},
+    "monitored_apps": ["dockerd", "xray"],
+    "scheduled_tasks": []
 }
-CONFIG_EOF
+with open("config.json", "w") as f:
+    json.dump(config, f, indent=2)
+' "$CUSTOM_NAME" "$CUSTOM_PORT" "$CUSTOM_DOMAIN" "$PASS_HASH"
 
     # Configure update script & command alias
     if [ -f "$INSTALL_DIR/update.sh" ]; then
@@ -169,17 +196,19 @@ edit_ward_config() {
         1)
             read -p "Enter New Panel Title: " NEW_TITLE
             if [ -n "$NEW_TITLE" ]; then
-                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['panel_name']='${NEW_TITLE}'; json.dump(d, open(f, 'w'), indent=2)"
+                update_config "$CONFIG_FILE" "panel_name" "$NEW_TITLE" "false"
                 systemctl restart "$SERVICE_NAME"
                 echo -e "${GREEN}[√] Panel title updated and service restarted.${NC}"
             fi
             ;;
         2)
             read -p "Enter New Service Port: " NEW_PORT
-            if [ -n "$NEW_PORT" ]; then
-                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['panel_port']=int(${NEW_PORT}); json.dump(d, open(f, 'w'), indent=2)"
+            if [[ "$NEW_PORT" =~ ^[0-9]+$ ]]; then
+                update_config "$CONFIG_FILE" "panel_port" "$NEW_PORT" "true"
                 systemctl restart "$SERVICE_NAME"
                 echo -e "${GREEN}[√] Port changed to ${NEW_PORT}. Remember to update Nginx proxy_pass!${NC}"
+            else
+                echo -e "${RED}[-] Invalid port number.${NC}"
             fi
             ;;
         3)
@@ -187,7 +216,7 @@ edit_ward_config() {
             echo ""
             if [ -n "$NEW_PASS" ]; then
                 NEW_HASH=$(echo -n "$NEW_PASS" | sha256sum | awk '{print $1}')
-                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['admin_password_hash']='${NEW_HASH}'; json.dump(d, open(f, 'w'), indent=2)"
+                update_config "$CONFIG_FILE" "admin_password_hash" "$NEW_HASH" "false"
                 systemctl restart "$SERVICE_NAME"
                 echo -e "${GREEN}[√] Admin password updated successfully.${NC}"
             fi
@@ -203,6 +232,7 @@ edit_ward_config() {
                     chmod +x "$NEW_DIR/update.sh"
                     ln -sf "$NEW_DIR/update.sh" /usr/local/bin/ward-update
                 fi
+                systemctl daemon-reload # Crucial step added
                 systemctl restart "$SERVICE_NAME"
                 echo -e "${GREEN}[√] Project moved to ${NEW_DIR} and service reconfigured.${NC}"
             fi
