@@ -352,17 +352,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "authenticated": self.is_authenticated(),
                 "panel_name": cfg.get("panel_name", "WARD")
             }).encode("utf-8"))
-
-        elif self.path == "/api/system/apply-update":
-            def do_up():
-                time.sleep(1)
-                inst_dir = os.path.dirname(os.path.abspath(__file__))
-                subprocess.run(f"bash {inst_dir}/update.sh", shell=True)
-            threading.Thread(target=do_up, daemon=True).start()
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(b'{"status":"updating"}')
             return
 
         if not self.is_authenticated() and self.path not in ["/", "/index.html"]:
@@ -377,6 +366,32 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(collect_metrics()).encode("utf-8"))
+        elif self.path == "/api/system/check-update":
+            curr_v = "1.0.0"
+            if os.path.exists(VERSION_PATH):
+                try:
+                    with open(VERSION_PATH) as f:
+                        curr_v = json.load(f).get("version", "1.0.0")
+                except Exception:
+                    pass
+            remote_v = curr_v
+            try:
+                url = "https://raw.githubusercontent.com/h4m1dr/ward/main/version.json"
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=4) as response:
+                    data = json.loads(response.read().decode())
+                    remote_v = data.get("version", curr_v)
+            except Exception:
+                pass
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "current": curr_v,
+                "latest": remote_v,
+                "has_update": (remote_v != curr_v)
+            }).encode("utf-8"))
         elif self.path == "/api/taskmanager/snapshot":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -440,7 +455,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(b'{"status": "error", "message": "Invalid Password"}')
-        elif self.path == "/api/system/apply-update":
+            return
+
+        if self.path == "/api/system/apply-update":
             def do_up():
                 time.sleep(1)
                 inst_dir = os.path.dirname(os.path.abspath(__file__))
