@@ -52,9 +52,20 @@ canvas { width: 100%; height: 100%; display: block; }
 .modal-body { background: var(--card); border: 1px solid var(--border); border-radius: 8px; max-width: 800px; margin: 30px auto; max-height: 85vh; display: flex; flex-direction: column; }
 .modal-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .modal-content { padding: 12px; overflow-y: auto; flex: 1; }
+
+/* Toast Notification Styles (NEW) */
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 10px 16px; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.3s ease-out; display: flex; align-items: center; gap: 8px; }
+.toast-success { background: var(--green); border: 1px solid rgba(255,255,255,0.1); }
+.toast-error { background: var(--red); border: 1px solid rgba(255,255,255,0.1); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 </style>
 </head>
 <body>
+
+<!-- Toast Container (NEW) -->
+<div id="toast-container"></div>
+
 <div id="login-overlay">
   <div class="login-box">
     <h3 id="login-title">WARD System</h3>
@@ -66,14 +77,19 @@ canvas { width: 100%; height: 100%; display: block; }
 
 <div class="header">
   <div>
-    <b style="font-size: 15px; color:#fff;" id="p-name">WARD</b> <span style="color:var(--green); font-size:11px;" id="panel-ver">v1.0.0</span>
-    <span id="update-badge" style="display:none; margin-left:8px;"></span>
-    <div style="font-size: 11px; color: var(--muted); margin-top: 2px;" id="h-specs">Probing system...</div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <!-- Connection Status Indicator (NEW) -->
+      <span id="conn-status" style="width:8px; height:8px; border-radius:50%; background:var(--red);"></span>
+      <b style="font-size: 15px; color:#fff;" id="p-name">WARD</b> 
+      <span style="color:var(--green); font-size:11px;" id="panel-ver">v1.0.0</span>
+      <span id="update-badge" style="display:none; margin-left:8px;"></span>
+    </div>
+    <div style="font-size: 11px; color: var(--muted); margin-top: 4px;" id="h-specs">Probing system...</div>
   </div>
   <div style="text-align: right; font-size: 11px; color: var(--muted);">
     <div>Net: <b id="h-net" style="color:#fff;">0 GiB</b></div>
     <div>Load: <b id="h-load" style="color:#fff;">0.0</b></div>
-    <div style="margin-top:2px;"><a href="javascript:void(0)" onclick="doLogout()" style="color:var(--muted); text-decoration:none;">Logout</a></div>
+    <div style="margin-top:4px;"><a href="javascript:void(0)" onclick="doLogout()" style="color:var(--muted); text-decoration:none;">Logout</a></div>
   </div>
 </div>
 
@@ -134,11 +150,11 @@ canvas { width: 100%; height: 100%; display: block; }
   <table class="list-table">
     <thead>
       <tr>
-        <th class="th-sort" onclick="sortPinned('name')">Application ⬍</th>
-        <th class="th-sort" onclick="sortPinned('cpu_pct')">CPU % ⬍</th>
-        <th class="th-sort" onclick="sortPinned('memory_mb')">RAM (MB) ⬍</th>
-        <th class="th-sort" onclick="sortPinned('threads')">Threads ⬍</th>
-        <th class="th-sort" onclick="sortPinned('status')">Status ⬍</th>
+        <th class="th-sort" onclick="toggleSort('apps', 'name')">Application ⬍</th>
+        <th class="th-sort" onclick="toggleSort('apps', 'cpu_pct')">CPU % ⬍</th>
+        <th class="th-sort" onclick="toggleSort('apps', 'memory_mb')">RAM (MB) ⬍</th>
+        <th class="th-sort" onclick="toggleSort('apps', 'threads')">Threads ⬍</th>
+        <th class="th-sort" onclick="toggleSort('apps', 'status')">Status ⬍</th>
         <th>Unpin</th>
       </tr>
     </thead>
@@ -159,8 +175,8 @@ canvas { width: 100%; height: 100%; display: block; }
   <table class="list-table">
     <thead>
       <tr>
-        <th class="th-sort" onclick="sortServices('name')">Service ⬍</th>
-        <th class="th-sort" onclick="sortServices('state')">State ⬍</th>
+        <th class="th-sort" onclick="toggleSort('services', 'name')">Service ⬍</th>
+        <th class="th-sort" onclick="toggleSort('services', 'state')">State ⬍</th>
         <th>Journalctl Logs</th>
         <th>Action</th>
       </tr>
@@ -182,8 +198,8 @@ canvas { width: 100%; height: 100%; display: block; }
   <table class="list-table">
     <thead>
       <tr>
-        <th class="th-sort" onclick="sortPorts('port')">Port ⬍</th>
-        <th class="th-sort" onclick="sortPorts('status')">Status ⬍</th>
+        <th class="th-sort" onclick="toggleSort('ports', 'port')">Port ⬍</th>
+        <th class="th-sort" onclick="toggleSort('ports', 'status')">Status ⬍</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -211,9 +227,9 @@ canvas { width: 100%; height: 100%; display: block; }
   <table class="list-table">
     <thead>
       <tr>
-        <th class="th-sort" onclick="sortDirs('name')">Label ⬍</th>
-        <th class="th-sort" onclick="sortDirs('path')">Path ⬍</th>
-        <th class="th-sort" onclick="sortDirs('size_mb')">Size ⬍</th>
+        <th class="th-sort" onclick="toggleSort('dirs', 'name')">Label ⬍</th>
+        <th class="th-sort" onclick="toggleSort('dirs', 'path')">Path ⬍</th>
+        <th class="th-sort" onclick="toggleSort('dirs', 'size_mb')">Size ⬍</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -235,11 +251,11 @@ canvas { width: 100%; height: 100%; display: block; }
       <table class="list-table">
         <thead>
           <tr>
-            <th class="th-sort" onclick="sortSnapshot('pid')">PID ⬍</th>
-            <th class="th-sort" onclick="sortSnapshot('name')">Application ⬍</th>
-            <th class="th-sort" onclick="sortSnapshot('cpu_pct')">CPU % ⬍</th>
-            <th class="th-sort" onclick="sortSnapshot('memory_mb')">RAM (MB) ⬍</th>
-            <th class="th-sort" onclick="sortSnapshot('threads')">Threads ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'pid')">PID ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'name')">Application ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'cpu_pct')">CPU % ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'memory_mb')">RAM (MB) ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'threads')">Threads ⬍</th>
             <th>Pin to Watchlist</th>
           </tr>
         </thead>
@@ -359,7 +375,15 @@ canvas { width: 100%; height: 100%; display: block; }
 let sessionToken = localStorage.getItem('ward_token') || '';
 let globalData = null;
 let snapshotData = [];
-let sortStates = {};
+
+// NEW: Dedicated sort state manager (prevents data mutation on fetch)
+let sortConfig = {
+  apps: { key: null, asc: true },
+  services: { key: null, asc: true },
+  ports: { key: null, asc: true },
+  dirs: { key: null, asc: true },
+  snapshot: { key: null, asc: true }
+};
 
 async function checkAuth() {
   try {
@@ -391,6 +415,7 @@ async function doLogin() {
     document.getElementById('login-overlay').style.display = 'none';
     fetchStatus();
     checkUpdate();
+    showToast('Authorized successfully', 'success');
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
@@ -436,11 +461,11 @@ const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap =
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
 
 function drawGrid(ctx, w, h, maxScale, isPct = true) {
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'; // Slightly brighter for better visibility
   ctx.lineWidth = 1;
-  ctx.setLineDash([2, 3]);
+  ctx.setLineDash([3, 3]);
   const levels = [0.25, 0.5, 0.75, 1.0];
-  ctx.fillStyle = 'rgba(132, 141, 151, 0.45)';
+  ctx.fillStyle = 'rgba(132, 141, 151, 0.6)';
   ctx.font = '9px sans-serif';
   levels.forEach(lvl => {
     const y = h - (lvl * (h - 6)) - 3;
@@ -477,7 +502,7 @@ function plotDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   ctx.clearRect(0, 0, w, h);
   drawGrid(ctx, w, h, maxScale, false);
 
-  ctx.fillStyle = 'rgba(132, 141, 151, 0.45)';
+  ctx.fillStyle = 'rgba(132, 141, 151, 0.6)';
   ctx.font = '9px sans-serif';
   ctx.fillText(`${Math.round(maxScale)}${unit}`, 3, 10);
   ctx.fillText(`${Math.round(maxScale / 2)}${unit}`, 3, h / 2);
@@ -498,6 +523,9 @@ async function fetchStatus() {
     const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
     if (res.status === 401) { checkAuth(); return; }
     const d = await res.json();
+    
+    // Update connection status indicator
+    document.getElementById('conn-status').style.background = 'var(--green)';
     globalData = d;
 
     document.getElementById('p-name').innerText = d.panel_name || 'WARD';
@@ -544,87 +572,91 @@ async function fetchStatus() {
     renderServicesTable();
     renderPortsTable();
     renderDirsTable();
-  } catch(e) {}
+  } catch(e) {
+    document.getElementById('conn-status').style.background = 'var(--red)';
+  }
 }
 
-// Sorters
-function genericSort(arr, key, stateKey) {
-  sortStates[stateKey] = !sortStates[stateKey];
-  const asc = sortStates[stateKey];
-  return arr.sort((a, b) => {
-    let v1 = a[key], v2 = b[key];
-    if (typeof v1 === 'string') return asc ? v1.localeCompare(v2) : v2.localeCompare(v1);
-    return asc ? (v1 - v2) : (v2 - v1);
+// NEW: Robust Sorting Logic (Does not mutate globalData)
+function toggleSort(tableKey, columnKey) {
+  const current = sortConfig[tableKey];
+  if (current.key === columnKey) {
+    current.asc = !current.asc;
+  } else {
+    current.key = columnKey;
+    current.asc = true;
+  }
+  
+  // Re-render the specific table
+  if (tableKey === 'apps') renderPinnedTable();
+  else if (tableKey === 'services') renderServicesTable();
+  else if (tableKey === 'ports') renderPortsTable();
+  else if (tableKey === 'dirs') renderDirsTable();
+  else if (tableKey === 'snapshot') renderSnapshotTable();
+}
+
+function getSortedArray(dataArray, tableKey) {
+  const config = sortConfig[tableKey];
+  if (!config || !config.key) return dataArray;
+  
+  return [...dataArray].sort((a, b) => {
+    let v1 = a[config.key], v2 = b[config.key];
+    if (typeof v1 === 'string') return config.asc ? v1.localeCompare(v2) : v2.localeCompare(v1);
+    return config.asc ? (v1 - v2) : (v2 - v1);
   });
 }
 
 function renderPinnedTable() {
   if (!globalData) return;
+  const data = getSortedArray(globalData.apps, 'apps');
   let html = '';
-  globalData.apps.forEach(a => {
+  data.forEach(a => {
     html += `<tr><td><b>${a.name}</b></td><td>${a.cpu_pct}%</td><td>${a.memory_mb} MB</td><td>${a.threads}</td><td><span class="badge ${a.status==='Active'?'badge-up':'badge-down'}">${a.status}</span></td><td><button class="btn-red" onclick="remCfg('app', '${a.name}')">✕</button></td></tr>`;
   });
   document.getElementById('app-tbody').innerHTML = html;
 }
-function sortPinned(k) { if (globalData) { genericSort(globalData.apps, k, 'pinned_' + k); renderPinnedTable(); } }
 
 function renderServicesTable() {
   if (!globalData) return;
+  // Convert object to array for sorting
+  let dataArray = Object.entries(globalData.services).map(([name, state]) => ({ name, state }));
+  const data = getSortedArray(dataArray, 'services');
+  
   let html = '';
-  for (const [k, v] of Object.entries(globalData.services)) {
-    html += `<tr><td><b>${k}</b></td><td><span class="badge ${v==='Running'?'badge-up':'badge-down'}">${v}</span></td><td><button class="btn" onclick="viewLogs('${k}')">Logs</button></td><td><button class="btn-red" onclick="remCfg('service', '${k}')">✕</button></td></tr>`;
-  }
+  data.forEach(item => {
+    html += `<tr><td><b>${item.name}</b></td><td><span class="badge ${item.state==='Running'?'badge-up':'badge-down'}">${item.state}</span></td><td><button class="btn" onclick="viewLogs('${item.name}')">Logs</button></td><td><button class="btn-red" onclick="remCfg('service', '${item.name}')">✕</button></td></tr>`;
+  });
   document.getElementById('srv-tbody').innerHTML = html;
-}
-function sortServices(k) {
-  if (!globalData) return;
-  const list = Object.entries(globalData.services).map(([name, state]) => ({ name, state }));
-  genericSort(list, k, 'srv_' + k);
-  const remapped = {};
-  list.forEach(i => remapped[i.name] = i.state);
-  globalData.services = remapped;
-  renderServicesTable();
 }
 
 function renderPortsTable() {
   if (!globalData) return;
+  let dataArray = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status }));
+  const data = getSortedArray(dataArray, 'ports');
+  
   let html = '';
-  for (const [k, v] of Object.entries(globalData.ports)) {
-    html += `<tr><td><b>Port ${k}</b></td><td><span class="badge ${v==='Listening'?'badge-up':'badge-down'}">${v}</span></td><td><button class="btn-red" onclick="remCfg('port', '${k}')">✕</button></td></tr>`;
-  }
+  data.forEach(item => {
+    html += `<tr><td><b>Port ${item.port}</b></td><td><span class="badge ${item.status==='Listening'?'badge-up':'badge-down'}">${item.status}</span></td><td><button class="btn-red" onclick="remCfg('port', '${item.port}')">✕</button></td></tr>`;
+  });
   document.getElementById('port-tbody').innerHTML = html;
+  
   let bH = '';
   globalData.blocked_ports.forEach(bp => {
     bH += `<span class="badge badge-down" style="padding:4px 8px;">Port ${bp} <b style="cursor:pointer;" onclick="remCfg('blocked_port', '${bp}')">✕</b></span>`;
   });
   document.getElementById('blocked-tags').innerHTML = bH;
 }
-function sortPorts(k) {
-  if (!globalData) return;
-  const list = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status }));
-  genericSort(list, k, 'port_' + k);
-  const remapped = {};
-  list.forEach(i => remapped[i.port] = i.status);
-  globalData.ports = remapped;
-  renderPortsTable();
-}
 
 function renderDirsTable() {
   if (!globalData) return;
+  let dataArray = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb }));
+  const data = getSortedArray(dataArray, 'dirs');
+  
   let html = '';
-  for (const [k, v] of Object.entries(globalData.caches)) {
-    html += `<tr><td><b>${k}</b></td><td>${v.path}</td><td><b>${v.size_mb} MB</b></td><td><button class="btn-red" onclick="remCfg('directory', '${k}')">✕</button></td></tr>`;
-  }
+  data.forEach(item => {
+    html += `<tr><td><b>${item.name}</b></td><td>${item.path}</td><td><b>${item.size_mb} MB</b></td><td><button class="btn-red" onclick="remCfg('directory', '${item.name}')">✕</button></td></tr>`;
+  });
   document.getElementById('dir-tbody').innerHTML = html;
-}
-function sortDirs(k) {
-  if (!globalData) return;
-  const list = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb }));
-  genericSort(list, k, 'dir_' + k);
-  const remapped = {};
-  list.forEach(i => remapped[i.name] = { path: i.path, size_mb: i.size_mb });
-  globalData.caches = remapped;
-  renderDirsTable();
 }
 
 // Scanners
@@ -637,13 +669,13 @@ async function openTaskManager() {
   renderSnapshotTable();
 }
 function renderSnapshotTable() {
+  const data = getSortedArray(snapshotData, 'snapshot');
   let html = '';
-  snapshotData.forEach(p => {
+  data.forEach(p => {
     html += `<tr><td>${p.pid}</td><td><b>${p.name}</b></td><td>${p.cpu_pct}%</td><td>${p.memory_mb} MB</td><td>${p.threads}</td><td><button class="btn btn-green" onclick="addCfg('app', '${p.name}')">+ Watch</button></td></tr>`;
   });
   document.getElementById('tm-tbody').innerHTML = html;
 }
-function sortSnapshot(k) { genericSort(snapshotData, k, 'snap_' + k); renderSnapshotTable(); }
 
 async function openServicesScanner() {
   document.getElementById('srv-modal').style.display = 'block';
@@ -685,7 +717,6 @@ async function fetchTreeData(p) {
 }
 function trackDiscoveredDir(name, path) {
   addCfgDirectory(name, path);
-  alert(`Added ${name} (${path}) to watchlist.`);
 }
 
 async function viewLogs(service) {
@@ -718,29 +749,58 @@ function showUpdateModal(latest, current) {
 async function applyUpdateNow() {
   document.getElementById('update-modal').style.display = 'none';
   await fetch('/api/system/apply-update', { method: 'POST', headers: { 'X-Session-Token': sessionToken } });
-  alert("Updating in background... The page will refresh in 5 seconds.");
+  showToast('Updating in background... Page will refresh.', 'success');
   setTimeout(() => location.reload(), 5000);
 }
 
 // Config Helpers
 async function addCfg(type, value) {
   if (!value) return;
-  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
-  fetchStatus();
+  try {
+    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
+    showToast(`Added ${value} successfully`, 'success');
+    fetchStatus();
+  } catch(e) {
+    showToast('Failed to add', 'error');
+  }
 }
 async function remCfg(type, value) {
-  await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
-  fetchStatus();
+  try {
+    await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
+    showToast(`Removed ${value} successfully`, 'success');
+    fetchStatus();
+  } catch(e) {
+    showToast('Failed to remove', 'error');
+  }
 }
 async function addCfgDirectory(name, path) {
-  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name, value: path }) });
-  fetchStatus();
+  try {
+    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name, value: path }) });
+    showToast(`Tracking folder: ${name}`, 'success');
+    fetchStatus();
+  } catch(e) {
+    showToast('Failed to track folder', 'error');
+  }
 }
 async function addFolder() {
   const name = document.getElementById('dir-name').value, path = document.getElementById('dir-path').value;
   if (!name || !path) return;
   await addCfgDirectory(name, path);
   document.getElementById('dir-name').value = ''; document.getElementById('dir-path').value = '';
+}
+
+// NEW: Toast Notification System
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
 
 checkAuth();
