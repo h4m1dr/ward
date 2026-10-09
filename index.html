@@ -7,65 +7,389 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
-  --bg: #0b0e14; --card: #151921; --border: #222733; --text: #d1d5db; --muted: #848d97;
-  --blue: #3b82f6; --green: #10b981; --purple: #8b5cf6; --red: #ef4444; --cyan: #06b6d4;
+  --bg: #0f1419;
+  --card: #1a2332;
+  --card-hover: #1f2b3d;
+  --border: #2d3a4f;
+  --text: #e4e8f1;
+  --muted: #8899aa;
+  --blue: #4a9eff;
+  --green: #00d68f;
+  --purple: #a855f7;
+  --red: #ff4757;
+  --cyan: #00d4ff;
+  --orange: #ff9f43;
+  --yellow: #ffd93d;
 }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; }
-#login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #07090e; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.login-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 280px; text-align: center; }
-.login-box h3 { margin: 0 0 16px 0; color: #fff; }
-.login-box input { width: 100%; box-sizing: border-box; background: #0b0e14; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
-.login-box button { width: 100%; background: var(--blue); color: #fff; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-.login-err { color: var(--red); font-size: 11px; margin-top: 8px; display: none; }
-.header { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-.tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
-.tab-btn { padding: 6px 14px; border: 1px solid var(--border); background: var(--card); color: var(--muted); border-radius: 6px; cursor: pointer; white-space: nowrap; }
-.tab-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; cursor: grab; user-select: none; }
-.card.dragging { opacity: 0.4; border: 2px dashed var(--blue); }
-.card-top { height: 130px; }
-.card-wide { grid-column: span 2; height: 165px; }
-@media (max-width: 500px) { .card-wide { grid-column: span 1; } }
-.c-head { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; }
-.c-val { font-size: 18px; font-weight: 800; color: #fff; margin: 3px 0; }
-.c-sub { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
-.chart-sm { width: 100%; height: 50px; }
-.chart-lg { width: 100%; height: 95px; }
-canvas { width: 100%; height: 100%; display: block; }
-.list-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-.list-table th, .list-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 12px; }
-.list-table th { background: #11141b; color: var(--muted); user-select: none; }
-.th-sort { cursor: pointer; transition: color 0.2s; }
-.th-sort:hover { color: #fff; }
-.btn { background: var(--blue); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-.btn-green { background: var(--green); }
-.btn-red { background: transparent; border: none; color: var(--red); cursor: pointer; font-weight: bold; }
-.badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-.badge-up { background: rgba(16,185,129,0.15); color: var(--green); }
-.badge-down { background: rgba(239,68,68,0.15); color: var(--red); }
-.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 999; }
-.modal-body { background: var(--card); border: 1px solid var(--border); border-radius: 8px; max-width: 800px; margin: 30px auto; max-height: 85vh; display: flex; flex-direction: column; }
-.modal-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.modal-content { padding: 12px; overflow-y: auto; flex: 1; }
 
-/* Toast Notification Styles (NEW) */
-#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
-.toast { padding: 10px 16px; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.3s ease-out; display: flex; align-items: center; gap: 8px; }
-.toast-success { background: var(--green); border: 1px solid rgba(255,255,255,0.1); }
-.toast-error { background: var(--red); border: 1px solid rgba(255,255,255,0.1); }
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Login Overlay */
+#login-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(7, 11, 17, 0.95);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+}
+.login-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.login-box h3 { margin: 0 0 20px 0; color: #fff; font-size: 20px; }
+.login-box input {
+  width: 100%; box-sizing: border-box;
+  background: var(--bg); border: 1px solid var(--border);
+  color: #fff; padding: 12px; border-radius: 8px;
+  margin-bottom: 14px; font-size: 14px;
+}
+.login-box input:focus { outline: none; border-color: var(--blue); }
+.login-box button {
+  width: 100%; background: var(--blue); color: #fff;
+  border: none; padding: 12px; border-radius: 8px;
+  cursor: pointer; font-weight: bold; font-size: 14px;
+  transition: background 0.2s;
+}
+.login-box button:hover { background: #3a8eef; }
+.login-err { color: var(--red); font-size: 12px; margin-top: 10px; display: none; }
+
+/* Header */
+.header {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-right { text-align: right; font-size: 12px; color: var(--muted); }
+.header-right b { color: var(--text); }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 8px; margin-bottom: 16px;
+  overflow-x: auto; padding-bottom: 4px;
+}
+.tab-btn {
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.tab-btn:hover { background: var(--card-hover); color: var(--text); }
+.tab-btn.active {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+  box-shadow: 0 2px 8px rgba(74, 158, 255, 0.3);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Grid & Cards - X-UI Style */
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+.card.dragging { opacity: 0.4; border: 2px dashed var(--blue); }
+
+.card-top { min-height: 200px; }
+.card-wide { grid-column: span 2; min-height: 240px; }
+@media (max-width: 600px) { .card-wide { grid-column: span 1; } }
+
+.c-head {
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: 600; font-size: 13px; color: var(--muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.c-val {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  margin: 6px 0;
+  line-height: 1.1;
+}
+.c-sub {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--muted);
+  margin-top: 4px;
+}
+
+.chart-sm { width: 100%; height: 70px; margin-top: 12px; }
+.chart-lg { width: 100%; height: 130px; margin-top: 12px; }
+canvas { width: 100%; height: 100%; display: block; }
+
+/* Tables */
+.list-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.list-table th, .list-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.list-table th {
+  background: #151d2b;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+.list-table tr:last-child td { border-bottom: none; }
+.list-table tr:hover td { background: var(--card-hover); }
+
+.th-sort { cursor: pointer; transition: color 0.2s; user-select: none; }
+.th-sort:hover { color: var(--blue); }
+.th-sort.sorted { color: var(--blue); }
+
+/* Buttons */
+.btn {
+  background: var(--blue); color: #fff; border: none;
+  padding: 8px 14px; border-radius: 6px;
+  cursor: pointer; font-size: 12px; font-weight: 500;
+  transition: all 0.2s;
+}
+.btn:hover { background: #3a8eef; transform: translateY(-1px); }
+.btn-green { background: var(--green); }
+.btn-green:hover { background: #00c482; }
+.btn-red { background: transparent; border: none; color: var(--red); cursor: pointer; font-weight: bold; font-size: 16px; }
+.btn-red:hover { color: #ff6b7a; }
+.btn-orange { background: var(--orange); }
+.btn-orange:hover { background: #ff8f33; }
+.btn-watched {
+  background: var(--green); color: #fff; border: none;
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+  cursor: default; opacity: 0.8;
+}
+.btn-disabled {
+  background: #2d3a4f; color: var(--muted); border: none;
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 11px; cursor: not-allowed; opacity: 0.6;
+}
+
+/* Badges */
+.badge {
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+  display: inline-block;
+}
+.badge-up { background: rgba(0, 214, 143, 0.15); color: var(--green); }
+.badge-down { background: rgba(255, 71, 87, 0.15); color: var(--red); }
+.badge-neutral { background: rgba(136, 153, 170, 0.15); color: var(--muted); }
+
+/* Inputs */
+.input-field {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: border-color 0.2s;
+}
+.input-field:focus { outline: none; border-color: var(--blue); }
+
+/* Modals */
+.modal {
+  display: none; position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s;
+}
+.modal-body {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 40px auto;
+  max-height: 85vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.modal-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 16px; font-weight: 600;
+}
+.modal-content { padding: 20px; overflow-y: auto; flex: 1; }
+
+/* Toast */
+#toast-container {
+  position: fixed; bottom: 24px; right: 24px;
+  z-index: 10000; display: flex; flex-direction: column; gap: 10px;
+}
+.toast {
+  padding: 12px 18px; border-radius: 8px;
+  color: #fff; font-size: 13px; font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  animation: slideIn 0.3s ease-out;
+  display: flex; align-items: center; gap: 10px;
+  min-width: 250px;
+}
+.toast-success { background: linear-gradient(135deg, #00d68f, #00b87a); }
+.toast-error { background: linear-gradient(135deg, #ff4757, #e03e4d); }
+.toast-info { background: linear-gradient(135deg, #4a9eff, #3a8eef); }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* Section Headers */
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.section-title { font-size: 18px; font-weight: 700; color: #fff; }
+.section-actions { display: flex; gap: 8px; align-items: center; }
+
+/* Settings Page */
+.settings-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+}
+@media (max-width: 800px) { .settings-grid { grid-template-columns: 1fr; } }
+.settings-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+.settings-card h3 {
+  margin: 0 0 16px 0; font-size: 15px;
+  color: var(--blue); font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.settings-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid rgba(45, 58, 79, 0.5);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-label { font-size: 13px; color: var(--text); }
+.settings-value { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+/* Form Groups */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block; font-size: 12px; color: var(--muted);
+  margin-bottom: 6px; font-weight: 500;
+}
+.form-group input, .form-group select {
+  width: 100%; background: var(--bg);
+  border: 1px solid var(--border); color: #fff;
+  padding: 10px 12px; border-radius: 6px; font-size: 13px;
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none; border-color: var(--blue);
+}
+
+/* Update Badge */
+.update-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green); color: #fff;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 214, 143, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(0, 214, 143, 0); }
+}
+
+/* Cron Task Card */
+.task-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.task-info { flex: 1; }
+.task-name { font-weight: 600; font-size: 14px; color: #fff; }
+.task-schedule { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.task-command { font-size: 11px; color: var(--cyan); font-family: monospace; margin-top: 4px; }
+.task-actions { display: flex; gap: 8px; }
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative; display: inline-block;
+  width: 44px; height: 24px;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--border);
+  transition: 0.3s; border-radius: 24px;
+}
+.toggle-slider:before {
+  position: absolute; content: "";
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  transition: 0.3s; border-radius: 50%;
+}
+input:checked + .toggle-slider { background-color: var(--green); }
+input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3d4f66; }
 </style>
 </head>
 <body>
 
-<!-- Toast Container (NEW) -->
 <div id="toast-container"></div>
 
+<!-- Login Overlay -->
 <div id="login-overlay">
   <div class="login-box">
     <h3 id="login-title">WARD System</h3>
@@ -75,85 +399,87 @@ canvas { width: 100%; height: 100%; display: block; }
   </div>
 </div>
 
+<!-- Header -->
 <div class="header">
-  <div>
-    <div style="display:flex; align-items:center; gap:8px;">
-      <!-- Connection Status Indicator (NEW) -->
-      <span id="conn-status" style="width:8px; height:8px; border-radius:50%; background:var(--red);"></span>
-      <b style="font-size: 15px; color:#fff;" id="p-name">WARD</b> 
-      <span style="color:var(--green); font-size:11px;" id="panel-ver">v1.0.0</span>
-      <span id="update-badge" style="display:none; margin-left:8px;"></span>
-    </div>
-    <div style="font-size: 11px; color: var(--muted); margin-top: 4px;" id="h-specs">Probing system...</div>
+  <div class="header-left">
+    <span id="conn-status" style="width:10px; height:10px; border-radius:50%; background:var(--red); display:inline-block; transition: background 0.3s;"></span>
+    <b style="font-size: 18px; color:#fff;" id="p-name">WARD</b>
+    <span style="color:var(--green); font-size:12px; font-weight:600;" id="panel-ver">v1.0.0</span>
+    <span id="update-badge-container"></span>
   </div>
-  <div style="text-align: right; font-size: 11px; color: var(--muted);">
-    <div>Net: <b id="h-net" style="color:#fff;">0 GiB</b></div>
-    <div>Load: <b id="h-load" style="color:#fff;">0.0</b></div>
+  <div class="header-right">
+    <div>Net: <b id="h-net">0 GiB</b></div>
+    <div>Load: <b id="h-load">0.0</b></div>
     <div style="margin-top:4px;"><a href="javascript:void(0)" onclick="doLogout()" style="color:var(--muted); text-decoration:none;">Logout</a></div>
   </div>
 </div>
 
+<!-- Tabs -->
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('res', this)">Overview</button>
-  <button class="tab-btn" onclick="switchTab('apps', this)">Watched Apps</button>
-  <button class="tab-btn" onclick="switchTab('srv', this)">Services</button>
-  <button class="tab-btn" onclick="switchTab('net', this)">Ports</button>
-  <button class="tab-btn" onclick="switchTab('dir', this)">Storage</button>
+  <button class="tab-btn active" onclick="switchTab('res', this)">📊 Overview</button>
+  <button class="tab-btn" onclick="switchTab('apps', this)">📱 Watched Apps</button>
+  <button class="tab-btn" onclick="switchTab('srv', this)">️ Services</button>
+  <button class="tab-btn" onclick="switchTab('net', this)">🔌 Ports</button>
+  <button class="tab-btn" onclick="switchTab('dir', this)">📁 Storage</button>
+  <button class="tab-btn" onclick="switchTab('cron', this)">⏰ Scheduled Tasks</button>
+  <button class="tab-btn" onclick="switchTab('settings', this)">🔧 Settings</button>
 </div>
 
 <!-- Tab: Overview -->
 <div id="res" class="tab-content active">
   <div class="grid" id="drag-grid">
     <div class="card card-top" draggable="true" id="c-cpu">
-      <div class="c-head"><span>CPU</span><span id="cpu-stat">Avg: 0%</span></div>
+      <div class="c-head"><span>CPU Usage</span><span id="cpu-stat">Avg: 0%</span></div>
       <div class="c-val" id="cpu-val">0%</div>
       <div class="c-sub"><span id="cpu-sub">1 Core</span><span id="cpu-peak" style="color:var(--red);">Peak: 0%</span></div>
       <div class="chart-sm"><canvas id="cv-cpu"></canvas></div>
     </div>
     <div class="card card-top" draggable="true" id="c-ram">
-      <div class="c-head"><span>RAM</span><span id="ram-stat">Avg: 0%</span></div>
+      <div class="c-head"><span>RAM Usage</span><span id="ram-stat">Avg: 0%</span></div>
       <div class="c-val" id="ram-val">0%</div>
       <div class="c-sub"><span id="ram-sub">0/0 MB</span><span id="ram-free">Free: 0 MB</span></div>
       <div class="chart-sm"><canvas id="cv-ram"></canvas></div>
     </div>
     <div class="card card-top" draggable="true" id="c-swap">
-      <div class="c-head"><span>SWAP</span><span>Virtual</span></div>
+      <div class="c-head"><span>SWAP</span><span>Virtual Memory</span></div>
       <div class="c-val" id="swap-val">0%</div>
       <div class="c-sub"><span id="swap-sub">0/0 MB</span><span>Swap</span></div>
       <div class="chart-sm"><canvas id="cv-swap"></canvas></div>
     </div>
     <div class="card card-top" draggable="true" id="c-disk">
-      <div class="c-head"><span>STORAGE</span><span id="disk-free" style="color:var(--green);">0 GB Free</span></div>
+      <div class="c-head"><span>Storage</span><span id="disk-free" style="color:var(--green);">0 GB Free</span></div>
       <div class="c-val" id="disk-val">0%</div>
       <div class="c-sub"><span id="disk-sub">0/0 GB</span><span>Root FS</span></div>
       <div class="chart-sm"><canvas id="cv-disk"></canvas></div>
     </div>
     <div class="card card-wide" draggable="true" id="c-net">
-      <div class="c-head"><span>NETWORK TRAFFIC</span><span id="net-speeds" style="color:#fff;">▲ 0 MB/s ▼ 0 MB/s</span></div>
+      <div class="c-head"><span>Network Traffic</span><span id="net-speeds" style="color:#fff;">▲ 0 MB/s ▼ 0 MB/s</span></div>
       <div class="c-sub"><span>Live Interface Rate</span><span>Peak Scale</span></div>
       <div class="chart-lg"><canvas id="cv-net"></canvas></div>
     </div>
     <div class="card card-wide" draggable="true" id="c-conn">
-      <div class="c-head"><span>SOCKET CONNECTIONS</span><span id="conn-totals" style="color:#fff;">0 Open</span></div>
+      <div class="c-head"><span>Socket Connections</span><span id="conn-totals" style="color:#fff;">0 Open</span></div>
       <div class="c-sub"><span id="conn-sub">TCP: 0 | UDP: 0</span><span>Active</span></div>
       <div class="chart-lg"><canvas id="cv-conn"></canvas></div>
     </div>
   </div>
 </div>
 
-<!-- Tab: Apps -->
+<!-- Tab: Watched Apps -->
 <div id="apps" class="tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <b>Pinned Watched Applications</b>
-    <button class="btn btn-green" onclick="openTaskManager()">⚡ Open Live Task Manager</button>
+  <div class="section-header">
+    <div class="section-title">Pinned Watched Applications</div>
+    <div class="section-actions">
+      <button class="btn btn-green" onclick="openTaskManager()">⚡ Open Live Task Manager</button>
+    </div>
   </div>
   <table class="list-table">
     <thead>
       <tr>
-        <th class="th-sort" onclick="toggleSort('apps', 'name')">Application ⬍</th>
+        <th class="th-sort" onclick="toggleSort('apps', 'name')">Application </th>
         <th class="th-sort" onclick="toggleSort('apps', 'cpu_pct')">CPU % ⬍</th>
         <th class="th-sort" onclick="toggleSort('apps', 'memory_mb')">RAM (MB) ⬍</th>
-        <th class="th-sort" onclick="toggleSort('apps', 'threads')">Threads ⬍</th>
+        <th class="th-sort" onclick="toggleSort('apps', 'threads')">Threads </th>
         <th class="th-sort" onclick="toggleSort('apps', 'status')">Status ⬍</th>
         <th>Unpin</th>
       </tr>
@@ -164,11 +490,11 @@ canvas { width: 100%; height: 100%; display: block; }
 
 <!-- Tab: Services -->
 <div id="srv" class="tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <b>Monitored Systemd Services</b>
-    <div style="display:flex; gap:6px;">
+  <div class="section-header">
+    <div class="section-title">Monitored Systemd Services</div>
+    <div class="section-actions">
       <button class="btn btn-green" onclick="openServicesScanner()">⚡ Live Services Scan</button>
-      <input type="text" id="in-srv" placeholder="e.g. nginx" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px;">
+      <input type="text" id="in-srv" class="input-field" placeholder="e.g. nginx" style="width:120px;">
       <button class="btn" onclick="addCfg('service', document.getElementById('in-srv').value); document.getElementById('in-srv').value='';">Add Service</button>
     </div>
   </div>
@@ -176,7 +502,7 @@ canvas { width: 100%; height: 100%; display: block; }
     <thead>
       <tr>
         <th class="th-sort" onclick="toggleSort('services', 'name')">Service ⬍</th>
-        <th class="th-sort" onclick="toggleSort('services', 'state')">State ⬍</th>
+        <th class="th-sort" onclick="toggleSort('services', 'state')">State </th>
         <th>Journalctl Logs</th>
         <th>Action</th>
       </tr>
@@ -187,11 +513,11 @@ canvas { width: 100%; height: 100%; display: block; }
 
 <!-- Tab: Ports -->
 <div id="net" class="tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <b>Monitored Open Ports</b>
-    <div style="display:flex; gap:6px;">
+  <div class="section-header">
+    <div class="section-title">Monitored Open Ports</div>
+    <div class="section-actions">
       <button class="btn btn-green" onclick="openPortsScanner()">⚡ Live Ports Scan</button>
-      <input type="number" id="in-port" placeholder="Port" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px; width:90px;">
+      <input type="number" id="in-port" class="input-field" placeholder="Port" style="width:90px;">
       <button class="btn" onclick="addCfg('port', document.getElementById('in-port').value); document.getElementById('in-port').value='';">Watch</button>
     </div>
   </div>
@@ -205,22 +531,27 @@ canvas { width: 100%; height: 100%; display: block; }
     </thead>
     <tbody id="port-tbody"></tbody>
   </table>
-  <h4 style="margin:16px 0 6px 0; color:var(--red);">🚨 Monitored Blocked Ports (Telegram Alert if Opened)</h4>
-  <div style="display:flex; gap:6px; margin-bottom:10px;">
-    <input type="number" id="in-bport" placeholder="Port (e.g. 3306)" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px; width:120px;">
-    <button class="btn btn-green" onclick="addCfg('blocked_port', document.getElementById('in-bport').value); document.getElementById('in-bport').value='';">Trap Port</button>
+
+  <div style="margin-top:24px;">
+    <div class="section-header">
+      <div class="section-title" style="color:var(--red);"> Monitored Blocked Ports (Telegram Alert if Opened)</div>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <input type="number" id="in-bport" class="input-field" placeholder="Port (e.g. 3306)" style="width:140px;">
+      <button class="btn btn-green" onclick="addCfg('blocked_port', document.getElementById('in-bport').value); document.getElementById('in-bport').value='';">Trap Port</button>
+    </div>
+    <div id="blocked-tags" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
   </div>
-  <div id="blocked-tags" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
 </div>
 
 <!-- Tab: Storage -->
 <div id="dir" class="tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <b>Storage Folders Tracker</b>
-    <div style="display:flex; gap:6px;">
+  <div class="section-header">
+    <div class="section-title">Storage Folders Tracker</div>
+    <div class="section-actions">
       <button class="btn btn-green" onclick="openTreeExplorer()">🌳 Explore Folder Tree</button>
-      <input type="text" id="dir-name" placeholder="Label" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px; width:100px;">
-      <input type="text" id="dir-path" placeholder="/path/to/folder" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px;">
+      <input type="text" id="dir-name" class="input-field" placeholder="Label" style="width:100px;">
+      <input type="text" id="dir-path" class="input-field" placeholder="/path/to/folder" style="width:200px;">
       <button class="btn" onclick="addFolder()">Track Folder</button>
     </div>
   </div>
@@ -237,13 +568,105 @@ canvas { width: 100%; height: 100%; display: block; }
   </table>
 </div>
 
-<!-- Modals -->
+<!-- Tab: Scheduled Tasks (NEW) -->
+<div id="cron" class="tab-content">
+  <div class="section-header">
+    <div class="section-title">⏰ Scheduled Tasks (Cron Jobs)</div>
+    <div class="section-actions">
+      <button class="btn btn-green" onclick="openAddTaskModal()">+ Add New Task</button>
+    </div>
+  </div>
+  <div id="tasks-list">
+    <div style="text-align:center; padding:40px; color:var(--muted);">
+      No scheduled tasks configured yet. Click "Add New Task" to create one.
+    </div>
+  </div>
+</div>
+
+<!-- Tab: Settings (NEW) -->
+<div id="settings" class="tab-content">
+  <div class="section-header">
+    <div class="section-title"> Panel Settings</div>
+  </div>
+  <div class="settings-grid">
+    <!-- Security Settings -->
+    <div class="settings-card">
+      <h3>🔐 Security</h3>
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" id="set-old-pass" class="input-field" placeholder="Enter current password">
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="set-new-pass" class="input-field" placeholder="Enter new password">
+      </div>
+      <button class="btn btn-orange" onclick="changePassword()" style="width:100%;">Change Password</button>
+    </div>
+
+    <!-- Panel Info -->
+    <div class="settings-card">
+      <h3>📋 Panel Information</h3>
+      <div class="settings-row">
+        <span class="settings-label">Panel Name</span>
+        <span class="settings-value" id="set-panel-name">WARD</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Version</span>
+        <span class="settings-value" id="set-panel-version">v1.0.0</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Port</span>
+        <span class="settings-value" id="set-panel-port">54321</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Uptime</span>
+        <span class="settings-value" id="set-panel-uptime">-</span>
+      </div>
+    </div>
+
+    <!-- Update Manager -->
+    <div class="settings-card">
+      <h3>🚀 Update Manager</h3>
+      <div class="settings-row">
+        <span class="settings-label">Current Version</span>
+        <span class="settings-value" id="set-current-ver">v1.0.0</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Latest Version</span>
+        <span class="settings-value" id="set-latest-ver">Checking...</span>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="btn" onclick="checkUpdateManual()" style="flex:1;">🔄 Check for Updates</button>
+        <button class="btn btn-green" onclick="applyUpdateNow()" id="btn-apply-update" disabled style="flex:1;"> Apply Update</button>
+      </div>
+    </div>
+
+    <!-- Backup & Restore -->
+    <div class="settings-card">
+      <h3>💾 Backup & Restore</h3>
+      <div class="settings-row">
+        <span class="settings-label">Export Configuration</span>
+        <button class="btn" onclick="downloadConfig()">📥 Download config.json</button>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Import Configuration</span>
+        <input type="file" id="config-file-input" accept=".json" style="display:none;" onchange="uploadConfig(event)">
+        <button class="btn btn-orange" onclick="document.getElementById('config-file-input').click()"> Upload & Restore</button>
+      </div>
+      <div style="margin-top:12px; padding:10px; background:var(--bg); border-radius:6px; font-size:11px; color:var(--muted);">
+        ⚠️ Restoring config will restart the service. Make sure the file is valid JSON.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Task Manager -->
 <div id="tm-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
       <b>⚡ Live Process Snapshot</b>
       <div>
-        <button class="btn" onclick="openTaskManager()">Refresh</button>
+        <button class="btn" onclick="openTaskManager()"> Refresh</button>
         <button class="btn-red" onclick="document.getElementById('tm-modal').style.display='none'">✕</button>
       </div>
     </div>
@@ -256,7 +679,7 @@ canvas { width: 100%; height: 100%; display: block; }
             <th class="th-sort" onclick="toggleSort('snapshot', 'cpu_pct')">CPU % ⬍</th>
             <th class="th-sort" onclick="toggleSort('snapshot', 'memory_mb')">RAM (MB) ⬍</th>
             <th class="th-sort" onclick="toggleSort('snapshot', 'threads')">Threads ⬍</th>
-            <th>Pin to Watchlist</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody id="tm-tbody"></tbody>
@@ -265,12 +688,13 @@ canvas { width: 100%; height: 100%; display: block; }
   </div>
 </div>
 
+<!-- Modal: Services Scanner -->
 <div id="srv-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
       <b>⚡ All Active Systemd Services</b>
       <div>
-        <button class="btn" onclick="openServicesScanner()">Refresh</button>
+        <button class="btn" onclick="openServicesScanner()">🔄 Refresh</button>
         <button class="btn-red" onclick="document.getElementById('srv-modal').style.display='none'">✕</button>
       </div>
     </div>
@@ -278,8 +702,8 @@ canvas { width: 100%; height: 100%; display: block; }
       <table class="list-table">
         <thead>
           <tr>
-            <th>Service Name</th>
-            <th>State</th>
+            <th class="th-sort" onclick="toggleSort('srvScan', 'name')">Service Name ⬍</th>
+            <th class="th-sort" onclick="toggleSort('srvScan', 'state')">State ⬍</th>
             <th>Active Sub</th>
             <th>Action</th>
           </tr>
@@ -290,12 +714,13 @@ canvas { width: 100%; height: 100%; display: block; }
   </div>
 </div>
 
+<!-- Modal: Ports Scanner -->
 <div id="port-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
       <b>⚡ All Open & Listening Ports</b>
       <div>
-        <button class="btn" onclick="openPortsScanner()">Refresh</button>
+        <button class="btn" onclick="openPortsScanner()"> Refresh</button>
         <button class="btn-red" onclick="document.getElementById('port-modal').style.display='none'">✕</button>
       </div>
     </div>
@@ -303,7 +728,7 @@ canvas { width: 100%; height: 100%; display: block; }
       <table class="list-table">
         <thead>
           <tr>
-            <th>Port Number</th>
+            <th class="th-sort" onclick="toggleSort('portScan', 'port')">Port Number ⬍</th>
             <th>Current Socket Status</th>
             <th>Action</th>
           </tr>
@@ -314,13 +739,14 @@ canvas { width: 100%; height: 100%; display: block; }
   </div>
 </div>
 
+<!-- Modal: Folder Tree Explorer -->
 <div id="tree-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
       <b>🌳 Subfolder Tree Explorer</b>
-      <div style="display:flex; gap:6px;">
-        <input type="text" id="tree-search-path" value="/var" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:3px 8px; border-radius:4px;">
-        <button class="btn" onclick="fetchTreeData(document.getElementById('tree-search-path').value)">Inspect</button>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="tree-search-path" class="input-field" value="/" style="width:200px;">
+        <button class="btn" onclick="fetchTreeData(document.getElementById('tree-search-path').value)">🔍 Inspect</button>
         <button class="btn-red" onclick="document.getElementById('tree-modal').style.display='none'">✕</button>
       </div>
     </div>
@@ -331,7 +757,7 @@ canvas { width: 100%; height: 100%; display: block; }
             <th>Folder Name</th>
             <th>Exact Path</th>
             <th>Size (MB)</th>
-            <th>Track Folder</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody id="tree-tbody"></tbody>
@@ -340,6 +766,45 @@ canvas { width: 100%; height: 100%; display: block; }
   </div>
 </div>
 
+<!-- Modal: Add Scheduled Task -->
+<div id="add-task-modal" class="modal">
+  <div class="modal-body" style="max-width:500px;">
+    <div class="modal-head">
+      <b>➕ Add New Scheduled Task</b>
+      <button class="btn-red" onclick="document.getElementById('add-task-modal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-content">
+      <div class="form-group">
+        <label>Task Name</label>
+        <input type="text" id="task-name" class="input-field" placeholder="e.g. Daily Backup">
+      </div>
+      <div class="form-group">
+        <label>Command to Execute</label>
+        <input type="text" id="task-command" class="input-field" placeholder="e.g. /opt/ward/backup.sh">
+      </div>
+      <div class="form-group">
+        <label>Schedule Type</label>
+        <select id="task-schedule-type" class="input-field" onchange="updateScheduleHint()">
+          <option value="minute">Every X Minutes</option>
+          <option value="hourly">Every X Hours</option>
+          <option value="daily">Daily at specific time</option>
+          <option value="weekly">Weekly on specific day</option>
+          <option value="custom">Custom Cron Expression</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label id="task-schedule-label">Interval (minutes)</label>
+        <input type="text" id="task-schedule-value" class="input-field" placeholder="e.g. 30">
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+        <button class="btn" onclick="document.getElementById('add-task-modal').style.display='none'">Cancel</button>
+        <button class="btn btn-green" onclick="addScheduledTask()">Add Task</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Update Available -->
 <div id="update-modal" class="modal">
   <div class="modal-body" style="max-width:500px;">
     <div class="modal-head">
@@ -348,26 +813,29 @@ canvas { width: 100%; height: 100%; display: block; }
     </div>
     <div class="modal-content" style="line-height:1.6;">
       <p id="up-msg">A new version is ready to install.</p>
-      <div style="background:#07090e; border:1px solid var(--border); padding:10px; border-radius:6px; margin:12px 0;">
-        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Update via Server Terminal:</div>
-        <code style="color:var(--green); font-size:13px;">ward-update</code>
-        <div style="font-size:10px; color:var(--muted); margin-top:4px;">Or: bash /opt/ward/update.sh</div>
+      <div style="background:var(--bg); border:1px solid var(--border); padding:14px; border-radius:8px; margin:14px 0;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">Update via Server Terminal:</div>
+        <code style="color:var(--green); font-size:14px; font-family:monospace;">ward-update</code>
+        <div style="font-size:11px; color:var(--muted); margin-top:6px;">Or: bash /opt/ward/update.sh</div>
       </div>
-      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
         <button class="btn" onclick="document.getElementById('update-modal').style.display='none'">Close</button>
-        <button class="btn btn-green" onclick="applyUpdateNow()">Apply Update Now</button>
+        <button class="btn btn-green" onclick="applyUpdateNow()">⬆ Apply Update Now</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Modal: Service Logs -->
 <div id="log-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
       <b id="log-title">Service Logs</b>
       <button class="btn-red" onclick="document.getElementById('log-modal').style.display='none'">✕</button>
     </div>
-    <div class="modal-content"><pre id="log-content" style="background:#05070a; padding:10px; border-radius:4px; font-size:11px; color:#848d97; overflow:auto;"></pre></div>
+    <div class="modal-content">
+      <pre id="log-content" style="background:var(--bg); padding:14px; border-radius:6px; font-size:12px; color:var(--muted); overflow:auto; font-family:monospace; line-height:1.6;"></pre>
+    </div>
   </div>
 </div>
 
@@ -375,16 +843,25 @@ canvas { width: 100%; height: 100%; display: block; }
 let sessionToken = localStorage.getItem('ward_token') || '';
 let globalData = null;
 let snapshotData = [];
+let srvScanData = [];
+let portScanData = [];
+let tasksData = [];
 
-// NEW: Dedicated sort state manager (prevents data mutation on fetch)
+// Sort configuration for all tables
 let sortConfig = {
   apps: { key: null, asc: true },
   services: { key: null, asc: true },
   ports: { key: null, asc: true },
   dirs: { key: null, asc: true },
-  snapshot: { key: null, asc: true }
+  snapshot: { key: null, asc: true },
+  srvScan: { key: null, asc: true },
+  portScan: { key: null, asc: true }
 };
 
+// Update state
+let updateState = { hasUpdate: false, current: '1.0.0', latest: '1.0.0' };
+
+// ==================== AUTH ====================
 async function checkAuth() {
   try {
     const res = await fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } });
@@ -395,6 +872,7 @@ async function checkAuth() {
       document.getElementById('login-overlay').style.display = 'none';
       fetchStatus();
       checkUpdate();
+      loadTasks();
     } else {
       document.getElementById('login-overlay').style.display = 'flex';
     }
@@ -415,6 +893,7 @@ async function doLogin() {
     document.getElementById('login-overlay').style.display = 'none';
     fetchStatus();
     checkUpdate();
+    loadTasks();
     showToast('Authorized successfully', 'success');
   } else {
     document.getElementById('login-err').style.display = 'block';
@@ -427,6 +906,7 @@ async function doLogout() {
   location.reload();
 }
 
+// ==================== TABS ====================
 function switchTab(id, el) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -434,7 +914,7 @@ function switchTab(id, el) {
   el.classList.add('active');
 }
 
-// Drag & Drop
+// ==================== DRAG & DROP ====================
 const grid = document.getElementById('drag-grid');
 let dragged = null;
 grid.addEventListener('dragstart', (e) => { dragged = e.target.closest('.card'); if (dragged) dragged.classList.add('dragging'); });
@@ -455,26 +935,36 @@ function restoreOrder() {
 }
 restoreOrder();
 
-// Accurate Plotters with Dotted Grids
-const pLen = 25;
+// ==================== CHARTS ====================
+const pLen = 30;
 const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
 
 function drawGrid(ctx, w, h, maxScale, isPct = true) {
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'; // Slightly brighter for better visibility
-  ctx.lineWidth = 1;
-  ctx.setLineDash([3, 3]);
+  // Draw more visible grid lines - X-UI style
   const levels = [0.25, 0.5, 0.75, 1.0];
-  ctx.fillStyle = 'rgba(132, 141, 151, 0.6)';
-  ctx.font = '9px sans-serif';
-  levels.forEach(lvl => {
-    const y = h - (lvl * (h - 6)) - 3;
+  levels.forEach((lvl, idx) => {
+    const y = h - (lvl * (h - 10)) - 5;
     ctx.beginPath();
+    // Make 50% and 100% lines more prominent
+    if (idx === 1 || idx === 3) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+    } else {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+    }
     ctx.moveTo(0, y);
     ctx.lineTo(w, y);
     ctx.stroke();
+    
+    // Labels
+    ctx.fillStyle = 'rgba(136, 153, 170, 0.8)';
+    ctx.font = '10px sans-serif';
     if (isPct) {
-      ctx.fillText(`${Math.round(lvl * maxScale)}%`, 3, y - 2);
+      ctx.fillText(`${Math.round(lvl * maxScale)}%`, 4, y - 3);
     }
   });
   ctx.setLineDash([]);
@@ -489,10 +979,10 @@ function plotSingle(id, arr, maxScale, color, fill) {
   ctx.beginPath();
   const step = w / (arr.length - 1);
   arr.forEach((val, i) => {
-    const y = h - ((Math.min(val / maxScale, 1)) * (h - 6)) - 3;
+    const y = h - ((Math.min(val / maxScale, 1)) * (h - 10)) - 5;
     i === 0 ? ctx.moveTo(0, y) : ctx.lineTo(i * step, y);
   });
-  ctx.strokeStyle = color; ctx.lineWidth = 1.6; ctx.stroke();
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
   if (fill) { ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); }
 }
 
@@ -502,82 +992,91 @@ function plotDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   ctx.clearRect(0, 0, w, h);
   drawGrid(ctx, w, h, maxScale, false);
 
-  ctx.fillStyle = 'rgba(132, 141, 151, 0.6)';
-  ctx.font = '9px sans-serif';
-  ctx.fillText(`${Math.round(maxScale)}${unit}`, 3, 10);
-  ctx.fillText(`${Math.round(maxScale / 2)}${unit}`, 3, h / 2);
+  ctx.fillStyle = 'rgba(136, 153, 170, 0.8)';
+  ctx.font = '10px sans-serif';
+  ctx.fillText(`${Math.round(maxScale)}${unit}`, 4, 12);
+  ctx.fillText(`${Math.round(maxScale / 2)}${unit}`, 4, h / 2);
 
   const step = w / (arr1.length - 1);
   [arr1, arr2].forEach((arr, idx) => {
     ctx.beginPath();
     arr.forEach((val, i) => {
-      const y = h - ((Math.min(val / maxScale, 1)) * (h - 6)) - 3;
+      const y = h - ((Math.min(val / maxScale, 1)) * (h - 10)) - 5;
       i === 0 ? ctx.moveTo(0, y) : ctx.lineTo(i * step, y);
     });
-    ctx.strokeStyle = idx === 0 ? c1 : c2; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.strokeStyle = idx === 0 ? c1 : c2; ctx.lineWidth = 2; ctx.stroke();
   });
 }
 
+// ==================== DATA FETCHING ====================
 async function fetchStatus() {
   try {
     const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
     if (res.status === 401) { checkAuth(); return; }
     const d = await res.json();
     
-    // Update connection status indicator
     document.getElementById('conn-status').style.background = 'var(--green)';
     globalData = d;
 
     document.getElementById('p-name').innerText = d.panel_name || 'WARD';
-    document.getElementById('h-specs').innerText = `CPU: ${d.cpu.model} (${d.cpu.cores} Core) | Uptime: ${d.uptime}`;
+    document.getElementById('h-specs') && (document.getElementById('h-specs').innerText = `CPU: ${d.cpu.model} (${d.cpu.cores} Core) | Uptime: ${d.uptime}`);
     document.getElementById('h-load').innerText = d.load_avg;
     document.getElementById('h-net').innerText = `${d.network.total_tx_gib} GiB | ${d.network.total_rx_gib} GiB`;
+
+    // Update settings panel if visible
+    document.getElementById('set-panel-name').innerText = d.panel_name || 'WARD';
+    document.getElementById('set-panel-uptime').innerText = d.uptime;
 
     document.getElementById('cpu-val').innerText = `${d.cpu.usage_pct}%`;
     document.getElementById('cpu-sub').innerText = `${d.cpu.cores} Virtual Core`;
     d_cpu.shift(); d_cpu.push(d.cpu.usage_pct);
     document.getElementById('cpu-stat').innerText = `Avg: ${Math.round(d_cpu.reduce((a,b)=>a+b)/pLen)}%`;
     document.getElementById('cpu-peak').innerText = `Peak: ${Math.max(...d_cpu)}%`;
-    plotSingle('cv-cpu', d_cpu, 100, '#3b82f6', 'rgba(59,130,246,0.15)');
+    plotSingle('cv-cpu', d_cpu, 100, '#4a9eff', 'rgba(74,158,255,0.12)');
 
     document.getElementById('ram-val').innerText = `${d.ram.pct}%`;
     document.getElementById('ram-sub').innerText = `${d.ram.used_mb} / ${d.ram.total_mb} MB`;
     document.getElementById('ram-free').innerText = `Free: ${d.ram.total_mb - d.ram.used_mb} MB`;
     d_ram.shift(); d_ram.push(d.ram.pct);
-    plotSingle('cv-ram', d_ram, 100, '#8b5cf6', 'rgba(139,92,246,0.15)');
+    plotSingle('cv-ram', d_ram, 100, '#a855f7', 'rgba(168,85,247,0.12)');
 
     document.getElementById('swap-val').innerText = `${d.swap.pct}%`;
     document.getElementById('swap-sub').innerText = `${d.swap.used_mb} / ${d.swap.total_mb} MB`;
     d_swap.shift(); d_swap.push(d.swap.pct);
-    plotSingle('cv-swap', d_swap, 100, '#06b6d4', 'rgba(6,182,212,0.15)');
+    plotSingle('cv-swap', d_swap, 100, '#00d4ff', 'rgba(0,212,255,0.12)');
 
     document.getElementById('disk-val').innerText = `${d.disk.pct}%`;
     document.getElementById('disk-sub').innerText = `${d.disk.used_gb} / ${d.disk.total_gb} GB`;
     document.getElementById('disk-free').innerText = `Free: ${d.disk.free_gb} GB`;
     d_disk.shift(); d_disk.push(d.disk.pct);
-    plotSingle('cv-disk', d_disk, 100, '#10b981', 'rgba(16,185,129,0.15)');
+    plotSingle('cv-disk', d_disk, 100, '#00d68f', 'rgba(0,214,143,0.12)');
 
     document.getElementById('net-speeds').innerText = `▲ ${d.network.speed_tx_mb} MB/s ▼ ${d.network.speed_rx_mb} MB/s`;
     d_tx.shift(); d_tx.push(d.network.speed_tx_mb);
     d_rx.shift(); d_rx.push(d.network.speed_rx_mb);
-    plotDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#3b82f6', '#10b981', 'M');
+    plotDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#4a9eff', '#00d68f', 'M');
 
     document.getElementById('conn-totals').innerText = `${d.connections.tcp + d.connections.udp} Open Sockets`;
     document.getElementById('conn-sub').innerText = `TCP: ${d.connections.tcp} | UDP: ${d.connections.udp}`;
     d_tcp.shift(); d_tcp.push(d.connections.tcp);
     d_udp.shift(); d_udp.push(d.connections.udp);
-    plotDouble('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#10b981', '#8b5cf6', '');
+    plotDouble('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#00d68f', '#a855f7', '');
 
     renderPinnedTable();
     renderServicesTable();
     renderPortsTable();
     renderDirsTable();
+    
+    // Re-render scanner modals if open (to update Watch/Watched buttons)
+    if (document.getElementById('tm-modal').style.display === 'block') renderSnapshotTable();
+    if (document.getElementById('srv-modal').style.display === 'block') renderServicesScannerTable();
+    if (document.getElementById('port-modal').style.display === 'block') renderPortsScannerTable();
   } catch(e) {
     document.getElementById('conn-status').style.background = 'var(--red)';
   }
 }
 
-// NEW: Robust Sorting Logic (Does not mutate globalData)
+// ==================== SORTING ====================
 function toggleSort(tableKey, columnKey) {
   const current = sortConfig[tableKey];
   if (current.key === columnKey) {
@@ -587,18 +1086,18 @@ function toggleSort(tableKey, columnKey) {
     current.asc = true;
   }
   
-  // Re-render the specific table
   if (tableKey === 'apps') renderPinnedTable();
   else if (tableKey === 'services') renderServicesTable();
   else if (tableKey === 'ports') renderPortsTable();
   else if (tableKey === 'dirs') renderDirsTable();
   else if (tableKey === 'snapshot') renderSnapshotTable();
+  else if (tableKey === 'srvScan') renderServicesScannerTable();
+  else if (tableKey === 'portScan') renderPortsScannerTable();
 }
 
 function getSortedArray(dataArray, tableKey) {
   const config = sortConfig[tableKey];
   if (!config || !config.key) return dataArray;
-  
   return [...dataArray].sort((a, b) => {
     let v1 = a[config.key], v2 = b[config.key];
     if (typeof v1 === 'string') return config.asc ? v1.localeCompare(v2) : v2.localeCompare(v1);
@@ -606,25 +1105,36 @@ function getSortedArray(dataArray, tableKey) {
   });
 }
 
+// ==================== RENDER TABLES ====================
 function renderPinnedTable() {
   if (!globalData) return;
   const data = getSortedArray(globalData.apps, 'apps');
   let html = '';
   data.forEach(a => {
-    html += `<tr><td><b>${a.name}</b></td><td>${a.cpu_pct}%</td><td>${a.memory_mb} MB</td><td>${a.threads}</td><td><span class="badge ${a.status==='Active'?'badge-up':'badge-down'}">${a.status}</span></td><td><button class="btn-red" onclick="remCfg('app', '${a.name}')">✕</button></td></tr>`;
+    html += `<tr>
+      <td><b>${a.name}</b></td>
+      <td>${a.cpu_pct}%</td>
+      <td>${a.memory_mb} MB</td>
+      <td>${a.threads}</td>
+      <td><span class="badge ${a.status==='Active'?'badge-up':'badge-down'}">${a.status}</span></td>
+      <td><button class="btn-red" onclick="remCfg('app', '${a.name}')">✕</button></td>
+    </tr>`;
   });
   document.getElementById('app-tbody').innerHTML = html;
 }
 
 function renderServicesTable() {
   if (!globalData) return;
-  // Convert object to array for sorting
   let dataArray = Object.entries(globalData.services).map(([name, state]) => ({ name, state }));
   const data = getSortedArray(dataArray, 'services');
-  
   let html = '';
   data.forEach(item => {
-    html += `<tr><td><b>${item.name}</b></td><td><span class="badge ${item.state==='Running'?'badge-up':'badge-down'}">${item.state}</span></td><td><button class="btn" onclick="viewLogs('${item.name}')">Logs</button></td><td><button class="btn-red" onclick="remCfg('service', '${item.name}')">✕</button></td></tr>`;
+    html += `<tr>
+      <td><b>${item.name}</b></td>
+      <td><span class="badge ${item.state==='Running'?'badge-up':'badge-down'}">${item.state}</span></td>
+      <td><button class="btn" onclick="viewLogs('${item.name}')"> Logs</button></td>
+      <td><button class="btn-red" onclick="remCfg('service', '${item.name}')">✕</button></td>
+    </tr>`;
   });
   document.getElementById('srv-tbody').innerHTML = html;
 }
@@ -633,16 +1143,19 @@ function renderPortsTable() {
   if (!globalData) return;
   let dataArray = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status }));
   const data = getSortedArray(dataArray, 'ports');
-  
   let html = '';
   data.forEach(item => {
-    html += `<tr><td><b>Port ${item.port}</b></td><td><span class="badge ${item.status==='Listening'?'badge-up':'badge-down'}">${item.status}</span></td><td><button class="btn-red" onclick="remCfg('port', '${item.port}')">✕</button></td></tr>`;
+    html += `<tr>
+      <td><b>Port ${item.port}</b></td>
+      <td><span class="badge ${item.status==='Listening'?'badge-up':'badge-down'}">${item.status}</span></td>
+      <td><button class="btn-red" onclick="remCfg('port', '${item.port}')">✕</button></td>
+    </tr>`;
   });
   document.getElementById('port-tbody').innerHTML = html;
   
   let bH = '';
   globalData.blocked_ports.forEach(bp => {
-    bH += `<span class="badge badge-down" style="padding:4px 8px;">Port ${bp} <b style="cursor:pointer;" onclick="remCfg('blocked_port', '${bp}')">✕</b></span>`;
+    bH += `<span class="badge badge-down" style="padding:6px 12px;">Port ${bp} <b style="cursor:pointer; margin-left:6px;" onclick="remCfg('blocked_port', '${bp}')">✕</b></span>`;
   });
   document.getElementById('blocked-tags').innerHTML = bH;
 }
@@ -651,74 +1164,146 @@ function renderDirsTable() {
   if (!globalData) return;
   let dataArray = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb }));
   const data = getSortedArray(dataArray, 'dirs');
-  
   let html = '';
   data.forEach(item => {
-    html += `<tr><td><b>${item.name}</b></td><td>${item.path}</td><td><b>${item.size_mb} MB</b></td><td><button class="btn-red" onclick="remCfg('directory', '${item.name}')">✕</button></td></tr>`;
+    html += `<tr>
+      <td><b>${item.name}</b></td>
+      <td style="font-family:monospace; font-size:12px;">${item.path}</td>
+      <td><b>${item.size_mb} MB</b></td>
+      <td><button class="btn-red" onclick="remCfg('directory', '${item.name}')">✕</button></td>
+    </tr>`;
   });
   document.getElementById('dir-tbody').innerHTML = html;
 }
 
-// Scanners
+// ==================== SCANNERS (with Watch/Watched logic) ====================
+function isWatchingApp(name) {
+  return globalData && globalData.apps && globalData.apps.some(a => a.name === name);
+}
+function isWatchingService(name) {
+  return globalData && globalData.services && globalData.services[name] !== undefined;
+}
+function isWatchingPort(port) {
+  return globalData && globalData.ports && globalData.ports[String(port)] !== undefined;
+}
+
 async function openTaskManager() {
   document.getElementById('tm-modal').style.display = 'block';
-  document.getElementById('tm-tbody').innerHTML = '<tr><td colspan="6">Scanning live processes...</td></tr>';
+  document.getElementById('tm-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">Scanning live processes...</td></tr>';
   const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } });
   const d = await res.json();
   snapshotData = d.processes;
   renderSnapshotTable();
 }
+
 function renderSnapshotTable() {
   const data = getSortedArray(snapshotData, 'snapshot');
   let html = '';
   data.forEach(p => {
-    html += `<tr><td>${p.pid}</td><td><b>${p.name}</b></td><td>${p.cpu_pct}%</td><td>${p.memory_mb} MB</td><td>${p.threads}</td><td><button class="btn btn-green" onclick="addCfg('app', '${p.name}')">+ Watch</button></td></tr>`;
+    const watching = isWatchingApp(p.name);
+    const btnHtml = watching 
+      ? `<button class="btn-watched">✓ Watched</button>`
+      : `<button class="btn btn-green" onclick="addCfg('app', '${p.name}')">+ Watch</button>`;
+    html += `<tr>
+      <td>${p.pid}</td>
+      <td><b>${p.name}</b></td>
+      <td>${p.cpu_pct}%</td>
+      <td>${p.memory_mb} MB</td>
+      <td>${p.threads}</td>
+      <td>${btnHtml}</td>
+    </tr>`;
   });
   document.getElementById('tm-tbody').innerHTML = html;
 }
 
 async function openServicesScanner() {
   document.getElementById('srv-modal').style.display = 'block';
-  document.getElementById('srv-scan-tbody').innerHTML = '<tr><td colspan="4">Scanning systemd daemons...</td></tr>';
+  document.getElementById('srv-scan-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">Scanning systemd daemons...</td></tr>';
   const res = await fetch('/api/services/snapshot', { headers: { 'X-Session-Token': sessionToken } });
   const d = await res.json();
+  srvScanData = d.services;
+  renderServicesScannerTable();
+}
+
+function renderServicesScannerTable() {
+  const data = getSortedArray(srvScanData, 'srvScan');
   let html = '';
-  d.services.forEach(s => {
-    html += `<tr><td><b>${s.name}</b></td><td><span class="badge ${s.state==='active'?'badge-up':'badge-down'}">${s.state}</span></td><td>${s.sub}</td><td><button class="btn btn-green" onclick="addCfg('service', '${s.name}')">+ Track</button></td></tr>`;
+  data.forEach(s => {
+    const watching = isWatchingService(s.name);
+    const btnHtml = watching
+      ? `<button class="btn-watched">✓ Watched</button>`
+      : `<button class="btn btn-green" onclick="addCfg('service', '${s.name}')">+ Track</button>`;
+    html += `<tr>
+      <td><b>${s.name}</b></td>
+      <td><span class="badge ${s.state==='active'?'badge-up':'badge-down'}">${s.state}</span></td>
+      <td>${s.sub}</td>
+      <td>${btnHtml}</td>
+    </tr>`;
   });
   document.getElementById('srv-scan-tbody').innerHTML = html;
 }
 
 async function openPortsScanner() {
   document.getElementById('port-modal').style.display = 'block';
-  document.getElementById('port-scan-tbody').innerHTML = '<tr><td colspan="3">Probing listening sockets...</td></tr>';
+  document.getElementById('port-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--muted);">Probing listening sockets...</td></tr>';
   const res = await fetch('/api/ports/snapshot', { headers: { 'X-Session-Token': sessionToken } });
   const d = await res.json();
+  portScanData = d.ports.map(p => ({ port: p }));
+  renderPortsScannerTable();
+}
+
+function renderPortsScannerTable() {
+  const data = getSortedArray(portScanData, 'portScan');
   let html = '';
-  d.ports.forEach(p => {
-    html += `<tr><td><b>Port ${p}</b></td><td><span class="badge badge-up">Listening</span></td><td><button class="btn btn-green" onclick="addCfg('port', '${p}')">+ Watch</button></td></tr>`;
+  data.forEach(p => {
+    const watching = isWatchingPort(p.port);
+    const btnHtml = watching
+      ? `<button class="btn-watched">✓ Watched</button>`
+      : `<button class="btn btn-green" onclick="addCfg('port', '${p.port}')">+ Watch</button>`;
+    html += `<tr>
+      <td><b>Port ${p.port}</b></td>
+      <td><span class="badge badge-up">Listening</span></td>
+      <td>${btnHtml}</td>
+    </tr>`;
   });
   document.getElementById('port-scan-tbody').innerHTML = html;
 }
 
+// ==================== FOLDER EXPLORER ====================
 async function openTreeExplorer() {
   document.getElementById('tree-modal').style.display = 'block';
   fetchTreeData(document.getElementById('tree-search-path').value);
 }
+
 async function fetchTreeData(p) {
-  document.getElementById('tree-tbody').innerHTML = '<tr><td colspan="4">Calculating folder sizes...</td></tr>';
-  const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(p)}`, { headers: { 'X-Session-Token': sessionToken } });
-  const d = await res.json();
-  let html = '';
-  d.items.forEach(item => {
-    html += `<tr><td><b>${item.name}</b></td><td>${item.path}</td><td>${item.size_mb} MB</td><td><button class="btn btn-green" onclick="trackDiscoveredDir('${item.name}', '${item.path}')">+ Track</button></td></tr>`;
-  });
-  document.getElementById('tree-tbody').innerHTML = html || '<tr><td colspan="4">No accessible subfolders found.</td></tr>';
+  document.getElementById('tree-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">Calculating folder sizes...</td></tr>';
+  try {
+    const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(p)}`, { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    if (d.items && d.items.length > 0) {
+      let html = '';
+      d.items.forEach(item => {
+        html += `<tr>
+          <td><b>${item.name}</b></td>
+          <td style="font-family:monospace; font-size:12px;">${item.path}</td>
+          <td><b>${item.size_mb} MB</b></td>
+          <td><button class="btn btn-green" onclick="trackDiscoveredDir('${item.name}', '${item.path}')">+ Track</button></td>
+        </tr>`;
+      });
+      document.getElementById('tree-tbody').innerHTML = html;
+    } else {
+      document.getElementById('tree-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">No accessible subfolders found.</td></tr>';
+    }
+  } catch(e) {
+    document.getElementById('tree-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--red);">Error fetching folder data.</td></tr>';
+  }
 }
+
 function trackDiscoveredDir(name, path) {
   addCfgDirectory(name, path);
 }
 
+// ==================== LOGS ====================
 async function viewLogs(service) {
   document.getElementById('log-title').innerText = `Logs: ${service}`;
   document.getElementById('log-content').innerText = 'Loading logs...';
@@ -727,18 +1312,37 @@ async function viewLogs(service) {
   document.getElementById('log-content').innerText = await res.text();
 }
 
-// Updater
+// ==================== UPDATE MANAGER ====================
 async function checkUpdate() {
   try {
     const res = await fetch('/api/system/check-update', { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
     document.getElementById('panel-ver').innerText = `v${d.current}`;
+    document.getElementById('set-current-ver').innerText = `v${d.current}`;
+    document.getElementById('set-panel-version').innerText = `v${d.current}`;
+    document.getElementById('set-latest-ver').innerText = `v${d.latest}`;
+    
+    updateState = { hasUpdate: d.has_update, current: d.current, latest: d.latest };
+    
     if (d.has_update) {
-      const b = document.getElementById('update-badge');
-      b.style.display = 'inline-block';
-      b.innerHTML = `<button class="btn btn-green" onclick="showUpdateModal('${d.latest}', '${d.current}')">⬆ Update (${d.latest})</button>`;
+      document.getElementById('update-badge-container').innerHTML = `<span class="update-badge" onclick="showUpdateModal('${d.latest}', '${d.current}')">⬆ Update ${d.latest}</span>`;
+      document.getElementById('btn-apply-update').disabled = false;
+    } else {
+      document.getElementById('update-badge-container').innerHTML = '';
+      document.getElementById('btn-apply-update').disabled = true;
     }
   } catch(e) {}
+}
+
+async function checkUpdateManual() {
+  showToast('Checking for updates...', 'info');
+  document.getElementById('set-latest-ver').innerText = 'Checking...';
+  await checkUpdate();
+  if (updateState.hasUpdate) {
+    showToast(`Update available: v${updateState.latest}`, 'success');
+  } else {
+    showToast('You are running the latest version', 'info');
+  }
 }
 
 function showUpdateModal(latest, current) {
@@ -748,40 +1352,240 @@ function showUpdateModal(latest, current) {
 
 async function applyUpdateNow() {
   document.getElementById('update-modal').style.display = 'none';
+  showToast('Applying update... Service will restart.', 'info');
   await fetch('/api/system/apply-update', { method: 'POST', headers: { 'X-Session-Token': sessionToken } });
-  showToast('Updating in background... Page will refresh.', 'success');
-  setTimeout(() => location.reload(), 5000);
+  setTimeout(() => {
+    showToast('Update applied! Refreshing...', 'success');
+    setTimeout(() => location.reload(), 2000);
+  }, 5000);
 }
 
-// Config Helpers
+// ==================== SCHEDULED TASKS ====================
+async function loadTasks() {
+  try {
+    const res = await fetch('/api/tasks/list', { headers: { 'X-Session-Token': sessionToken } });
+    if (res.ok) {
+      const d = await res.json();
+      tasksData = d.tasks || [];
+      renderTasks();
+    }
+  } catch(e) {
+    tasksData = [];
+    renderTasks();
+  }
+}
+
+function renderTasks() {
+  const container = document.getElementById('tasks-list');
+  if (tasksData.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--muted);">No scheduled tasks configured yet. Click "Add New Task" to create one.</div>';
+    return;
+  }
+  let html = '';
+  tasksData.forEach((task, idx) => {
+    html += `<div class="task-card">
+      <div class="task-info">
+        <div class="task-name">${task.name}</div>
+        <div class="task-schedule">📅 ${task.schedule_type}: ${task.schedule_value}</div>
+        <div class="task-command">⚡ ${task.command}</div>
+      </div>
+      <div class="task-actions">
+        <label class="toggle-switch">
+          <input type="checkbox" ${task.enabled ? 'checked' : ''} onchange="toggleTask(${idx})">
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="btn-red" onclick="deleteTask(${idx})">🗑</button>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function openAddTaskModal() {
+  document.getElementById('add-task-modal').style.display = 'block';
+  document.getElementById('task-name').value = '';
+  document.getElementById('task-command').value = '';
+  document.getElementById('task-schedule-value').value = '';
+  updateScheduleHint();
+}
+
+function updateScheduleHint() {
+  const type = document.getElementById('task-schedule-type').value;
+  const label = document.getElementById('task-schedule-label');
+  const input = document.getElementById('task-schedule-value');
+  const hints = {
+    minute: 'Interval (minutes)',
+    hourly: 'Interval (hours)',
+    daily: 'Time (e.g. 04:00)',
+    weekly: 'Day and time (e.g. Monday 04:00)',
+    custom: 'Cron expression (e.g. */15 * * * *)'
+  };
+  label.innerText = hints[type] || 'Schedule value';
+}
+
+async function addScheduledTask() {
+  const name = document.getElementById('task-name').value;
+  const command = document.getElementById('task-command').value;
+  const schedule_type = document.getElementById('task-schedule-type').value;
+  const schedule_value = document.getElementById('task-schedule-value').value;
+  
+  if (!name || !command || !schedule_value) {
+    showToast('Please fill all fields', 'error');
+    return;
+  }
+  
+  try {
+    await fetch('/api/tasks/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ name, command, schedule_type, schedule_value, enabled: true })
+    });
+    showToast('Task added successfully', 'success');
+    document.getElementById('add-task-modal').style.display = 'none';
+    loadTasks();
+  } catch(e) {
+    showToast('Failed to add task', 'error');
+  }
+}
+
+async function toggleTask(idx) {
+  const task = tasksData[idx];
+  try {
+    await fetch('/api/tasks/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ index: idx, enabled: !task.enabled })
+    });
+    showToast(`Task ${task.enabled ? 'disabled' : 'enabled'}`, 'success');
+    loadTasks();
+  } catch(e) {
+    showToast('Failed to toggle task', 'error');
+  }
+}
+
+async function deleteTask(idx) {
+  if (!confirm('Delete this scheduled task?')) return;
+  try {
+    await fetch('/api/tasks/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ index: idx })
+    });
+    showToast('Task deleted', 'success');
+    loadTasks();
+  } catch(e) {
+    showToast('Failed to delete task', 'error');
+  }
+}
+
+// ==================== SETTINGS ====================
+async function changePassword() {
+  const oldPass = document.getElementById('set-old-pass').value;
+  const newPass = document.getElementById('set-new-pass').value;
+  if (!oldPass || !newPass) {
+    showToast('Please fill both password fields', 'error');
+    return;
+  }
+  try {
+    const res = await fetch('/api/settings/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ old_password: oldPass, new_password: newPass })
+    });
+    const d = await res.json();
+    if (d.status === 'ok') {
+      showToast('Password changed successfully', 'success');
+      document.getElementById('set-old-pass').value = '';
+      document.getElementById('set-new-pass').value = '';
+    } else {
+      showToast(d.message || 'Failed to change password', 'error');
+    }
+  } catch(e) {
+    showToast('Failed to change password', 'error');
+  }
+}
+
+function downloadConfig() {
+  fetch('/api/settings/config', { headers: { 'X-Session-Token': sessionToken } })
+    .then(res => res.json())
+    .then(d => {
+      const blob = new Blob([JSON.stringify(d.config, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ward-config-backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Config downloaded', 'success');
+    })
+    .catch(() => showToast('Failed to download config', 'error'));
+}
+
+function uploadConfig(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const config = JSON.parse(e.target.result);
+      await fetch('/api/settings/restore-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+        body: JSON.stringify({ config })
+      });
+      showToast('Config restored! Service restarting...', 'success');
+      setTimeout(() => location.reload(), 3000);
+    } catch(err) {
+      showToast('Invalid JSON file', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ==================== CONFIG HELPERS ====================
 async function addCfg(type, value) {
   if (!value) return;
   try {
-    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
+    await fetch('/api/config/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ type, value })
+    });
     showToast(`Added ${value} successfully`, 'success');
     fetchStatus();
   } catch(e) {
     showToast('Failed to add', 'error');
   }
 }
+
 async function remCfg(type, value) {
   try {
-    await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
+    await fetch('/api/config/remove', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ type, value })
+    });
     showToast(`Removed ${value} successfully`, 'success');
     fetchStatus();
   } catch(e) {
     showToast('Failed to remove', 'error');
   }
 }
+
 async function addCfgDirectory(name, path) {
   try {
-    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name, value: path }) });
+    await fetch('/api/config/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ type: 'directory', name, value: path })
+    });
     showToast(`Tracking folder: ${name}`, 'success');
     fetchStatus();
   } catch(e) {
     showToast('Failed to track folder', 'error');
   }
 }
+
 async function addFolder() {
   const name = document.getElementById('dir-name').value, path = document.getElementById('dir-path').value;
   if (!name || !path) return;
@@ -789,12 +1593,13 @@ async function addFolder() {
   document.getElementById('dir-name').value = ''; document.getElementById('dir-path').value = '';
 }
 
-// NEW: Toast Notification System
+// ==================== TOAST ====================
 function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${message}`;
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  toast.innerHTML = `<span>${icons[type] || '✅'}</span> ${message}`;
   container.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0';
@@ -803,8 +1608,11 @@ function showToast(message, type = 'success') {
   }, 3000);
 }
 
+// ==================== INIT ====================
 checkAuth();
 setInterval(() => { if (sessionToken) fetchStatus(); }, 2000);
+// Auto-check updates every 24 hours
+setInterval(() => { if (sessionToken) checkUpdate(); }, 24 * 60 * 60 * 1000);
 </script>
 </body>
 </html>
