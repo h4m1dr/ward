@@ -12,7 +12,7 @@ import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
-# تعیین مسیر پایه به صورت داینامیک
+# Dynamic base path resolution
 INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(INSTALL_DIR, "config.json")
 VERSION_PATH = os.path.join(INSTALL_DIR, "version.json")
@@ -352,7 +352,7 @@ def collect_metrics():
 
 class RequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        pass # Suppress default HTTP logging to keep journalctl clean
+        pass  # Suppress default HTTP logging to keep journalctl clean
 
     def is_authenticated(self):
         cfg = load_config()
@@ -455,6 +455,21 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
             self.wfile.write(logs.encode("utf-8"))
+
+        # --- NEW: Settings & Tasks GET Endpoints ---
+        elif self.path == "/api/tasks/list":
+            cfg = load_config()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"tasks": cfg.get("scheduled_tasks", [])}).encode("utf-8"))
+
+        elif self.path == "/api/settings/config":
+            cfg = load_config()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"config": cfg}).encode("utf-8"))
             
         elif self.path in ["/", "/index.html"]:
             self.send_response(200)
@@ -474,10 +489,11 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         length = int(self.headers.get('content-length', 0))
         payload = json.loads(self.rfile.read(length).decode('utf-8')) if length > 0 else {}
-        cfg = load_config()
-
+        
+        # Handle login separately (before auth check)
         if self.path == "/api/auth/login":
             pw = payload.get("password", "")
+            cfg = load_config()
             if hash_pw(pw) == cfg.get("admin_password_hash"):
                 token = secrets.token_hex(24)
                 _active_sessions.add(token)
@@ -493,9 +509,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(b'{"status": "error", "message": "Invalid Password"}')
             return
 
+        # Strict auth check for all other POST requests
+        if not self.is_authenticated():
+            self.send_response(401)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"error": "Unauthorized"}')
+            return
+
+        cfg = load_config()
+
         if self.path == "/api/system/apply-update":
             update_script = os.path.join(INSTALL_DIR, "update.sh")
-            
             if not os.path.exists(update_script):
                 self.send_response(500)
                 self.send_header("Content-Type", "application/json")
@@ -504,12 +529,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return
 
             def do_up():
-                time.sleep(1.5) # تاخیر کوتاه برای اطمینان از ارسال پاسخ به کلاینت قبل از بسته شدن سرور
+                time.sleep(1.5)  # Short delay to ensure response is sent before server restarts
                 try:
                     os.chmod(update_script, 0o755)
                     subprocess.run(["bash", update_script], capture_output=True, text=True)
                 except Exception:
-                    pass # سرویس توسط اسکریپت ری‌استارت خواهد شد
+                    pass  # Service will be restarted by the script
 
             threading.Thread(target=do_up, daemon=True).start()
             self.send_response(200)
@@ -528,13 +553,82 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'{"status": "ok"}')
             return
 
-        if not self.is_authenticated():
-            self.send_response(401)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(b'{"error": "Unauthorized"}')
+        # --- NEW: Settings Endpoints ---
+        if self.path == "/api/settings/change-password":
+            old_pw = payload.get("old_password", "")
+            new_pw = payload.get("new_password", "")
+            if hash_pw(old_pw) == cfg.get("admin_password_hash"):
+                cfg["admin_password_hash"] = hash_pw(new_pw)
+                save_config(cfg)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"status": "ok"}')
+            else:
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"status": "error", "message": "Current password is incorrect"}')
             return
 
+        elif self.path == "/api/settings/restore-config":
+            new_cfg = payload.get("config", {})
+            # Basic validation to prevent corrupting the config
+            if "admin_password_hash" in new_cfg and "panel_port" in new_cfg:
+                save_config(new_cfg)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"status": "ok"}')
+            else:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"status": "error", "message": "Invalid config format"}')
+            return
+
+        # --- NEW: Scheduled Tasks Endpoints ---
+        elif self.path == "/api/tasks/add":
+            tasks = cfg.setdefault("scheduled_tasks", [])
+            tasks.append({
+                "name": payload.get("name"),
+                "command": payload.get("command"),
+                "schedule_type": payload.get("schedule_type"),
+                "schedule_value": payload.get("schedule_value"),
+                "enabled": payload.get("enabled", True)
+            })
+            save_config(cfg)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
+            return
+
+        elif self.path == "/api/tasks/toggle":
+            idx = payload.get("index")
+            tasks = cfg.get("scheduled_tasks", [])
+            if isinstance(idx, int) and 0 <= idx < len(tasks):
+                tasks[idx]["enabled"] = payload.get("enabled", True)
+                save_config(cfg)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
+            return
+
+        elif self.path == "/api/tasks/delete":
+            idx = payload.get("index")
+            tasks = cfg.get("scheduled_tasks", [])
+            if isinstance(idx, int) and 0 <= idx < len(tasks):
+                tasks.pop(idx)
+                save_config(cfg)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
+            return
+
+        # --- Existing Config Endpoints ---
         if self.path == "/api/config/add":
             t, v = payload.get("type"), payload.get("value")
             if t == "app" and v not in cfg.get("monitored_apps", []):
