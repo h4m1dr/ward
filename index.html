@@ -1,94 +1,466 @@
-#!/usr/bin/env bash
-set -e
-
-REPO_URL="https://github.com/h4m1dr/ward.git"
-INSTALL_DIR="/opt/ward"
-
-echo "=========================================="
-echo "    WARD System Watchdog - Interactive Setup"
-echo "=========================================="
-
-if [ "$EUID" -ne 0 ]; then
-  echo "[-] Please run as root."
-  exit 1
-fi
-
-apt-get update -qq && apt-get install -y -qq git python3 curl
-
-if [ -d "$INSTALL_DIR/.git" ]; then
-  echo "[+] Updating local repository..."
-  cd "$INSTALL_DIR"
-  git reset --hard HEAD
-  git pull origin main
-else
-  echo "[+] Cloning repository to $INSTALL_DIR..."
-  git clone "$REPO_URL" "$INSTALL_DIR"
-  cd "$INSTALL_DIR"
-fi
-
-# دریافت تنظیمات از کاربر
-echo ""
-read -p "Enter Panel Title [Default: WARD Monitor]: " CUSTOM_NAME
-CUSTOM_NAME=${CUSTOM_NAME:-"WARD Monitor"}
-
-read -p "Enter Internal Service Port [Default: 54321]: " CUSTOM_PORT
-CUSTOM_PORT=${CUSTOM_PORT:-54321}
-
-read -s -p "Set Web Admin Password [Default: admin1234]: " ADMIN_PASS
-echo ""
-ADMIN_PASS=${ADMIN_PASS:-"admin1234"}
-
-# تولید هش SHA256 رمزعبور
-PASS_HASH=$(echo -n "$ADMIN_PASS" | sha256sum | awk '{print $1}')
-
-# ساخت فایل کانفیگ اختصاصی
-cat << CONFIG_EOF > "$INSTALL_DIR/config.json"
-{
-  "panel_name": "$CUSTOM_NAME",
-  "panel_port": $CUSTOM_PORT,
-  "auth_enabled": true,
-  "admin_password_hash": "$PASS_HASH",
-  "telegram": {
-    "bot_token": "",
-    "chat_id": ""
-  },
-  "monitored_services": ["nginx", "ssh"],
-  "monitored_ports": [80, 443, 22],
-  "blocked_ports_trigger": [21, 23, 3306, 5432, 6379],
-  "monitored_directories": {
-    "system_cache": "/var/cache",
-    "tmp": "/tmp"
-  },
-  "monitored_apps": [
-    "dockerd",
-    "xray"
-  ],
-  "scheduled_tasks": [
-    {
-      "id": "t1",
-      "name": "Purge Temp",
-      "cron_hour": 4,
-      "command": "rm -rf /tmp/*",
-      "enabled": true
-    }
-  ]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WARD - Sentinel Dashboard</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root {
+  --bg: #0b0e14; --card: #151921; --border: #222733; --text: #d1d5db; --muted: #848d97;
+  --blue: #3b82f6; --green: #10b981; --purple: #8b5cf6; --red: #ef4444;
 }
-CONFIG_EOF
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; font-size: 13px; }
 
-# راه‌اندازی سرویس systemd
-cp "$INSTALL_DIR/ward.service" /etc/systemd/system/ward.service
-systemctl daemon-reload
-systemctl enable --now ward
-systemctl restart ward
+/* Login Modal Overlay */
+#login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #07090e; display: flex; align-items: center; justify-content: center; z-index: 10000; }
+.login-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 280px; box-shadow: 0 8px 30px rgba(0,0,0,0.7); text-align: center; }
+.login-box h3 { margin: 0 0 16px 0; color: #fff; font-size: 17px; }
+.login-box input { width: 100%; box-sizing: border-box; background: #0b0e14; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; text-align: center; }
+.login-box button { width: 100%; background: var(--blue); color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.login-err { color: var(--red); font-size: 11px; margin-top: 8px; display: none; }
 
-echo ""
-echo "=========================================="
-echo "[✓] Installation Finished Successfully!"
-echo "    Panel Title: $CUSTOM_NAME"
-echo "    Listening on: http://127.0.0.1:$CUSTOM_PORT"
-echo "    Auth Security: Active (Password Protected)"
-echo ""
-echo "[!] IMPORTANT NGINX NOTICE:"
-echo "    In your Nginx domain config, set:"
-echo "    proxy_pass http://127.0.0.1:$CUSTOM_PORT;"
-echo "=========================================="
+.header { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
+.tab-btn { padding: 6px 14px; border: 1px solid var(--border); background: var(--card); color: var(--muted); border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tab-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; cursor: grab; user-select: none; }
+.card.dragging { opacity: 0.4; border: 2px dashed var(--blue); }
+.card-top { height: 120px; }
+.card-wide { grid-column: span 2; height: 160px; }
+@media (max-width: 500px) { .card-wide { grid-column: span 1; } }
+.c-head { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; }
+.c-val { font-size: 18px; font-weight: 800; color: #fff; margin: 4px 0; }
+.c-sub { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.chart-sm { width: 100%; height: 45px; }
+.chart-lg { width: 100%; height: 95px; }
+canvas { width: 100%; height: 100%; display: block; }
+.list-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 8px; }
+.list-table th, .list-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+.list-table th { background: #11141b; font-size: 11px; color: var(--muted); }
+.btn { background: var(--blue); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+.btn-green { background: var(--green); }
+.btn-red { background: transparent; border: none; color: var(--red); cursor: pointer; font-weight: bold; }
+.badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+.badge-up { background: rgba(16,185,129,0.15); color: var(--green); }
+.badge-down { background: rgba(239,68,68,0.15); color: var(--red); }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 999; }
+.modal-body { background: var(--card); border: 1px solid var(--border); border-radius: 8px; max-width: 750px; margin: 40px auto; max-height: 80vh; display: flex; flex-direction: column; }
+.modal-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-content { padding: 12px; overflow-y: auto; }
+</style>
+</head>
+<body>
+
+<div id="login-overlay">
+  <div class="login-box">
+    <h3 id="login-title">WARD System</h3>
+    <input type="password" id="login-pass" placeholder="Admin Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Authorize</button>
+    <div id="login-err" class="login-err">Invalid Password!</div>
+  </div>
+</div>
+
+<div class="header">
+  <div>
+    <b style="font-size: 15px; color:#fff;" id="p-name">WARD</b> <span style="color:var(--green); font-size:11px;">v1.0.0</span>
+    <span id="update-badge" style="display:none; margin-left:8px;"><button class="btn btn-green" onclick="applyUpdate()">Update</button></span>
+    <div style="font-size: 11px; color: var(--muted); margin-top: 2px;" id="h-specs">Probing system...</div>
+  </div>
+  <div style="text-align: right; font-size: 11px; color: var(--muted);">
+    <div>Net: <b id="h-net" style="color:#fff;">0 GiB</b></div>
+    <div>Load: <b id="h-load" style="color:#fff;">0.0</b></div>
+    <div style="margin-top:2px;"><a href="javascript:void(0)" onclick="doLogout()" style="color:var(--muted); text-decoration:none;">[Logout]</a></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('res', this)">Overview</button>
+  <button class="tab-btn" onclick="switchTab('apps', this)">Watched Apps</button>
+  <button class="tab-btn" onclick="switchTab('srv', this)">Services</button>
+  <button class="tab-btn" onclick="switchTab('net', this)">Ports</button>
+  <button class="tab-btn" onclick="switchTab('dir', this)">Storage</button>
+</div>
+
+<div id="res" class="tab-content active">
+  <div class="grid" id="drag-grid">
+    <div class="card card-top" draggable="true" id="c-cpu">
+      <div class="c-head"><span>CPU</span><span id="cpu-stat">Avg: 0%</span></div>
+      <div class="c-val" id="cpu-val">0%</div>
+      <div class="c-sub"><span id="cpu-sub">1 Core</span><span id="cpu-peak" style="color:var(--red);">Peak: 0%</span></div>
+      <div class="chart-sm"><canvas id="cv-cpu"></canvas></div>
+    </div>
+    <div class="card card-top" draggable="true" id="c-ram">
+      <div class="c-head"><span>RAM</span><span id="ram-stat">Avg: 0%</span></div>
+      <div class="c-val" id="ram-val">0%</div>
+      <div class="c-sub"><span id="ram-sub">0 / 0 MB</span><span id="ram-free">Free: 0 MB</span></div>
+      <div class="chart-sm"><canvas id="cv-ram"></canvas></div>
+    </div>
+    <div class="card card-top" draggable="true" id="c-swap">
+      <div class="c-head"><span>SWAP</span><span>Virtual</span></div>
+      <div class="c-val" id="swap-val">0%</div>
+      <div class="c-sub"><span id="swap-sub">0 / 0 MB</span><span>Swap</span></div>
+      <div class="chart-sm"><canvas id="cv-swap"></canvas></div>
+    </div>
+    <div class="card card-top" draggable="true" id="c-disk">
+      <div class="c-head"><span>STORAGE</span><span id="disk-free" style="color:var(--green);">0 GB Free</span></div>
+      <div class="c-val" id="disk-val">0%</div>
+      <div class="c-sub"><span id="disk-sub">0 / 0 GB</span><span>Root FS</span></div>
+      <div class="chart-sm"><canvas id="cv-disk"></canvas></div>
+    </div>
+    <div class="card card-wide" draggable="true" id="c-net">
+      <div class="c-head"><span>NETWORK TRAFFIC</span><span id="net-speeds" style="color:#fff;">▲ 0 MB/s ▼ 0 MB/s</span></div>
+      <div class="c-sub"><span>Interface eth0/all</span><span>Live Rate</span></div>
+      <div class="chart-lg"><canvas id="cv-net"></canvas></div>
+    </div>
+    <div class="card card-wide" draggable="true" id="c-conn">
+      <div class="c-head"><span>SOCKET CONNECTIONS</span><span id="conn-totals" style="color:#fff;">0 Open</span></div>
+      <div class="c-sub"><span id="conn-sub">TCP: 0 | UDP: 0</span><span>Active</span></div>
+      <div class="chart-lg"><canvas id="cv-conn"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div id="apps" class="tab-content">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <b>Pinned Watched Applications</b>
+    <button class="btn btn-green" onclick="openTaskManager()">⚡ Open Live Task Manager</button>
+  </div>
+  <table class="list-table">
+    <thead><tr><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Status</th><th>Unpin</th></tr></thead>
+    <tbody id="app-tbody"></tbody>
+  </table>
+</div>
+
+<div id="srv" class="tab-content">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <b>Monitored Systemd Services</b>
+    <div>
+      <input type="text" id="in-srv" placeholder="e.g. nginx" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px;">
+      <button class="btn" onclick="addCfg('service', document.getElementById('in-srv').value)">Add Service</button>
+    </div>
+  </div>
+  <table class="list-table">
+    <thead><tr><th>Service</th><th>State</th><th>Journalctl Logs</th><th>Action</th></tr></thead>
+    <tbody id="srv-tbody"></tbody>
+  </table>
+</div>
+
+<div id="net" class="tab-content">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <b>Monitored Open Ports</b>
+    <div>
+      <input type="number" id="in-port" placeholder="Port" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; width:70px; border-radius:4px;">
+      <button class="btn" onclick="addCfg('port', document.getElementById('in-port').value)">Watch</button>
+    </div>
+  </div>
+  <table class="list-table">
+    <thead><tr><th>Port</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="port-tbody"></tbody>
+  </table>
+  <h4 style="margin:16px 0 6px 0; color:var(--red);">⚠️ Monitored Blocked Ports (Telegram Alert if Opened)</h4>
+  <div style="display:flex; gap:6px; margin-bottom:10px;">
+    <input type="number" id="in-bport" placeholder="Port" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; width:90px; border-radius:4px;">
+    <button class="btn btn-green" onclick="addCfg('blocked_port', document.getElementById('in-bport').value)">Trap Port</button>
+  </div>
+  <div id="blocked-tags" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+</div>
+
+<div id="dir" class="tab-content">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <b>Storage Folders Tracker</b>
+    <div>
+      <input type="text" id="dir-name" placeholder="Label" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; width:80px; border-radius:4px;">
+      <input type="text" id="dir-path" placeholder="/path/to/folder" style="background:#0b0e14; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:4px;">
+      <button class="btn" onclick="addFolder()">Track Folder</button>
+    </div>
+  </div>
+  <table class="list-table">
+    <thead><tr><th>Label</th><th>Path</th><th>Size</th><th>Action</th></tr></thead>
+    <tbody id="dir-tbody"></tbody>
+  </table>
+</div>
+
+<div id="tm-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <b>⚡ Live Process Snapshot</b>
+      <div>
+        <button class="btn" onclick="openTaskManager()">Refresh</button>
+        <button class="btn-red" onclick="document.getElementById('tm-modal').style.display='none'">X</button>
+      </div>
+    </div>
+    <div class="modal-content">
+      <table class="list-table">
+        <thead><tr><th>PID</th><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Pin to Watchlist</th></tr></thead>
+        <tbody id="tm-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="log-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <b id="log-title">Service Logs</b>
+      <button class="btn-red" onclick="document.getElementById('log-modal').style.display='none'">X</button>
+    </div>
+    <div class="modal-content"><pre id="log-content" style="background:#05070a; padding:10px; border-radius:4px; font-size:11px; white-space:pre-wrap;"></pre></div>
+  </div>
+</div>
+
+<script>
+let sessionToken = localStorage.getItem('ward_token') || '';
+
+async function checkAuth() {
+  try {
+    const res = await fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    document.getElementById('login-title').innerText = d.panel_name || 'WARD System';
+    document.getElementById('p-name').innerText = d.panel_name || 'WARD';
+    if (d.authenticated) {
+      document.getElementById('login-overlay').style.display = 'none';
+      fetchStatus();
+      checkUpdate();
+    } else {
+      document.getElementById('login-overlay').style.display = 'flex';
+    }
+  } catch(e) {}
+}
+
+async function doLogin() {
+  const pw = document.getElementById('login-pass').value;
+  const res = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw })
+  });
+  const d = await res.json();
+  if (d.status === 'ok') {
+    sessionToken = d.token;
+    localStorage.setItem('ward_token', d.token);
+    document.getElementById('login-overlay').style.display = 'none';
+    fetchStatus();
+    checkUpdate();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  await fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Session-Token': sessionToken } });
+  localStorage.removeItem('ward_token');
+  location.reload();
+}
+
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+const grid = document.getElementById('drag-grid');
+let dragged = null;
+grid.addEventListener('dragstart', (e) => { dragged = e.target.closest('.card'); if (dragged) dragged.classList.add('dragging'); });
+grid.addEventListener('dragend', () => { if (dragged) dragged.classList.remove('dragging'); dragged = null; saveOrder(); });
+grid.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const after = [...grid.querySelectorAll('.card:not(.dragging)')].reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = e.clientY - box.top - box.height / 2;
+    return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+  if (dragged) { after == null ? grid.appendChild(dragged) : grid.insertBefore(dragged, after); }
+});
+function saveOrder() { localStorage.setItem('ward_order', JSON.stringify([...grid.children].map(c => c.id))); }
+function restoreOrder() {
+  const saved = localStorage.getItem('ward_order');
+  if (saved) try { JSON.parse(saved).forEach(id => { const el = document.getElementById(id); if (el) grid.appendChild(el); }); } catch(e){}
+}
+restoreOrder();
+
+const pLen = 25;
+const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
+const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
+
+function plotSingle(id, arr, maxScale, color, fill) {
+  const cvs = document.getElementById(id); if (!cvs) return;
+  const ctx = cvs.getContext('2d'), w = cvs.width = cvs.clientWidth, h = cvs.height = cvs.clientHeight;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = '#222733'; ctx.setLineDash([2,2]);
+  ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath();
+  const step = w / (arr.length - 1);
+  arr.forEach((val, i) => {
+    const y = h - ((Math.min(val / maxScale, 1)) * (h - 4)) - 2;
+    i === 0 ? ctx.moveTo(0, y) : ctx.lineTo(i * step, y);
+  });
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+  if (fill) { ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); }
+}
+
+function plotDouble(id, arr1, arr2, maxScale, c1, c2) {
+  const cvs = document.getElementById(id); if (!cvs) return;
+  const ctx = cvs.getContext('2d'), w = cvs.width = cvs.clientWidth, h = cvs.height = cvs.clientHeight;
+  ctx.clearRect(0,0,w,h);
+  const step = w / (arr1.length - 1);
+  [arr1, arr2].forEach((arr, idx) => {
+    ctx.beginPath();
+    arr.forEach((val, i) => {
+      const y = h - ((Math.min(val / maxScale, 1)) * (h - 6)) - 3;
+      i === 0 ? ctx.moveTo(0, y) : ctx.lineTo(i * step, y);
+    });
+    ctx.strokeStyle = idx === 0 ? c1 : c2; ctx.lineWidth = 1.5; ctx.stroke();
+  });
+}
+
+async function fetchStatus() {
+  try {
+    const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
+    if (res.status === 401) { checkAuth(); return; }
+    const d = await res.json();
+    document.getElementById('p-name').innerText = d.panel_name || 'WARD';
+    document.getElementById('h-specs').innerText = `CPU: ${d.cpu.model} (${d.cpu.cores} Core) | Uptime: ${d.uptime}`;
+    document.getElementById('h-load').innerText = d.load_avg;
+    document.getElementById('h-net').innerText = `${d.network.total_tx_gib} GiB | ${d.network.total_rx_gib} GiB`;
+
+    document.getElementById('cpu-val').innerText = `${d.cpu.usage_pct}%`;
+    document.getElementById('cpu-sub').innerText = `${d.cpu.cores} Virtual Core`;
+    d_cpu.shift(); d_cpu.push(d.cpu.usage_pct);
+    document.getElementById('cpu-stat').innerText = `Avg: ${Math.round(d_cpu.reduce((a,b)=>a+b)/pLen)}%`;
+    document.getElementById('cpu-peak').innerText = `Peak: ${Math.max(...d_cpu)}%`;
+    plotSingle('cv-cpu', d_cpu, 100, '#3b82f6', 'rgba(59,130,246,0.15)');
+
+    document.getElementById('ram-val').innerText = `${d.ram.pct}%`;
+    document.getElementById('ram-sub').innerText = `${d.ram.used_mb} / ${d.ram.total_mb} MB`;
+    document.getElementById('ram-free').innerText = `Free: ${d.ram.total_mb - d.ram.used_mb} MB`;
+    d_ram.shift(); d_ram.push(d.ram.pct);
+    plotSingle('cv-ram', d_ram, 100, '#8b5cf6', 'rgba(139,92,246,0.15)');
+
+    document.getElementById('swap-val').innerText = `${d.swap.pct}%`;
+    document.getElementById('swap-sub').innerText = `${d.swap.used_mb} / ${d.swap.total_mb} MB`;
+    d_swap.shift(); d_swap.push(d.swap.pct);
+    plotSingle('cv-swap', d_swap, 100, '#06b6d4', 'rgba(6,182,212,0.15)');
+
+    document.getElementById('disk-val').innerText = `${d.disk.pct}%`;
+    document.getElementById('disk-sub').innerText = `${d.disk.used_gb} / ${d.disk.total_gb} GB`;
+    document.getElementById('disk-free').innerText = `Free: ${d.disk.free_gb} GB`;
+    d_disk.shift(); d_disk.push(d.disk.pct);
+    plotSingle('cv-disk', d_disk, 100, '#10b981', 'rgba(16,185,129,0.15)');
+
+    document.getElementById('net-speeds').innerText = `▲ ${d.network.speed_tx_mb} MB/s ▼ ${d.network.speed_rx_mb} MB/s`;
+    d_tx.shift(); d_tx.push(d.network.speed_tx_mb);
+    d_rx.shift(); d_rx.push(d.network.speed_rx_mb);
+    plotDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#3b82f6', '#10b981');
+
+    document.getElementById('conn-totals').innerText = `${d.connections.tcp + d.connections.udp} Open Sockets`;
+    document.getElementById('conn-sub').innerText = `TCP: ${d.connections.tcp} | UDP: ${d.connections.udp}`;
+    d_tcp.shift(); d_tcp.push(d.connections.tcp);
+    d_udp.shift(); d_udp.push(d.connections.udp);
+    plotDouble('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#10b981', '#8b5cf6');
+
+    // Apps Watchlist
+    let aH = '';
+    d.apps.forEach(a => {
+      aH += `<tr><td><b>${a.name}</b></td><td>${a.cpu_pct}%</td><td>${a.memory_mb} MB</td><td>${a.threads}</td><td><span class="badge ${a.status==='Active'?'badge-up':'badge-down'}">${a.status}</span></td><td><button class="btn-red" onclick="remCfg('app', '${a.name}')">X</button></td></tr>`;
+    });
+    document.getElementById('app-tbody').innerHTML = aH;
+
+    // Services
+    let sH = '';
+    for (const [k, v] of Object.entries(d.services)) {
+      sH += `<tr><td><b>${k}</b></td><td><span class="badge ${v==='Running'?'badge-up':'badge-down'}">${v}</span></td><td><button class="btn" onclick="viewLogs('${k}')">Logs</button></td><td><button class="btn-red" onclick="remCfg('service', '${k}')">X</button></td></tr>`;
+    }
+    document.getElementById('srv-tbody').innerHTML = sH;
+
+    // Ports
+    let pH = '';
+    for (const [k, v] of Object.entries(d.ports)) {
+      pH += `<tr><td><b>Port ${k}</b></td><td><span class="badge ${v==='Listening'?'badge-up':'badge-down'}">${v}</span></td><td><button class="btn-red" onclick="remCfg('port', '${k}')">X</button></td></tr>`;
+    }
+    document.getElementById('port-tbody').innerHTML = pH;
+
+    // Blocked Ports Tags
+    let bH = '';
+    d.blocked_ports.forEach(bp => {
+      bH += `<span class="badge badge-down" style="padding:4px 8px;">Port ${bp} <b style="cursor:pointer;" onclick="remCfg('blocked_port', '${bp}')">×</b></span>`;
+    });
+    document.getElementById('blocked-tags').innerHTML = bH;
+
+    // Folders
+    let dH = '';
+    for (const [k, v] of Object.entries(d.caches)) {
+      dH += `<tr><td><b>${k}</b></td><td>${v.path}</td><td><b>${v.size_mb} MB</b></td><td><button class="btn-red" onclick="remCfg('directory', '${k}')">X</button></td></tr>`;
+    }
+    document.getElementById('dir-tbody').innerHTML = dH;
+  } catch(e) {}
+}
+
+async function checkUpdate() {
+  try {
+    const res = await fetch('/api/system/check-update', { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    if (d.has_update) {
+      document.getElementById('update-badge').style.display = 'inline-block';
+    }
+  } catch(e) {}
+}
+
+async function applyUpdate() {
+  if (confirm("Apply update from GitHub and restart daemon?")) {
+    await fetch('/api/system/apply-update', { method: 'POST', headers: { 'X-Session-Token': sessionToken }, body: '{}' });
+    alert("Updating in background... Page will reload shortly.");
+    setTimeout(() => location.reload(), 4000);
+  }
+}
+
+async function openTaskManager() {
+  document.getElementById('tm-modal').style.display = 'block';
+  document.getElementById('tm-tbody').innerHTML = '<tr><td colspan="6">Scanning running processes...</td></tr>';
+  const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } });
+  const d = await res.json();
+  let html = '';
+  d.processes.forEach(p => {
+    html += `<tr><td>${p.pid}</td><td><b>${p.name}</b></td><td>${p.cpu_pct}%</td><td>${p.memory_mb} MB</td><td>${p.threads}</td><td><button class="btn" onclick="addCfg('app', '${p.name}')">+ Watch</button></td></tr>`;
+  });
+  document.getElementById('tm-tbody').innerHTML = html;
+}
+
+async function viewLogs(service) {
+  document.getElementById('log-title').innerText = `Logs: ${service}`;
+  document.getElementById('log-content').innerText = 'Loading logs...';
+  document.getElementById('log-modal').style.display = 'block';
+  const res = await fetch(`/api/service/logs?name=${service}`, { headers: { 'X-Session-Token': sessionToken } });
+  document.getElementById('log-content').innerText = await res.text();
+}
+
+async function addCfg(type, value) {
+  if (!value) return;
+  await fetch('/api/config/add', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-Session-Token': sessionToken}, body: JSON.stringify({ type, value }) });
+  fetchStatus();
+}
+
+async function remCfg(type, value) {
+  await fetch('/api/config/remove', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-Session-Token': sessionToken}, body: JSON.stringify({ type, value }) });
+  fetchStatus();
+}
+
+async function addFolder() {
+  const name = document.getElementById('dir-name').value, path = document.getElementById('dir-path').value;
+  if (!name || !path) return;
+  await fetch('/api/config/add', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-Session-Token': sessionToken}, body: JSON.stringify({ type: 'directory', name, value: path }) });
+  document.getElementById('dir-name').value = ''; document.getElementById('dir-path').value = '';
+  fetchStatus();
+}
+
+checkAuth();
+setInterval(() => { if (sessionToken) fetchStatus(); }, 2000);
+</script>
+</body>
+</html>
