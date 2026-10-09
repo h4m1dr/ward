@@ -39,9 +39,7 @@ def load_config():
         "blocked_ports_trigger": [21, 23, 3306, 5432, 6379],
         "monitored_directories": {"system_cache": "/var/cache", "tmp": "/tmp"},
         "monitored_apps": ["dockerd", "xray"],
-        "scheduled_tasks": [
-            {"id": "t1", "name": "Purge Temp", "cron_hour": 4, "command": "rm -rf /tmp/*", "enabled": True}
-        ]
+        "scheduled_tasks": []
     }
     if os.path.exists(CONFIG_PATH):
         try:
@@ -61,21 +59,6 @@ def save_config(cfg):
     except Exception:
         return False
 
-def send_telegram_alert(text):
-    cfg = load_config()
-    token = cfg.get("telegram", {}).get("bot_token")
-    chat_id = cfg.get("telegram", {}).get("chat_id")
-    pname = cfg.get("panel_name", "WARD")
-    if not token or not chat_id:
-        return
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = urllib.parse.urlencode({"chat_id": chat_id, "text": f"[{pname} Alert]\n{text}"}).encode("utf-8")
-    try:
-        req = urllib.request.Request(url, data=payload, method="POST")
-        urllib.request.urlopen(req, timeout=5)
-    except Exception:
-        pass
-
 def get_cpu_info():
     global _prev_idle, _prev_total
     model = "Linux Processor"
@@ -94,14 +77,14 @@ def get_cpu_info():
     try:
         with open("/proc/stat", "r") as f:
             fields = [float(x) for x in f.readline().strip().split()[1:]]
-            idle = fields[3] + fields[4]
-            total = sum(fields)
-            diff_idle = idle - _prev_idle
-            diff_total = total - _prev_total
-            if diff_total > 0:
-                cpu_percent = round((1.0 - (diff_idle / diff_total)) * 100, 1)
-            _prev_idle = idle
-            _prev_total = total
+        idle = fields[3] + fields[4]
+        total = sum(fields)
+        diff_idle = idle - _prev_idle
+        diff_total = total - _prev_total
+        if diff_total > 0:
+            cpu_percent = round((1.0 - (diff_idle / diff_total)) * 100, 1)
+        _prev_idle = idle
+        _prev_total = total
     except Exception:
         pass
     return {"model": model, "cores": max(cores, 1), "usage_pct": max(0.0, min(100.0, cpu_percent))}
@@ -129,7 +112,6 @@ def get_network_stats():
     _prev_net_rx = total_rx
     _prev_net_tx = total_tx
     _prev_net_time = now
-
     return {
         "total_rx_gib": round(total_rx / (1024**3), 2),
         "total_tx_gib": round(total_tx / (1024**3), 2),
@@ -151,27 +133,41 @@ def get_active_listening_ports():
                     ports.add(int(port_str))
     except Exception:
         pass
-
-    cfg = load_config()
-    for bp in cfg.get("blocked_ports_trigger", []):
-        if int(bp) in ports and int(bp) not in _known_listening_ports:
-            send_telegram_alert(f"Critical Monitored Closed Port is now OPEN: {bp}")
-    _known_listening_ports = ports
     return sorted(list(ports))
 
 def get_dir_size_mb(path):
     if not os.path.exists(path):
         return 0.0
-    total = 0
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            fp = os.path.join(root, f)
-            if not os.path.islink(fp):
-                try:
-                    total += os.path.getsize(fp)
-                except OSError:
-                    pass
-    return round(total / (1024 * 1024), 2)
+    try:
+        res = subprocess.run(["du", "-sm", path], capture_output=True, text=True)
+        if res.returncode == 0:
+            return float(res.stdout.split()[0])
+    except Exception:
+        pass
+    return 0.0
+
+def explore_directory_tree(path):
+    if not os.path.exists(path) or not os.path.isdir(path):
+        return []
+    items = []
+    try:
+        res = subprocess.run(["du", "-sm", "--max-depth=1", path], capture_output=True, text=True)
+        if res.returncode == 0:
+            for line in res.stdout.strip().split("\n"):
+                parts = line.split("\t")
+                if len(parts) == 2:
+                    sz_mb = float(parts[0])
+                    sub_path = parts[1].strip()
+                    if sub_path != path:
+                        items.append({
+                            "name": os.path.basename(sub_path),
+                            "path": sub_path,
+                            "size_mb": sz_mb
+                        })
+    except Exception:
+        pass
+    items.sort(key=lambda x: x["size_mb"], reverse=True)
+    return items
 
 def scan_all_processes():
     global _proc_cpu_prev
@@ -182,6 +178,7 @@ def scan_all_processes():
             if "MemTotal" in line:
                 total_mem = int(line.split()[1]) * 1024
                 break
+
     now = time.time()
     for pid in [p for p in os.listdir('/proc') if p.isdigit()]:
         try:
@@ -207,8 +204,9 @@ def scan_all_processes():
                 if dt > 0:
                     cpu = round(((total_time - old_time) / (dt * 100)), 1)
             _proc_cpu_prev[pid] = (total_time, now)
+
             procs.append({
-                "pid": pid,
+                "pid": int(pid),
                 "name": comm,
                 "cpu_pct": max(0.0, min(100.0, cpu)),
                 "memory_mb": round(vm_rss / (1024 * 1024), 2),
@@ -220,12 +218,27 @@ def scan_all_processes():
     procs.sort(key=lambda x: x["memory_mb"], reverse=True)
     return procs
 
+def scan_systemd_services():
+    services = []
+    try:
+        res = subprocess.run(["systemctl", "list-units", "--type=service", "--all", "--no-pager", "--no-legend"], capture_output=True, text=True)
+        for line in res.stdout.splitlines():
+            parts = line.split()
+            if len(parts) >= 4 and parts[0].endswith(".service"):
+                s_name = parts[0][:-8]
+                s_state = parts[3]
+                services.append({"name": s_name, "state": s_state, "sub": parts[2]})
+    except Exception:
+        pass
+    services.sort(key=lambda x: x["name"])
+    return services
+
 def get_pinned_apps(pinned_names):
     all_procs = scan_all_processes()
     proc_dict = {}
     for p in all_procs:
         if p["name"] not in proc_dict:
-            proc_dict[p["name"]] = p
+            proc_dict[p["name"]] = p.copy()
         else:
             proc_dict[p["name"]]["memory_mb"] += p["memory_mb"]
             proc_dict[p["name"]]["memory_pct"] = round(proc_dict[p["name"]]["memory_pct"] + p["memory_pct"], 1)
@@ -259,6 +272,7 @@ def collect_metrics():
     avail_ram = mem.get('MemAvailable', 0)
     total_ram = mem.get('MemTotal', 1)
     used_ram = total_ram - avail_ram
+
     total_swap = mem.get('SwapTotal', 1)
     free_swap = mem.get('SwapFree', 0)
     used_swap = total_swap - free_swap
@@ -290,6 +304,7 @@ def collect_metrics():
     with open("/proc/uptime") as f:
         s = float(f.readline().split()[0])
         uptime = f"{int(s//86400)}d {int((s%86400)//3600)}h {int((s%3600)//60)}m"
+
     with open("/proc/loadavg") as f:
         p = f.readline().split()
         load_avg = f"{p[0]} / {p[1]} / {p[2]}"
@@ -343,7 +358,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(401)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(b'{"error":"Unauthorized"}')
+            self.wfile.write(b'{"error": "Unauthorized"}')
             return
 
         if self.path == "/api/status":
@@ -356,6 +371,23 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"processes": scan_all_processes()}).encode("utf-8"))
+        elif self.path == "/api/services/snapshot":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"services": scan_systemd_services()}).encode("utf-8"))
+        elif self.path == "/api/ports/snapshot":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"ports": get_active_listening_ports()}).encode("utf-8"))
+        elif self.path.startswith("/api/storage/explore?"):
+            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            target = qs.get("path", ["/"])[0]
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"path": target, "items": explore_directory_tree(target)}).encode("utf-8"))
         elif self.path.startswith("/api/service/logs?"):
             qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             srv = qs.get("name", [""])[0]
@@ -367,27 +399,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
             self.wfile.write(logs.encode("utf-8"))
-        elif self.path == "/api/system/check-update":
-            curr_v = "1.0.0"
-            if os.path.exists(VERSION_PATH):
-                try:
-                    with open(VERSION_PATH) as f:
-                        curr_v = json.load(f).get("version", "1.0.0")
-                except Exception:
-                    pass
-            remote_v = curr_v
-            try:
-                url = "https://raw.githubusercontent.com/h4m1dr/ward/main/version.json"
-                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-                with urllib.request.urlopen(req, timeout=4) as response:
-                    data = json.loads(response.read().decode())
-                    remote_v = data.get("version", curr_v)
-            except Exception:
-                pass
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"current": curr_v, "latest": remote_v, "has_update": remote_v != curr_v}).encode("utf-8"))
         elif self.path in ["/", "/index.html"]:
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -417,7 +428,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_response(401)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write(b'{"status":"error","message":"Invalid Password"}')
+                self.wfile.write(b'{"status": "error", "message": "Invalid Password"}')
             return
 
         if self.path == "/api/auth/logout":
@@ -427,14 +438,14 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.send_header("Set-Cookie", "ward_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT")
             self.end_headers()
-            self.wfile.write(b'{"status":"ok"}')
+            self.wfile.write(b'{"status": "ok"}')
             return
 
         if not self.is_authenticated():
             self.send_response(401)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(b'{"error":"Unauthorized"}')
+            self.wfile.write(b'{"error": "Unauthorized"}')
             return
 
         if self.path == "/api/config/add":
@@ -449,6 +460,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 cfg.setdefault("blocked_ports_trigger", []).append(int(v))
             elif t == "directory":
                 cfg["monitored_directories"][payload.get("name")] = v
+
         elif self.path == "/api/config/remove":
             t, v = payload.get("type"), payload.get("value")
             if t == "app":
@@ -461,22 +473,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 cfg["blocked_ports_trigger"] = [x for x in cfg.get("blocked_ports_trigger", []) if str(x) != str(v)]
             elif t == "directory":
                 cfg["monitored_directories"].pop(v, None)
-        elif self.path == "/api/system/apply-update":
-            def do_up():
-                time.sleep(1)
-                subprocess.run("cd /opt/ward && git fetch && git reset --hard origin/main && systemctl restart ward", shell=True)
-            threading.Thread(target=do_up, daemon=True).start()
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(b'{"status":"updating"}')
-            return
 
         save_config(cfg)
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(b'{"status":"ok"}')
+        self.wfile.write(b'{"status": "ok"}')
 
 if __name__ == "__main__":
     cfg = load_config()
