@@ -121,4 +121,4 @@ bash <(curl -fsSL [https://raw.githubusercontent.com/h4m1dr/ward/main/install.sh
 Distributed under the [MIT License](https://www.google.com/search?q=LICENSE).
 
 
-```
+---
