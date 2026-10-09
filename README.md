@@ -10,17 +10,18 @@
 - **Zero Heavy Dependencies:** Written entirely in pure Python 3 using direct Linux `/proc` kernel interfaces—no external libraries (`psutil`, `flask`, etc.).
 - **Interactive Multi-Row UI:** Drag-and-drop dashboard layout with persistent card positions (CPU, Memory, Swap, Disk storage, Dual-stream network speed, and socket connections).
 - **Password-Protected Access:** Built-in session token authentication and SHA-256 hash validation to secure the dashboard.
-- **High-Precision Telemetry:** Real-time native canvas graphs tracking load averages, exact metrics, and peak spikes.
+- **High-Precision Telemetry:** Real-time native canvas graphs with background reference grids and vertical percentage scales tracking exact metrics, averages, and peak spikes.
 - **Pinned Process Watchlist:** Persistent monitoring for bookmarked services and applications without noise from kernel threads.
-- **Live Task Manager Snapshot:** On-demand full system process inspection with single-click pinning to the permanent watchlist.
+- **Live Scanners & Task Manager:** On-demand inspection popups for all running OS processes, active systemd daemons, and listening network sockets with single-click watchlist pinning.
+- **Directory Tree Explorer:** Built-in storage subfolder inspector to audit directory sizes and track targets with a single click.
 - **Service Logs Inspector:** Real-time `journalctl` log viewer for systemd services.
 - **Security Watchdog:** Proactive socket tracking with instant Telegram alert triggers if specified blocked/closed ports are opened.
-- **Interactive Management CLI:** All-in-one terminal menu for installation, configuration tuning, service control, and log debugging.
-- **In-Panel Self-Updater:** Checks GitHub for new releases and updates the daemon in the background with a single click.
+- **Dedicated Quick Updater:** Lightweight background updating engine via panel button or instant CLI command (`ward-update`).
+- **Interactive Management CLI:** All-in-one terminal menu for clean setup, configuration tuning, service control, and log debugging.
 
 ---
 
-## 🚀 Quick Installation & Management
+## 🚀 Quick Installation & Setup
 
 Run the interactive management script on your server (Ubuntu / Debian):
 
@@ -40,12 +41,28 @@ When prompted, you can configure:
 
 ### CLI Management Menu
 
-Rerunning the same command anytime gives you access to:
+Rerunning the same script anytime gives you access to:
 
-* **Install / Update:** Automated setup flow.
+* **Install WARD:** Clean automated setup flow.
 * **Edit Configuration:** Modify port, title, installation path, or admin password on the fly.
 * **Service Health & Logs:** Restart the daemon, check systemd status, or view live `journalctl` output.
 * **Uninstall:** Clean removal of all files and systemd units.
+
+---
+
+## 🔄 Updating WARD
+
+Updates do not require reinstalling or re-entering your configuration.
+
+* **Via Web Dashboard:** When a new release is detected on GitHub, an **Update** badge appears in the header. Clicking it opens a modal to apply the update immediately in the background.
+* **Via Terminal (One Word):** Run the globally registered updater command anytime:
+
+```bash
+ward-update
+
+```
+
+*(Or manually via: `bash /opt/ward/update.sh`)*
 
 ---
 
@@ -91,28 +108,15 @@ nginx -t && systemctl reload nginx
 2. Send the `/newapp` command and select your bot.
 3. Choose a title (e.g., `WARD Monitor`) and short description.
 4. Upload an application icon.
-5. Set the Web App URL to your domain:
+5. Set the Web App URL to your HTTPS domain:
+
 ```text
 https://your-subdomain.domain.com
 
 ```
 
-
 6. Define a short name for the URL.
 7. Launch the Mini App button inside your chat to monitor server metrics directly in Telegram.
-
----
-
-## 🔄 Updating WARD
-
-* **Via Web Dashboard:** If an update is detected on GitHub, an **Update** badge appears in the header. Clicking it will pull changes and restart the daemon.
-* **Via CLI:** Run the install command and select option `1` to pull the latest version:
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/h4m1dr/ward/main/install.sh)
-
-```
-
-
 
 ---
 
