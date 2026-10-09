@@ -3,6 +3,8 @@ import sys
 import json
 import time
 import socket
+import secrets
+import hashlib
 import subprocess
 import threading
 import urllib.request
@@ -10,10 +12,10 @@ import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
-PORT = 8765
 CONFIG_PATH = "/opt/ward/config.json"
 VERSION_PATH = "/opt/ward/version.json"
 
+_active_sessions = set()
 _prev_idle = 0
 _prev_total = 0
 _prev_net_rx = 0
@@ -22,8 +24,15 @@ _prev_net_time = 0
 _known_listening_ports = set()
 _proc_cpu_prev = {}
 
+def hash_pw(pw):
+    return hashlib.sha256(pw.encode('utf-8')).hexdigest()
+
 def load_config():
     default_config = {
+        "panel_name": "WARD Monitor",
+        "panel_port": 54321,
+        "auth_enabled": True,
+        "admin_password_hash": hash_pw("admin1234"),
         "telegram": {"bot_token": "", "chat_id": ""},
         "monitored_services": ["nginx", "ssh"],
         "monitored_ports": [80, 443, 22],
@@ -37,7 +46,9 @@ def load_config():
     if os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, 'r') as f:
-                return json.load(f)
+                data = json.load(f)
+                default_config.update(data)
+                return default_config
         except Exception:
             return default_config
     return default_config
@@ -54,10 +65,11 @@ def send_telegram_alert(text):
     cfg = load_config()
     token = cfg.get("telegram", {}).get("bot_token")
     chat_id = cfg.get("telegram", {}).get("chat_id")
+    pname = cfg.get("panel_name", "WARD")
     if not token or not chat_id:
         return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = urllib.parse.urlencode({"chat_id": chat_id, "text": f"[WARD Alert]\n{text}"}).encode("utf-8")
+    payload = urllib.parse.urlencode({"chat_id": chat_id, "text": f"[{pname} Alert]\n{text}"}).encode("utf-8")
     try:
         req = urllib.request.Request(url, data=payload, method="POST")
         urllib.request.urlopen(req, timeout=5)
@@ -143,7 +155,7 @@ def get_active_listening_ports():
     cfg = load_config()
     for bp in cfg.get("blocked_ports_trigger", []):
         if int(bp) in ports and int(bp) not in _known_listening_ports:
-            send_telegram_alert(f"⚠️ Critical Port Opened: Monitored port {bp} is now listening!")
+            send_telegram_alert(f"Critical Monitored Closed Port is now OPEN: {bp}")
     _known_listening_ports = ports
     return sorted(list(ports))
 
@@ -283,6 +295,7 @@ def collect_metrics():
         load_avg = f"{p[0]} / {p[1]} / {p[2]}"
 
     return {
+        "panel_name": cfg.get("panel_name", "WARD"),
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "uptime": uptime,
         "load_avg": load_avg,
@@ -302,17 +315,45 @@ def collect_metrics():
     }
 
 class RequestHandler(BaseHTTPRequestHandler):
+    def is_authenticated(self):
+        cfg = load_config()
+        if not cfg.get("auth_enabled", True):
+            return True
+        token = self.headers.get("X-Session-Token", "")
+        if not token:
+            cookies = self.headers.get("Cookie", "")
+            for c in cookies.split(";"):
+                if "ward_token=" in c:
+                    token = c.split("ward_token=")[1].strip()
+        return token in _active_sessions
+
     def do_GET(self):
+        if self.path == "/api/auth/status":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            cfg = load_config()
+            self.wfile.write(json.dumps({
+                "authenticated": self.is_authenticated(),
+                "panel_name": cfg.get("panel_name", "WARD")
+            }).encode("utf-8"))
+            return
+
+        if not self.is_authenticated() and self.path not in ["/", "/index.html"]:
+            self.send_response(401)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"error":"Unauthorized"}')
+            return
+
         if self.path == "/api/status":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps(collect_metrics()).encode("utf-8"))
         elif self.path == "/api/taskmanager/snapshot":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps({"processes": scan_all_processes()}).encode("utf-8"))
         elif self.path.startswith("/api/service/logs?"):
@@ -324,7 +365,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 logs = res.stdout or res.stderr
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
-            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(logs.encode("utf-8"))
         elif self.path == "/api/system/check-update":
@@ -346,7 +386,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 pass
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps({"current": curr_v, "latest": remote_v, "has_update": remote_v != curr_v}).encode("utf-8"))
         elif self.path in ["/", "/index.html"]:
@@ -361,8 +400,42 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         length = int(self.headers.get('content-length', 0))
-        payload = json.loads(self.rfile.read(length).decode('utf-8'))
+        payload = json.loads(self.rfile.read(length).decode('utf-8')) if length > 0 else {}
         cfg = load_config()
+
+        if self.path == "/api/auth/login":
+            pw = payload.get("password", "")
+            if hash_pw(pw) == cfg.get("admin_password_hash"):
+                token = secrets.token_hex(24)
+                _active_sessions.add(token)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Set-Cookie", f"ward_token={token}; Path=/; HttpOnly; SameSite=Lax")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "ok", "token": token}).encode("utf-8"))
+            else:
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"status":"error","message":"Invalid Password"}')
+            return
+
+        if self.path == "/api/auth/logout":
+            token = self.headers.get("X-Session-Token", "")
+            _active_sessions.discard(token)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Set-Cookie", "ward_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT")
+            self.end_headers()
+            self.wfile.write(b'{"status":"ok"}')
+            return
+
+        if not self.is_authenticated():
+            self.send_response(401)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"error":"Unauthorized"}')
+            return
 
         if self.path == "/api/config/add":
             t, v = payload.get("type"), payload.get("value")
@@ -402,10 +475,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         save_config(cfg)
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(b'{"status":"ok"}')
 
 if __name__ == "__main__":
-    server = HTTPServer(("127.0.0.1", PORT), RequestHandler)
+    cfg = load_config()
+    port = int(cfg.get("panel_port", 54321))
+    server = HTTPServer(("127.0.0.1", port), RequestHandler)
     server.serve_forever()
