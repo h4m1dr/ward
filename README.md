@@ -25,7 +25,7 @@
 Run the interactive management script on your server (Ubuntu / Debian):
 
 ```bash
-bash <(curl -fsSL [https://raw.githubusercontent.com/h4m1dr/ward/main/install.sh](https://raw.githubusercontent.com/h4m1dr/ward/main/install.sh))
+bash <(curl -fsSL https://raw.githubusercontent.com/h4m1dr/ward/main/install.sh)
 
 ```
 
