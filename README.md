@@ -103,6 +103,5 @@ cd /opt/ward && git pull origin main && systemctl restart ward
 
 Distributed under the [MIT License](https://www.google.com/search?q=LICENSE).
 
-```
 
 ---
