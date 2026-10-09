@@ -128,7 +128,7 @@ CONFIG_EOF
 
     echo -e "${CYAN}[+] Configuring systemd daemon...${NC}"
     generate_service_file "$INSTALL_DIR"
-    systemctl enable-now "$SERVICE_NAME"
+    systemctl enable --now "$SERVICE_NAME"
     systemctl restart "$SERVICE_NAME"
 
     echo ""
