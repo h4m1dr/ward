@@ -37,7 +37,7 @@ If you use Nginx to manage SSL and subdomains, add this block to your site confi
 
 ```nginx
 server {
-    server_name 9z.ykno.ir;
+    server_name panel.domain.com;
 
     listen 443 ssl http2;
     # Add your SSL certificate paths:
@@ -76,7 +76,7 @@ nginx -t && systemctl reload nginx
 5. Upload a square icon/image for the application.
 6. When prompted for the Web App URL, enter your HTTPS domain:
 ```text
-[https://9z.ykno.ir](https://9z.ykno.ir)
+[https://panel.domain.com](https://panel.domain.com)
 
 ```
 
