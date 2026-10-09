@@ -1,0 +1,28 @@
+{
+  "github_repo": "h4m1dr/ward",
+  "telegram": {
+    "bot_token": "",
+    "chat_id": ""
+  },
+  "monitored_services": ["nginx", "ssh"],
+  "monitored_ports": [80, 443, 22],
+  "blocked_ports_trigger": [21, 23, 3306, 5432, 6379],
+  "monitored_directories": {
+    "system_cache": "/var/cache",
+    "tmp": "/tmp"
+  },
+  "monitored_apps": [
+    "dockerd",
+    "xray",
+    "psiphon-tunnel-"
+  ],
+  "scheduled_tasks": [
+    {
+      "id": "t1",
+      "name": "Purge Logs & Cache",
+      "cron_hour": 4,
+      "command": "journalctl --vacuum-time=2d && rm -rf /tmp/*",
+      "enabled": true
+    }
+  ]
+}

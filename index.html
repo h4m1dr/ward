@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Sentinel - 3X-UI & Nezha Edition</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #151921;
+            --card-border: #222733;
+            --text-main: #d1d5db;
+            --text-muted: #848d97;
+            --blue-line: #3b82f6;
+            --green-line: #10b981;
+            --purple-line: #8b5cf6;
+            --cyan-line: #06b6d4;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 14px;
+            font-size: 13px;
+        }
+        .header-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tabs { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; }
+        .tab-btn {
+            padding: 7px 16px;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: var(--blue-line);
+            color: #fff;
+            border-color: var(--blue-line);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Draggable Grid Layout matching 3X-UI */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        @media (max-width: 1024px) {
+            .dash-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .dash-grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: grab;
+            user-select: none;
+            position: relative;
+        }
+        .card:active { cursor: grabbing; }
+        .card.dragging { opacity: 0.4; border: 2px dashed var(--blue-line); }
+
+        .card-top {
+            grid-column: span 1;
+            height: 125px;
+        }
+        .card-wide {
+            grid-column: span 2;
+            height: 185px;
+        }
+        @media (max-width: 600px) {
+            .card-wide { grid-column: span 1; }
+        }
+
+        .c-title { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-bottom: 2px; }
+        .c-val { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 2px; }
+        .c-sub { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .chart-box { width: 100%; height: 50px; position: relative; }
+        .chart-box-lg { width: 100%; height: 110px; position: relative; }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* Action tables */
+        .list-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; margin-top: 10px; }
+        .list-table th, .list-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--card-border); }
+        .list-table th { background: #11141b; font-size: 11px; color: var(--text-muted); }
+        .btn { background: var(--blue-line); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-green { background: var(--green-line); }
+        .btn-red { background: transparent; border: none; color: #ef4444; cursor: pointer; font-weight: bold; }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .badge-up { background: rgba(16,185,129,0.15); color: var(--green-line); }
+        .badge-down { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+        /* Task Manager Popup */
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 999; padding: 15px; }
+        .modal-body { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; max-width: 850px; margin: 30px auto; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+        .modal-head { padding: 12px; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-content { padding: 12px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+    <!-- Header Specs -->
+    <div class="header-box">
+        <div>
+            <b style="font-size: 15px; color:#fff;">Sentinel Monitor</b>
+            <span style="font-size: 11px; color: var(--green-line); margin-left: 8px;" id="h-status">● Running</span>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="h-specs">CPU: ... | Uptime: ...</div>
+        </div>
+        <div style="text-align: right; font-size: 11px; color: var(--text-muted);">
+            <div>Total Network: <b id="h-net" style="color:#fff;">...</b></div>
+            <div>Load Avg: <b id="h-load" style="color:#fff;">...</b></div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('res', this)">Overview</button>
+        <button class="tab-btn" onclick="switchTab('apps', this)">Applications</button>
+        <button class="tab-btn" onclick="switchTab('srv', this)">Services</button>
+        <button class="tab-btn" onclick="switchTab('net', this)">Ports</button>
+        <button class="tab-btn" onclick="switchTab('dir', this)">Storage Folders</button>
+    </div>
+
+    <!-- TAB 1: OVERVIEW (3X-UI MULTI-ROW DRAGGABLE DASHBOARD) -->
+    <div id="res" class="tab-content active">
+        <div class="dash-grid" id="draggable-dashboard">
+
+            <!-- Card 1: CPU -->
+            <div class="card card-top" draggable="true" id="c-cpu-card">
+                <div>
+                    <div class="c-title"><span>CPU</span><span id="cpu-stat" style="font-size:11px; color:var(--text-muted);">Avg: 0%</span></div>
+                    <div class="c-val" id="cpu-val">0%</div>
+                    <div class="c-sub"><span id="cpu-sub">1 Core</span><span id="cpu-peak" style="color:#ef4444;">Peak: 0%</span></div>
+                </div>
+                <div class="chart-box"><canvas id="cv-cpu"></canvas></div>
+            </div>
+
+            <!-- Card 2: RAM -->
+            <div class="card card-top" draggable="true" id="c-ram-card">
+                <div>
+                    <div class="c-title"><span>RAM</span><span id="ram-stat" style="font-size:11px; color:var(--text-muted);">Avg: 0%</span></div>
+                    <div class="c-val" id="ram-val">0%</div>
+                    <div class="c-sub"><span id="ram-sub">0 / 0 MB</span><span id="ram-free">Free: 0 MB</span></div>
+                </div>
+                <div class="chart-box"><canvas id="cv-ram"></canvas></div>
+            </div>
+
+            <!-- Card 3: SWAP -->
+            <div class="card card-top" draggable="true" id="c-swap-card">
+                <div>
+                    <div class="c-title"><span>SWAP</span><span style="font-size:11px; color:var(--text-muted);">Virtual</span></div>
+                    <div class="c-val" id="swap-val">0%</div>
+                    <div class="c-sub"><span id="swap-sub">0 / 0 MB</span><span>Limit 260MB</span></div>
+                </div>
+                <div class="chart-box"><canvas id="cv-swap"></canvas></div>
+            </div>
+
+            <!-- Card 4: STORAGE (Now with real Graph!) -->
+            <div class="card card-top" draggable="true" id="c-disk-card">
+                <div>
+                    <div class="c-title"><span>STORAGE</span><span id="disk-free" style="font-size:11px; color:var(--green-line);">Free: 0 GB</span></div>
+                    <div class="c-val" id="disk-val">0%</div>
+                    <div class="c-sub"><span id="disk-sub">0 / 0 GB</span><span id="disk-stat">Disk Used</span></div>
+                </div>
+                <div class="chart-box"><canvas id="cv-disk"></canvas></div>
+            </div>
+
+            <!-- Card 5: OVERALL SPEED (Wide chart) -->
+            <div class="card card-wide" draggable="true" id="c-net-card">
+                <div>
+                    <div class="c-title">
+                        <span>OVERALL SPEED</span>
+                        <span id="net-speeds" style="font-size:11px; color:#fff;">▲ 0 KB/s  ▼ 0 KB/s</span>
+                    </div>
+                    <div class="c-sub"><span>Interface total</span><span>Avg over window</span></div>
+                </div>
+                <div class="chart-box-lg"><canvas id="cv-net"></canvas></div>
+            </div>
+
+            <!-- Card 6: CONNECTION STATS (Wide chart) -->
+            <div class="card card-wide" draggable="true" id="c-conn-card">
+                <div>
+                    <div class="c-title">
+                        <span>CONNECTION STATS</span>
+                        <span id="conn-totals" style="font-size:12px; color:#fff;">0 open sockets</span>
+                    </div>
+                    <div class="c-sub"><span id="conn-sub">TCP: 0 | UDP: 0</span><span>Active connections</span></div>
+                </div>
+                <div class="chart-box-lg"><canvas id="cv-conn"></canvas></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TAB 2: APPLICATIONS (WATCHLIST + ON-DEMAND TASK MANAGER) -->
+    <div id="apps" class="tab-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b>Watched Applications (Pinned only)</b>
+            <button class="btn btn-green" onclick="openTaskManager()">⚡ Open Live Task Manager</button>
+        </div>
+        <table class="list-table">
+            <thead>
+                <tr>
+                    <th onclick="sortApps('name')" style="cursor:pointer;">Application ⬍</th>
+                    <th onclick="sortApps('cpu_pct')" style="cursor:pointer;">CPU % ⬍</th>
+                    <th onclick="sortApps('memory_mb')" style="cursor:pointer;">RAM (MB) ⬍</th>
+                    <th>Threads</th>
+                    <th>Status</th>
+                    <th>Unpin</th>
+                </tr>
+            </thead>
+            <tbody id="app-watchlist-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- TAB 3: SERVICES -->
+    <div id="srv" class="tab-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b>Monitored Services</b>
+            <div>
+                <input type="text" id="add-srv-in" placeholder="Service (e.g. nginx)" style="padding:5px; background:var(--bg-color); color:#fff; border:1px solid var(--card-border); border-radius:4px;">
+                <button class="btn" onclick="addConfig('service', document.getElementById('add-srv-in').value)">Add Service</button>
+            </div>
+        </div>
+        <table class="list-table">
+            <thead><tr><th>Service Name</th><th>Status</th><th>Logs</th><th>Remove</th></tr></thead>
+            <tbody id="srv-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- TAB 4: PORTS & SECURITY -->
+    <div id="net" class="tab-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b>Watched Ports</b>
+            <div>
+                <input type="number" id="add-port-in" placeholder="Port" style="padding:5px; width:90px; background:var(--bg-color); color:#fff; border:1px solid var(--card-border); border-radius:4px;">
+                <button class="btn" onclick="addConfig('port', document.getElementById('add-port-in').value)">Watch Port</button>
+            </div>
+        </div>
+        <table class="list-table">
+            <thead><tr><th>Port</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="port-tbody"></tbody>
+        </table>
+
+        <h4 style="margin:16px 0 6px 0; color:#ef4444;">🚨 Trigger if Closed Port is Opened</h4>
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+            <input type="number" id="add-bport-in" placeholder="Port number" style="padding:5px; width:120px; background:var(--bg-color); color:#fff; border:1px solid var(--card-border); border-radius:4px;">
+            <button class="btn btn-green" onclick="addConfig('blocked_port', document.getElementById('add-bport-in').value)">Add Trigger</button>
+        </div>
+        <div id="blocked-tags" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- TAB 5: STORAGE FOLDERS -->
+    <div id="dir" class="tab-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b>Tracked Storage Folders</b>
+            <div>
+                <input type="text" id="dir-name-in" placeholder="Label" style="padding:5px; width:100px; background:var(--bg-color); color:#fff; border:1px solid var(--card-border); border-radius:4px;">
+                <input type="text" id="dir-path-in" placeholder="/absolute/path" style="padding:5px; background:var(--bg-color); color:#fff; border:1px solid var(--card-border); border-radius:4px;">
+                <button class="btn" onclick="addDirectory()">Track Directory</button>
+            </div>
+        </div>
+        <table class="list-table">
+            <thead><tr><th>Label</th><th>Path</th><th>Size (MB)</th><th>Action</th></tr></thead>
+            <tbody id="dir-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- TASK MANAGER POPUP -->
+    <div id="tm-modal" class="modal">
+        <div class="modal-body">
+            <div class="modal-head">
+                <b>⚡ Live Task Manager (Snapshot)</b>
+                <div>
+                    <button class="btn" onclick="openTaskManager()">🔄 Refresh</button>
+                    <button class="btn-red" onclick="closeTaskManager()" style="font-size:16px;">✕</button>
+                </div>
+            </div>
+            <div class="modal-content">
+                <table class="list-table">
+                    <thead><tr><th>PID</th><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Action</th></tr></thead>
+                    <tbody id="tm-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(id, el) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        // --- Drag & Drop Reordering (Alireza x-ui style) ---
+        const grid = document.getElementById('draggable-dashboard');
+        let draggedItem = null;
+
+        grid.addEventListener('dragstart', (e) => {
+            draggedItem = e.target.closest('.card');
+            if (draggedItem) draggedItem.classList.add('dragging');
+        });
+        grid.addEventListener('dragend', (e) => {
+            if (draggedItem) draggedItem.classList.remove('dragging');
+            draggedItem = null;
+            saveLayoutOrder();
+        });
+        grid.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(grid, e.clientX, e.clientY);
+            if (draggedItem) {
+                if (afterElement == null) grid.appendChild(draggedItem);
+                else grid.insertBefore(draggedItem, afterElement);
+            }
+        });
+
+        function getDragAfterElement(container, x, y) {
+            const draggableElements = [...container.querySelectorAll('.card:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
+                else return closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function saveLayoutOrder() {
+            const order = [...grid.children].map(c => c.id);
+            localStorage.setItem('sentinel_card_order', JSON.stringify(order));
+        }
+
+        function restoreLayoutOrder() {
+            const saved = localStorage.getItem('sentinel_card_order');
+            if (!saved) return;
+            try {
+                const order = JSON.parse(saved);
+                order.forEach(id => {
+                    const card = document.getElementById(id);
+                    if (card) grid.appendChild(card);
+                });
+            } catch (e) {}
+        }
+        restoreLayoutOrder();
+
+        // --- Precise Charts Logic (25 Points) ---
+        const pLen = 25;
+        const d_cpu = new Array(pLen).fill(0);
+        const d_ram = new Array(pLen).fill(0);
+        const d_swap = new Array(pLen).fill(0);
+        const d_disk = new Array(pLen).fill(0);
+        const d_net_rx = new Array(pLen).fill(0);
+        const d_net_tx = new Array(pLen).fill(0);
+        const d_tcp = new Array(pLen).fill(0);
+        const d_udp = new Array(pLen).fill(0);
+
+        function renderChart(cvsId, dataArr, maxScale, strokeColor, fillColor) {
+            const cvs = document.getElementById(cvsId);
+            if (!cvs) return;
+            const ctx = cvs.getContext('2d');
+            const w = cvs.width = cvs.clientWidth;
+            const h = cvs.height = cvs.clientHeight;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Dotted reference line (50%)
+            ctx.strokeStyle = '#222733';
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(0, h / 2);
+            ctx.lineTo(w, h / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Plot data line
+            ctx.beginPath();
+            const step = w / (dataArr.length - 1);
+            dataArr.forEach((val, i) => {
+                const norm = Math.max(0, Math.min(val / maxScale, 1));
+                const y = h - (norm * (h - 4)) - 2;
+                if (i === 0) ctx.moveTo(0, y);
+                else ctx.lineTo(i * step, y);
+            });
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            if (fillColor) {
+                ctx.lineTo(w, h);
+                ctx.lineTo(0, h);
+                ctx.closePath();
+                ctx.fillStyle = fillColor;
+                ctx.fill();
+            }
+        }
+
+        function renderMultiChart(cvsId, arr1, arr2, maxScale, color1, color2) {
+            const cvs = document.getElementById(cvsId);
+            if (!cvs) return;
+            const ctx = cvs.getContext('2d');
+            const w = cvs.width = cvs.clientWidth;
+            const h = cvs.height = cvs.clientHeight;
+
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.strokeStyle = '#222733';
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const step = w / (arr1.length - 1);
+
+            // Plot line 1
+            ctx.beginPath();
+            arr1.forEach((v, i) => {
+                const y = h - (Math.min(v / maxScale, 1) * (h - 6)) - 3;
+                if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * step, y);
+            });
+            ctx.strokeStyle = color1;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Plot line 2
+            ctx.beginPath();
+            arr2.forEach((v, i) => {
+                const y = h - (Math.min(v / maxScale, 1) * (h - 6)) - 3;
+                if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * step, y);
+            });
+            ctx.strokeStyle = color2;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        let currentAppData = [];
+        let appSortAsc = false;
+        function sortApps(key) {
+            appSortAsc = !appSortAsc;
+            currentAppData.sort((a, b) => (a[key] < b[key] ? (appSortAsc ? -1 : 1) : (appSortAsc ? 1 : -1)));
+            renderAppTable();
+        }
+        function renderAppTable() {
+            let html = '';
+            currentAppData.forEach(a => {
+                const badge = a.status === 'Active' ? 'badge-up' : 'badge-down';
+                html += `<tr>
+                    <td><b>${a.name}</b></td>
+                    <td>${a.cpu_pct}%</td>
+                    <td>${a.memory_mb} MB (${a.memory_pct}%)</td>
+                    <td>${a.threads}</td>
+                    <td><span class="badge ${badge}">${a.status}</span></td>
+                    <td><button class="btn-red" onclick="removeConfig('app', '${a.name}')">✕</button></td>
+                </tr>`;
+            });
+            document.getElementById('app-watchlist-tbody').innerHTML = html;
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const d = await res.json();
+
+                // Headers
+                document.getElementById('h-specs').innerText = `CPU: ${d.cpu.model} (${d.cpu.cores} Core) | Uptime: ${d.uptime}`;
+                document.getElementById('h-load').innerText = d.load_avg;
+                document.getElementById('h-net').innerText = `▲ ${d.network.total_tx_gib} GiB | ▼ ${d.network.total_rx_gib} GiB`;
+
+                // 1. CPU
+                document.getElementById('cpu-val').innerText = `${d.cpu.usage_pct}%`;
+                document.getElementById('cpu-sub').innerText = `${d.cpu.cores} Core / Real-time`;
+                d_cpu.shift(); d_cpu.push(d.cpu.usage_pct);
+                document.getElementById('cpu-stat').innerText = `Avg: ${Math.round(d_cpu.reduce((a,b)=>a+b)/pLen)}%`;
+                document.getElementById('cpu-peak').innerText = `Peak: ${Math.max(...d_cpu)}%`;
+                renderChart('cv-cpu', d_cpu, 100, '#3b82f6', 'rgba(59,130,246,0.15)');
+
+                // 2. RAM
+                document.getElementById('ram-val').innerText = `${d.ram.pct}%`;
+                document.getElementById('ram-sub').innerText = `${d.ram.used_mb} / ${d.ram.total_mb} MB`;
+                document.getElementById('ram-free').innerText = `Free: ${d.ram.total_mb - d.ram.used_mb} MB`;
+                d_ram.shift(); d_ram.push(d.ram.pct);
+                document.getElementById('ram-stat').innerText = `Avg: ${Math.round(d_ram.reduce((a,b)=>a+b)/pLen)}%`;
+                renderChart('cv-ram', d_ram, 100, '#8b5cf6', 'rgba(139,92,246,0.15)');
+
+                // 3. SWAP
+                document.getElementById('swap-val').innerText = `${d.swap.pct}%`;
+                document.getElementById('swap-sub').innerText = `${d.swap.used_mb} / ${d.swap.total_mb} MB`;
+                d_swap.shift(); d_swap.push(d.swap.pct);
+                renderChart('cv-swap', d_swap, 100, '#06b6d4', 'rgba(6,182,212,0.15)');
+
+                // 4. STORAGE (Now Graph!)
+                document.getElementById('disk-val').innerText = `${d.disk.pct}%`;
+                document.getElementById('disk-sub').innerText = `${d.disk.used_gb} / ${d.disk.total_gb} GB`;
+                document.getElementById('disk-free').innerText = `Free: ${d.disk.free_gb} GB`;
+                d_disk.shift(); d_disk.push(d.disk.pct);
+                renderChart('cv-disk', d_disk, 100, '#10b981', 'rgba(16,185,129,0.15)');
+
+                // 5. OVERALL SPEED (Wide Chart)
+                document.getElementById('net-speeds').innerText = `▲ ${d.network.speed_tx_mb} MB/s  ▼ ${d.network.speed_rx_mb} MB/s`;
+                d_net_tx.shift(); d_net_tx.push(d.network.speed_tx_mb);
+                d_net_rx.shift(); d_net_rx.push(d.network.speed_rx_mb);
+                renderMultiChart('cv-net', d_net_tx, d_net_rx, Math.max(5, Math.max(...d_net_tx, ...d_net_rx)), '#3b82f6', '#9ca3af');
+
+                // 6. CONNECTION STATS (Wide Chart)
+                document.getElementById('conn-totals').innerText = `${d.connections.tcp + d.connections.udp} open sockets`;
+                document.getElementById('conn-sub').innerText = `TCP: ${d.connections.tcp} | UDP: ${d.connections.udp}`;
+                d_tcp.shift(); d_tcp.push(d.connections.tcp);
+                d_udp.shift(); d_udp.push(d.connections.udp);
+                renderMultiChart('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp)), '#10b981', '#8b5cf6');
+
+                // Render Watchlist
+                currentAppData = d.apps;
+                renderAppTable();
+
+                // Services
+                let srvHtml = '';
+                for (const [k, v] of Object.entries(d.services)) {
+                    srvHtml += `<tr>
+                        <td><b>${k}</b></td>
+                        <td><span class="badge ${v === 'Running' ? 'badge-up' : 'badge-down'}">${v}</span></td>
+                        <td><button class="btn" style="padding:2px 8px; font-size:11px;" onclick="viewLogs('${k}')">Logs</button></td>
+                        <td><button class="btn-red" onclick="removeConfig('service', '${k}')">✕</button></td>
+                    </tr>`;
+                }
+                document.getElementById('srv-tbody').innerHTML = srvHtml;
+
+                // Ports
+                let portHtml = '';
+                for (const [k, v] of Object.entries(d.ports)) {
+                    portHtml += `<tr>
+                        <td><b>Port ${k}</b></td>
+                        <td><span class="badge ${v === 'Listening' ? 'badge-up' : 'badge-down'}">${v}</span></td>
+                        <td><button class="btn-red" onclick="removeConfig('port', '${k}')">✕</button></td>
+                    </tr>`;
+                }
+                document.getElementById('port-tbody').innerHTML = portHtml;
+
+                // Blocked Ports Tags
+                let bHtml = '';
+                d.blocked_ports.forEach(bp => {
+                    bHtml += `<span class="badge badge-down" style="padding:4px 8px;">Port ${bp} <b onclick="removeConfig('blocked_port', '${bp}')" style="cursor:pointer; margin-left:4px;">✕</b></span>`;
+                });
+                document.getElementById('blocked-tags').innerHTML = bHtml;
+
+                // Directories
+                let dirHtml = '';
+                for (const [k, v] of Object.entries(d.caches)) {
+                    dirHtml += `<tr>
+                        <td><b>${k}</b></td>
+                        <td>${v.path}</td>
+                        <td><b>${v.size_mb} MB</b></td>
+                        <td><button class="btn-red" onclick="removeConfig('directory', '${k}')">✕</button></td>
+                    </tr>`;
+                }
+                document.getElementById('dir-tbody').innerHTML = dirHtml;
+
+            } catch (e) { console.error(e); }
+        }
+
+        // --- Task Manager Modal ---
+        async function openTaskManager() {
+            document.getElementById('tm-modal').style.display = 'block';
+            document.getElementById('tm-tbody').innerHTML = '<tr><td colspan="6">Scanning running processes...</td></tr>';
+            const res = await fetch('/api/taskmanager/snapshot');
+            const d = await res.json();
+            let html = '';
+            d.processes.forEach(p => {
+                html += `<tr>
+                    <td>${p.pid}</td>
+                    <td><b>${p.name}</b></td>
+                    <td>${p.cpu_pct}%</td>
+                    <td>${p.memory_mb} MB (${p.memory_pct}%)</td>
+                    <td>${p.threads}</td>
+                    <td><button class="btn" style="padding:2px 8px; font-size:11px;" onclick="addConfig('app', '${p.name}')">+ Watch</button></td>
+                </tr>`;
+            });
+            document.getElementById('tm-tbody').innerHTML = html;
+        }
+
+        function closeTaskManager() { document.getElementById('tm-modal').style.display = 'none'; }
+
+        async function addConfig(type, value) {
+            if (!value) return;
+            await fetch('/api/config/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, value })
+            });
+            fetchStatus();
+        }
+
+        async function removeConfig(type, value) {
+            await fetch('/api/config/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, value })
+            });
+            fetchStatus();
+        }
+
+        async function addDirectory() {
+            const name = document.getElementById('dir-name-in').value;
+            const path = document.getElementById('dir-path-in').value;
+            if (!name || !path) return;
+            await fetch('/api/config/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'directory', name, value: path })
+            });
+            document.getElementById('dir-name-in').value = '';
+            document.getElementById('dir-path-in').value = '';
+            fetchStatus();
+        }
+
+        fetchStatus();
+        setInterval(fetchStatus, 2000);
+    </script>
+</body>
+</html>
