@@ -12,8 +12,10 @@ import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
-CONFIG_PATH = "/opt/ward/config.json"
-VERSION_PATH = "/opt/ward/version.json"
+# تعیین مسیر پایه به صورت داینامیک
+INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(INSTALL_DIR, "config.json")
+VERSION_PATH = os.path.join(INSTALL_DIR, "version.json")
 
 _active_sessions = set()
 _prev_idle = 0
@@ -173,11 +175,14 @@ def scan_all_processes():
     global _proc_cpu_prev
     procs = []
     total_mem = 1
-    with open('/proc/meminfo', 'r') as f:
-        for line in f:
-            if "MemTotal" in line:
-                total_mem = int(line.split()[1]) * 1024
-                break
+    try:
+        with open('/proc/meminfo', 'r') as f:
+            for line in f:
+                if "MemTotal" in line:
+                    total_mem = int(line.split()[1]) * 1024
+                    break
+    except Exception:
+        pass
 
     now = time.time()
     for pid in [p for p in os.listdir('/proc') if p.isdigit()]:
@@ -265,10 +270,14 @@ def collect_metrics():
     active_ports = get_active_listening_ports()
 
     mem = {}
-    with open('/proc/meminfo', 'r') as f:
-        for line in f:
-            parts = line.split(':')
-            mem[parts[0].strip()] = int(parts[1].split()[0]) // 1024
+    try:
+        with open('/proc/meminfo', 'r') as f:
+            for line in f:
+                parts = line.split(':')
+                mem[parts[0].strip()] = int(parts[1].split()[0]) // 1024
+    except Exception:
+        pass
+        
     avail_ram = mem.get('MemAvailable', 0)
     total_ram = mem.get('MemTotal', 1)
     used_ram = total_ram - avail_ram
@@ -277,11 +286,14 @@ def collect_metrics():
     free_swap = mem.get('SwapFree', 0)
     used_swap = total_swap - free_swap
 
-    st = os.statvfs('/')
-    total_disk = round((st.f_blocks * st.f_frsize) / (1024**3), 2)
-    free_disk = round((st.f_bavail * st.f_frsize) / (1024**3), 2)
-    used_disk = round(total_disk - free_disk, 2)
-    used_disk_pct = round((used_disk / total_disk) * 100, 1)
+    try:
+        st = os.statvfs('/')
+        total_disk = round((st.f_blocks * st.f_frsize) / (1024**3), 2)
+        free_disk = round((st.f_bavail * st.f_frsize) / (1024**3), 2)
+        used_disk = round(total_disk - free_disk, 2)
+        used_disk_pct = round((used_disk / total_disk) * 100, 1)
+    except Exception:
+        total_disk = free_disk = used_disk = used_disk_pct = 0.0
 
     services_state = {}
     for s in cfg.get("monitored_services", []):
@@ -298,16 +310,25 @@ def collect_metrics():
 
     pinned_apps = get_pinned_apps(cfg.get("monitored_apps", []))
 
-    tcp_count = len([1 for l in open("/proc/net/tcp").readlines() if not l.strip().startswith("sl")])
-    udp_count = len([1 for l in open("/proc/net/udp").readlines() if not l.strip().startswith("sl")])
+    tcp_count = 0
+    udp_count = 0
+    try:
+        tcp_count = len([1 for l in open("/proc/net/tcp").readlines() if not l.strip().startswith("sl")])
+        udp_count = len([1 for l in open("/proc/net/udp").readlines() if not l.strip().startswith("sl")])
+    except Exception:
+        pass
 
-    with open("/proc/uptime") as f:
-        s = float(f.readline().split()[0])
-        uptime = f"{int(s//86400)}d {int((s%86400)//3600)}h {int((s%3600)//60)}m"
-
-    with open("/proc/loadavg") as f:
-        p = f.readline().split()
-        load_avg = f"{p[0]} / {p[1]} / {p[2]}"
+    uptime = "0d 0h 0m"
+    load_avg = "0.0 / 0.0 / 0.0"
+    try:
+        with open("/proc/uptime") as f:
+            s = float(f.readline().split()[0])
+            uptime = f"{int(s//86400)}d {int((s%86400)//3600)}h {int((s%3600)//60)}m"
+        with open("/proc/loadavg") as f:
+            p = f.readline().split()
+            load_avg = f"{p[0]} / {p[1]} / {p[2]}"
+    except Exception:
+        pass
 
     return {
         "panel_name": cfg.get("panel_name", "WARD"),
@@ -315,7 +336,7 @@ def collect_metrics():
         "uptime": uptime,
         "load_avg": load_avg,
         "cpu": cpu_data,
-        "ram": {"used_mb": used_ram, "total_mb": total_ram, "pct": round((used_ram/total_ram)*100, 1)},
+        "ram": {"used_mb": used_ram, "total_mb": total_ram, "pct": round((used_ram/total_ram)*100, 1) if total_ram > 0 else 0.0},
         "swap": {"used_mb": used_swap, "total_mb": total_swap, "pct": round((used_swap/max(total_swap, 1))*100, 1)},
         "disk": {"used_gb": used_disk, "free_gb": free_disk, "total_gb": total_disk, "pct": used_disk_pct},
         "network": net_data,
@@ -330,6 +351,9 @@ def collect_metrics():
     }
 
 class RequestHandler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass # Suppress default HTTP logging to keep journalctl clean
+
     def is_authenticated(self):
         cfg = load_config()
         if not cfg.get("auth_enabled", True):
@@ -366,6 +390,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(collect_metrics()).encode("utf-8"))
+            
         elif self.path == "/api/system/check-update":
             curr_v = "1.0.0"
             if os.path.exists(VERSION_PATH):
@@ -392,21 +417,25 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "latest": remote_v,
                 "has_update": (remote_v != curr_v)
             }).encode("utf-8"))
+            
         elif self.path == "/api/taskmanager/snapshot":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"processes": scan_all_processes()}).encode("utf-8"))
+            
         elif self.path == "/api/services/snapshot":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"services": scan_systemd_services()}).encode("utf-8"))
+            
         elif self.path == "/api/ports/snapshot":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"ports": get_active_listening_ports()}).encode("utf-8"))
+            
         elif self.path.startswith("/api/storage/explore?"):
             qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             target = qs.get("path", ["/"])[0]
@@ -414,23 +443,30 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"path": target, "items": explore_directory_tree(target)}).encode("utf-8"))
+            
         elif self.path.startswith("/api/service/logs?"):
             qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             srv = qs.get("name", [""])[0]
             logs = "No logs available"
             if srv:
-                res = subprocess.run(["journalctl", "-u", srv, "-n", "35", "--no-pager"], capture_output=True, text=True)
+                res = subprocess.run(["journalctl", "-u", "ward", "-n", "35", "--no-pager"], capture_output=True, text=True)
                 logs = res.stdout or res.stderr
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
             self.wfile.write(logs.encode("utf-8"))
+            
         elif self.path in ["/", "/index.html"]:
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
-            with open("/opt/ward/index.html", "rb") as f:
-                self.wfile.write(f.read())
+            index_path = os.path.join(INSTALL_DIR, "index.html")
+            if os.path.exists(index_path):
+                with open(index_path, "rb") as f:
+                    self.wfile.write(f.read())
+            else:
+                self.send_response(404)
+                self.end_headers()
         else:
             self.send_response(404)
             self.end_headers()
@@ -458,15 +494,28 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
 
         if self.path == "/api/system/apply-update":
+            update_script = os.path.join(INSTALL_DIR, "update.sh")
+            
+            if not os.path.exists(update_script):
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"error": "update.sh script not found"}')
+                return
+
             def do_up():
-                time.sleep(1)
-                inst_dir = os.path.dirname(os.path.abspath(__file__))
-                subprocess.run(f"bash {inst_dir}/update.sh", shell=True)
+                time.sleep(1.5) # تاخیر کوتاه برای اطمینان از ارسال پاسخ به کلاینت قبل از بسته شدن سرور
+                try:
+                    os.chmod(update_script, 0o755)
+                    subprocess.run(["bash", update_script], capture_output=True, text=True)
+                except Exception:
+                    pass # سرویس توسط اسکریپت ری‌استارت خواهد شد
+
             threading.Thread(target=do_up, daemon=True).start()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(b'{"status":"updating"}')
+            self.wfile.write(b'{"status": "updating"}')
             return
 
         if self.path == "/api/auth/logout":
@@ -522,4 +571,5 @@ if __name__ == "__main__":
     cfg = load_config()
     port = int(cfg.get("panel_port", 54321))
     server = HTTPServer(("127.0.0.1", port), RequestHandler)
+    print(f"WARD Server running on port {port}")
     server.serve_forever()
