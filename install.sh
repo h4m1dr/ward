@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# ==========================================
-# WARD - Management & Installation CLI Tool
-# ==========================================
-
+# WARD Management & Installation CLI Tool
 REPO_URL="https://github.com/h4m1dr/ward.git"
 DEFAULT_INSTALL_DIR="/opt/ward"
 SERVICE_NAME="ward"
@@ -17,7 +14,6 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# Check root privileges
 check_root() {
     if [ "$EUID" -ne 0 ]; then
         echo -e "${RED}[-] Error: Please run this script as root.${NC}"
@@ -25,7 +21,6 @@ check_root() {
     fi
 }
 
-# Resolve actual installation directory
 get_install_dir() {
     if [ -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
         DIR=$(grep "WorkingDirectory=" "/etc/systemd/system/${SERVICE_NAME}.service" | cut -d'=' -f2 | tr -d ' ')
@@ -37,12 +32,11 @@ get_install_dir() {
     echo "$DEFAULT_INSTALL_DIR"
 }
 
-# Write Systemd Service File
 generate_service_file() {
     local target_dir="$1"
     cat << EOF > "/etc/systemd/system/${SERVICE_NAME}.service"
 [Unit]
-Description=WARD - Watchdog for Applications, Resources & Directories
+Description=WARD Watchdog for Applications, Resources & Directories
 After=network.target
 
 [Service]
@@ -61,15 +55,13 @@ EOF
 
 # 1. Full Automated Installation
 install_ward() {
-    echo -e "${BLUE}==========================================${NC}"
-    echo -e "${BLUE}        WARD Installation Process         ${NC}"
-    echo -e "${BLUE}==========================================${NC}"
+    echo -e "${BLUE}======================================${NC}"
+    echo -e "${BLUE}       WARD Clean Installation        ${NC}"
+    echo -e "${BLUE}======================================${NC}"
 
-    # Install system dependencies
     echo -e "${CYAN}[+] Installing system dependencies...${NC}"
     apt-get update -qq && apt-get install -y -qq git python3 curl
 
-    # Read user custom variables
     echo ""
     read -p "Enter Target Directory [Default: ${DEFAULT_INSTALL_DIR}]: " USER_DIR
     INSTALL_DIR=${USER_DIR:-"$DEFAULT_INSTALL_DIR"}
@@ -87,9 +79,8 @@ install_ward() {
     echo ""
     ADMIN_PASS=${ADMIN_PASS:-"admin1234"}
 
-    # Clone or update code
     if [ -d "$INSTALL_DIR/.git" ]; then
-        echo -e "${CYAN}[+] Updating existing repository in ${INSTALL_DIR}...${NC}"
+        echo -e "${CYAN}[+] Resetting local directory in ${INSTALL_DIR}...${NC}"
         cd "$INSTALL_DIR"
         git reset --hard HEAD
         git pull origin main
@@ -100,10 +91,8 @@ install_ward() {
         cd "$INSTALL_DIR"
     fi
 
-    # Hash password via SHA-256
     PASS_HASH=$(echo -n "$ADMIN_PASS" | sha256sum | awk '{print $1}')
 
-    # Create config.json
     echo -e "${CYAN}[+] Generating config.json...${NC}"
     cat << CONFIG_EOF > "$INSTALL_DIR/config.json"
 {
@@ -127,38 +116,36 @@ install_ward() {
     "dockerd",
     "xray"
   ],
-  "scheduled_tasks": [
-    {
-      "id": "t1",
-      "name": "Purge Temp",
-      "cron_hour": 4,
-      "command": "rm -rf /tmp/*",
-      "enabled": true
-    }
-  ]
+  "scheduled_tasks": []
 }
 CONFIG_EOF
 
-    # Configure and start Systemd service
+    # Configure update script & command alias
+    if [ -f "$INSTALL_DIR/update.sh" ]; then
+        chmod +x "$INSTALL_DIR/update.sh"
+        ln -sf "$INSTALL_DIR/update.sh" /usr/local/bin/ward-update
+    fi
+
     echo -e "${CYAN}[+] Configuring systemd daemon...${NC}"
     generate_service_file "$INSTALL_DIR"
-    systemctl enable --now "$SERVICE_NAME"
+    systemctl enable-now "$SERVICE_NAME"
     systemctl restart "$SERVICE_NAME"
 
     echo ""
-    echo -e "${GREEN}==========================================${NC}"
-    echo -e "${GREEN}[✓] WARD installed and launched successfully!${NC}"
-    echo -e "    Panel Name : ${CYAN}${CUSTOM_NAME}${NC}"
-    echo -e "    Local Port : ${CYAN}${CUSTOM_PORT}${NC}"
-    echo -e "    Directory  : ${CYAN}${INSTALL_DIR}${NC}"
-    echo -e "    Status     : ${GREEN}Active (running)${NC}"
+    echo -e "${GREEN}======================================${NC}"
+    echo -e "${GREEN}[√] WARD installed successfully!${NC}"
+    echo -e "Panel Name : ${CYAN}${CUSTOM_NAME}${NC}"
+    echo -e "Local Port : ${CYAN}${CUSTOM_PORT}${NC}"
+    echo -e "Directory  : ${CYAN}${INSTALL_DIR}${NC}"
+    echo -e "Status     : ${GREEN}Active (running)${NC}"
     echo ""
     echo -e "${YELLOW}[!] If using Nginx Reverse Proxy, set:${NC}"
     echo -e "${YELLOW}    proxy_pass http://127.0.0.1:${CUSTOM_PORT};${NC}"
-    echo -e "${GREEN}==========================================${NC}"
+    echo -e "${YELLOW}[!] Quick updater registered: run 'ward-update' anytime.${NC}"
+    echo -e "${GREEN}======================================${NC}"
 }
 
-# 2. Modify & Edit Configuration (Port, Directory, Name, Password)
+# 2. Modify & Edit Configuration
 edit_ward_config() {
     INSTALL_DIR=$(get_install_dir)
     CONFIG_FILE="${INSTALL_DIR}/config.json"
@@ -168,9 +155,9 @@ edit_ward_config() {
         return
     fi
 
-    echo -e "${YELLOW}==========================================${NC}"
-    echo -e "${YELLOW}        Edit WARD Configuration           ${NC}"
-    echo -e "${YELLOW}==========================================${NC}"
+    echo -e "${YELLOW}======================================${NC}"
+    echo -e "${YELLOW}       Edit WARD Configuration        ${NC}"
+    echo -e "${YELLOW}======================================${NC}"
     echo "1) Change Panel Title"
     echo "2) Change Listening Port"
     echo "3) Change Admin Password"
@@ -182,17 +169,17 @@ edit_ward_config() {
         1)
             read -p "Enter New Panel Title: " NEW_TITLE
             if [ -n "$NEW_TITLE" ]; then
-                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['panel_name']='${NEW_TITLE}'; json.dump(d,open(f,'w'),indent=2)"
+                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['panel_name']='${NEW_TITLE}'; json.dump(d, open(f, 'w'), indent=2)"
                 systemctl restart "$SERVICE_NAME"
-                echo -e "${GREEN}[✓] Panel title updated and service restarted.${NC}"
+                echo -e "${GREEN}[√] Panel title updated and service restarted.${NC}"
             fi
             ;;
         2)
             read -p "Enter New Service Port: " NEW_PORT
             if [ -n "$NEW_PORT" ]; then
-                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['panel_port']=int(${NEW_PORT}); json.dump(d,open(f,'w'),indent=2)"
+                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['panel_port']=int(${NEW_PORT}); json.dump(d, open(f, 'w'), indent=2)"
                 systemctl restart "$SERVICE_NAME"
-                echo -e "${GREEN}[✓] Port changed to ${NEW_PORT}. Make sure to update your Nginx proxy_pass!${NC}"
+                echo -e "${GREEN}[√] Port changed to ${NEW_PORT}. Remember to update Nginx proxy_pass!${NC}"
             fi
             ;;
         3)
@@ -200,9 +187,9 @@ edit_ward_config() {
             echo ""
             if [ -n "$NEW_PASS" ]; then
                 NEW_HASH=$(echo -n "$NEW_PASS" | sha256sum | awk '{print $1}')
-                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['admin_password_hash']='${NEW_HASH}'; json.dump(d,open(f,'w'),indent=2)"
+                python3 -c "import json; f='${CONFIG_FILE}'; d=json.load(open(f)); d['admin_password_hash']='${NEW_HASH}'; json.dump(d, open(f, 'w'), indent=2)"
                 systemctl restart "$SERVICE_NAME"
-                echo -e "${GREEN}[✓] Admin password updated successfully.${NC}"
+                echo -e "${GREEN}[√] Admin password updated successfully.${NC}"
             fi
             ;;
         4)
@@ -212,8 +199,12 @@ edit_ward_config() {
                 mkdir -p "$(dirname "$NEW_DIR")"
                 mv "$INSTALL_DIR" "$NEW_DIR"
                 generate_service_file "$NEW_DIR"
+                if [ -f "$NEW_DIR/update.sh" ]; then
+                    chmod +x "$NEW_DIR/update.sh"
+                    ln -sf "$NEW_DIR/update.sh" /usr/local/bin/ward-update
+                fi
                 systemctl restart "$SERVICE_NAME"
-                echo -e "${GREEN}[✓] Project moved to ${NEW_DIR} and systemd updated.${NC}"
+                echo -e "${GREEN}[√] Project moved to ${NEW_DIR} and service reconfigured.${NC}"
             fi
             ;;
         5)
@@ -230,23 +221,23 @@ check_and_debug() {
     INSTALL_DIR=$(get_install_dir)
     CONFIG_FILE="${INSTALL_DIR}/config.json"
 
-    echo -e "${CYAN}==========================================${NC}"
-    echo -e "${CYAN}       Status, Health & Log Center        ${NC}"
-    echo -e "${CYAN}==========================================${NC}"
+    echo -e "${CYAN}======================================${NC}"
+    echo -e "${CYAN}     Status, Health & Log Center      ${NC}"
+    echo -e "${CYAN}======================================${NC}"
     echo "1) Check Service Status"
     echo "2) Restart Service"
     echo "3) View Real-Time Service Logs (journalctl)"
     echo "4) Print Current Configuration Summary"
     echo "5) Return to Main Menu"
-    read -p "Select option [1-5]: " dbg_opt
+    read -p "Select option [1-5]: " db_opt
 
-    case $dbg_opt in
+    case $db_opt in
         1)
             systemctl status "$SERVICE_NAME" --no-pager
             ;;
         2)
             systemctl restart "$SERVICE_NAME"
-            echo -e "${GREEN}[✓] Service ${SERVICE_NAME} restarted.${NC}"
+            echo -e "${GREEN}[√] Service ${SERVICE_NAME} restarted.${NC}"
             ;;
         3)
             echo -e "${YELLOW}[!] Displaying last 40 log lines (Press Ctrl+C to exit)...${NC}"
@@ -273,23 +264,26 @@ check_and_debug() {
 # 4. Uninstall WARD completely
 uninstall_ward() {
     INSTALL_DIR=$(get_install_dir)
-    echo -e "${RED}==========================================${NC}"
-    echo -e "${RED}         Uninstall & Purge WARD           ${NC}"
-    echo -e "${RED}==========================================${NC}"
+
+    echo -e "${RED}======================================${NC}"
+    echo -e "${RED}       Uninstall & Purge WARD         ${NC}"
+    echo -e "${RED}======================================${NC}"
     read -p "Are you sure you want to completely remove WARD? [y/N]: " confirm
+
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "${YELLOW}[+] Stopping and disabling service...${NC}"
         systemctl stop "$SERVICE_NAME" 2>/dev/null || true
         systemctl disable "$SERVICE_NAME" 2>/dev/null || true
 
-        echo -e "${YELLOW}[+] Removing systemd service unit...${NC}"
+        echo -e "${YELLOW}[+] Removing systemd service unit & updater alias...${NC}"
         rm -f "/etc/systemd/system/${SERVICE_NAME}.service"
+        rm -f /usr/local/bin/ward-update
         systemctl daemon-reload
 
         echo -e "${YELLOW}[+] Deleting installation files from ${INSTALL_DIR}...${NC}"
         rm -rf "$INSTALL_DIR"
 
-        echo -e "${GREEN}[✓] WARD has been completely removed from your system.${NC}"
+        echo -e "${GREEN}[√] WARD has been completely removed from your system.${NC}"
     else
         echo -e "${BLUE}[*] Uninstall cancelled.${NC}"
     fi
@@ -300,11 +294,11 @@ main_menu() {
     check_root
     while true; do
         echo ""
-        echo -e "${CYAN}==========================================${NC}"
-        echo -e "${CYAN}       WARD System Management Menu        ${NC}"
-        echo -e "${CYAN}==========================================${NC}"
-        echo "1) Install / Update WARD (Automated Flow)"
-        echo "2) Edit Configuration (Port, Name, Path, Password)"
+        echo -e "${CYAN}======================================${NC}"
+        echo -e "${CYAN}     WARD System Management Menu      ${NC}"
+        echo -e "${CYAN}======================================${NC}"
+        echo "1) Install WARD (Clean Setup)"
+        echo "2) Edit Configuration (Port, Title, Path, Password)"
         echo "3) Service Health, Restart & Journalctl Logs"
         echo "4) Uninstall WARD Completely"
         echo "5) Exit"
@@ -321,5 +315,4 @@ main_menu() {
     done
 }
 
-# Run Menu
 main_menu
