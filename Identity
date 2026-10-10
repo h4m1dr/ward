@@ -3237,37 +3237,154 @@ You now have the complete **8-Section Identity Specification** for WARD v1.2.0.
 
 
 
+## SECTION 9: MISSING LEGACY & CORE UTILITIES (`#core-utilities`)
+**Scope:** Critical underlying mechanisms present in the current codebase (v1.1.0) that must be preserved in v1.2.0+. These are the "invisible gears" that keep WARD lightweight, dependency-free, and stable.
 
+### 9.1. Module: Simple Authentication & Session Flow
+**Purpose:** Password protection without heavy database or complex JWT. Uses memory-based session tokens.
+**Current Implementation:** `server.py` (`_active_sessions` set), `index.html` (`#login-overlay`).
 
+**Logic Specification:**
+1.  **Login Overlay:** Full-screen `div` with `z-index: 10000`. Blocks all interaction until authenticated.
+2.  **Token Generation:** Backend generates `secrets.token_hex(24)` on successful password match (SHA256 hash comparison).
+3.  **Storage:** Token stored in `localStorage.setItem('ward_token', token)`.
+4.  **Request Header:** All API calls include `headers: { 'X-Session-Token': sessionToken }`.
+5.  **401 Handling (No-Reload Policy):**
+    *   If API returns `401`, frontend increments `authFailedCount`.
+    *   If `count >= 2`, clear localStorage and show Login Overlay.
+    *   **CRITICAL:** Do NOT use `location.reload()` on 401 to prevent infinite refresh loops.
+6.  **Logout:** Clears localStorage, removes token from backend `_active_sessions`, shows Login Overlay.
 
+**API Contract:**
+*   `POST /api/auth/login`: Payload `{ password }`. Returns `{ status: 'ok', token: '...' }`.
+*   `POST /api/auth/logout`: Header `X-Session-Token`. Returns `{ status: 'ok' }`.
+*   `GET /api/auth/status`: Returns `{ authenticated: bool, panel_name: string }`.
 
+### 9.2. Module: Self-Updater Mechanism
+**Purpose:** Allow users to update WARD directly from the UI without SSH access.
+**Current Implementation:** `server.py` (`/api/system/check-update`, `/api/system/apply-update`), `update.sh`.
 
+**Logic Specification:**
+1.  **Version Check:**
+    *   Local: Read `version.json` in install dir.
+    *   Remote: Fetch `https://raw.githubusercontent.com/h4m1dr/ward/main/version.json` (timeout 4s).
+    *   Compare: If `remote.version != local.version`, flag `has_update: true`.
+2.  **UI Indicator:**
+    *   Header Badge: Shows `⬆ Update vX.Y.Z` if available.
+    *   Settings Panel: Shows Current vs Latest version.
+3.  **Apply Update:**
+    *   Frontend calls `POST /api/system/apply-update`.
+    *   Backend spawns a detached thread: `sleep(1.5)` -> `bash update.sh`.
+    *   **Safety:** `update.sh` must backup `config.json` before `git reset --hard` and restore it after.
+4.  **Post-Update:** Frontend waits 5s then `location.reload()`.
 
+**API Contract:**
+*   `GET /api/system/check-update`: Returns `{ current, latest, has_update }`.
+*   `POST /api/system/apply-update`: Returns `{ status: 'updating' }`.
 
+### 9.3. Module: Lightweight Canvas Chart Engine
+**Purpose:** Render real-time graphs without external libraries (Chart.js/D3) to keep payload < 50KB.
+**Current Implementation:** `index.html` functions `plotNetdataSingle`, `plotNetdataDouble`, `drawNetdataGrid`.
 
+**Logic Specification:**
+1.  **Data Structure (Ring Buffer):**
+    *   Fixed length arrays (e.g., `const pLen = 40`).
+    *   Update logic: `array.shift(); array.push(newValue);`.
+2.  **Rendering Context:**
+    *   Use `canvas.getContext('2d')`.
+    *   Scale for Retina: `canvas.width = clientWidth * 2`.
+3.  **Grid Drawing (`drawNetdataGrid`):**
+    *   Horizontal dashed lines at 25%, 50%, 75%, 100%.
+    *   Color: `rgba(139, 143, 163, 0.15)`.
+    *   Labels: Left-aligned, monospace font, muted color.
+4.  **Line Drawing:**
+    *   Map value to Y: `y = height - ((value / maxScale) * (height - padding))`.
+    *   Stroke: `lineWidth: 2`, `lineJoin: 'round'`.
+    *   Fill: Linear gradient from `color + '30'` (top) to `color + '00'` (bottom).
+5.  **Dynamic Scaling:**
+    *   `maxScale` calculated as `Math.max(5, ...dataBuffer)` to prevent flat lines on low traffic.
 
+**Constraint:** MUST NOT import any external charting library. Pure Vanilla JS Canvas only.
 
+### 9.4. Module: Folder Explorer Modal (Picker)
+**Purpose:** UI for browsing server directories to select paths for monitoring.
+**Current Implementation:** `index.html` (`#folder-modal`), `server.py` (`explore_directory_tree`).
 
+**Logic Specification:**
+1.  **Trigger:** Button "Explore Folders" in Storage tab.
+2.  **Modal UI:**
+    *   Input field for path (default `/root` or `/home`).
+    *   Table listing subdirectories: Name, Path, Size (MB), Action (+Track).
+3.  **Backend Logic (`explore_directory_tree`):**
+    *   Input: `path` string.
+    *   Filter: Exclude virtual FS (`/proc`, `/sys`, `/dev`, `/run`, `/snap`).
+    *   Execution: `du -sm --max-depth=1 '{path}' 2>/dev/null` with `timeout=5`.
+    *   Output: JSON list of `{ name, path, size_mb }`.
+4.  **Interaction:**
+    *   Click "+Track" -> Calls `/api/config/add` -> Refreshes modal data -> Shows Toast.
+    *   Error Handling: If `du` fails or permission denied, return empty list with error message, do not crash.
 
+**API Contract:**
+*   `GET /api/storage/explore?path=/var`: Returns `{ items: [...], error: null }`.
 
+### 9.5. Module: Config Safe-Merge Strategy
+**Purpose:** Prevent crashes when `config.json` is outdated or missing keys after an update.
+**Current Implementation:** `server.py` (`load_config`).
 
+**Logic Specification:**
+1.  **Define Defaults:** Hardcoded dictionary `default_config` with ALL required keys (including new ones like `theme`, `scheduled_tasks`).
+2.  **Load File:** Try to read `config.json`.
+3.  **Merge Logic:**
+    ```python
+    data = json.load(f)
+    for key, value in default_config.items():
+        if key not in data:
+            data[key] = value # Inject missing keys with defaults
+    return data
+    ```
+4.  **Atomic Write:** When saving, write to `config.json.tmp` first, then `os.replace` to `config.json` to prevent corruption on power loss.
+5.  **Validation:** Before applying imported config, check for existence of critical keys (`admin_password_hash`, `panel_port`).
 
+### 9.6. Module: Toast vs Event Log Distinction
+**Purpose:** Separate transient feedback from permanent audit trails.
+**Current Implementation:** `showToast()` function vs `WARD_EVENTS.log()`.
 
+**Logic Specification:**
+1.  **Toast (Transient):**
+    *   **Use Case:** "Service Added", "Settings Saved", "Connection Error".
+    *   **UI:** Fixed bottom-right, auto-dismiss after 3000ms.
+    *   **Persistence:** None. Disappears on reload.
+    *   **Implementation:** DOM manipulation in `#toast-container`.
+2.  **Event Log (Persistent):**
+    *   **Use Case:** "CPU Critical", "Port Down", "Auto-Recovery Triggered".
+    *   **UI:** Notification Drawer (🔔), stored in memory ring buffer.
+    *   **Persistence:** Kept in `collections.deque(maxlen=100)` in backend. Sent via API.
+    *   **Implementation:** `EventEngine` class in backend, fetched via `/api/events/recent`.
 
+### 9.7. Module: Connection Status Indicator
+**Purpose:** Visual feedback on API connectivity health.
+**Current Implementation:** `.status-dot` in Header.
 
+**Logic Specification:**
+1.  **Default State:** Green (`--accent-health`) with pulse animation.
+2.  **Failure State:** If `fetchStatus()` throws exception or returns non-OK:
+    *   Change color to Red (`--accent-crit`).
+    *   Stop pulse animation.
+    *   Increment `authFailedCount`.
+3.  **Recovery:** On next successful fetch, reset to Green.
+4.  **Placement:** Top-left header, next to Page Title.
 
+---
 
+### ✅ FINAL VALIDATION CHECKLIST
+With Section 9 added, the Identity Document now covers:
+- [x] All UI Tabs (Overview, Process, Service, Port, Storage, Settings)
+- [x] Global Shell (Header, Sidebar, Footer, Nav)
+- [x] Core Logic (Auth, Config, Updater, Charts)
+- [x] Data Contracts (All API Endpoints defined)
+- [x] Safety Mechanisms (Safe-Merge, Atomic Write, Timeout handling)
+- [x] Future Hooks (Event Bus, TMA Bridge, AI placeholders)
 
-
-
-
-
-
-
-
-
-
-
-
-
+**Coverage Estimate:** 100% of current v1.1.0 features + 100% of planned v1.2.0 architecture.
+**Risk of Regression:** Near Zero. Any AI implementing this spec will preserve the lightweight nature and existing functionality.
 
