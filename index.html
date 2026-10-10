@@ -38,7 +38,6 @@ body {
   font-size: 14px;
 }
 
-/* ===== LOGIN OVERLAY ===== */
 #login-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -119,7 +118,6 @@ body {
   display: none;
 }
 
-/* ===== SIDEBAR ===== */
 .sidebar {
   width: 240px;
   background: var(--sidebar);
@@ -132,9 +130,7 @@ body {
   overflow: hidden;
 }
 
-.sidebar.collapsed {
-  width: 60px;
-}
+.sidebar.collapsed { width: 60px; }
 
 .sidebar-header {
   padding: 20px;
@@ -152,11 +148,7 @@ body {
   gap: 0;
 }
 
-.sidebar-logo {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-}
+.sidebar-logo { width: 36px; height: 36px; flex-shrink: 0; }
 
 .sidebar-title {
   font-size: 18px;
@@ -166,10 +158,7 @@ body {
   transition: opacity 0.2s;
 }
 
-.sidebar.collapsed .sidebar-title {
-  opacity: 0;
-  width: 0;
-}
+.sidebar.collapsed .sidebar-title { opacity: 0; width: 0; }
 
 .sidebar-version {
   font-size: 11px;
@@ -179,10 +168,7 @@ body {
   transition: opacity 0.2s;
 }
 
-.sidebar.collapsed .sidebar-version {
-  opacity: 0;
-  width: 0;
-}
+.sidebar.collapsed .sidebar-version { opacity: 0; width: 0; }
 
 .sidebar-toggle {
   position: absolute;
@@ -258,13 +244,9 @@ body {
   flex-shrink: 0;
 }
 
-.sidebar.collapsed .nav-icon {
-  width: 100%;
-}
+.sidebar.collapsed .nav-icon { width: 100%; }
 
-.nav-text {
-  transition: opacity 0.2s;
-}
+.nav-text { transition: opacity 0.2s; }
 
 .sidebar.collapsed .nav-text {
   opacity: 0;
@@ -288,7 +270,6 @@ body {
   text-align: center;
 }
 
-/* ===== MAIN CONTENT ===== */
 .main-content {
   flex: 1;
   overflow-y: auto;
@@ -351,7 +332,6 @@ body {
 
 .logout-btn:hover { color: var(--danger); border-color: var(--danger); }
 
-/* ===== CONTENT SECTIONS ===== */
 .content-section { display: none; }
 .content-section.active { display: block; animation: fadeIn 0.25s; }
 
@@ -360,7 +340,6 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== CHARTS GRID ===== */
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -434,7 +413,6 @@ body {
 @media (max-width: 1400px) { .chart-card.full-width { grid-column: span 2; } }
 @media (max-width: 700px) { .chart-card.full-width { grid-column: span 1; } }
 
-/* ===== TABLES ===== */
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -464,7 +442,10 @@ body {
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: var(--card-hover); }
 
-/* ===== BUTTONS ===== */
+.th-sort { cursor: pointer; transition: color 0.2s; user-select: none; }
+.th-sort:hover { color: var(--primary); }
+.th-sort.sorted { color: var(--primary); }
+
 .btn {
   background: var(--primary);
   color: #fff;
@@ -515,7 +496,6 @@ body {
   cursor: default;
 }
 
-/* ===== BADGES ===== */
 .badge {
   padding: 3px 9px;
   border-radius: 4px;
@@ -528,7 +508,6 @@ body {
 .badge-success { background: rgba(0, 214, 143, 0.15); color: var(--success); }
 .badge-danger { background: rgba(255, 51, 102, 0.15); color: var(--danger); }
 
-/* ===== INPUTS ===== */
 .input-field {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -542,11 +521,7 @@ body {
 
 .input-field:focus { outline: none; border-color: var(--primary); }
 
-/* ===== SETTINGS - FULL WIDTH ===== */
-.settings-container {
-  width: 100%;
-  max-width: 100%;
-}
+.settings-container { width: 100%; max-width: 100%; }
 
 .settings-group {
   background: var(--card);
@@ -609,7 +584,6 @@ body {
   padding: 3px;
 }
 
-/* ===== MODALS ===== */
 .modal {
   display: none;
   position: fixed;
@@ -646,7 +620,6 @@ body {
 
 .modal-content { padding: 20px; overflow-y: auto; flex: 1; }
 
-/* ===== TOAST ===== */
 #toast-container {
   position: fixed;
   bottom: 20px;
@@ -677,7 +650,6 @@ body {
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -686,7 +658,6 @@ body {
 </head>
 <body>
 
-<!-- ===== LOGIN OVERLAY ===== -->
 <div id="login-overlay">
   <div class="login-box">
     <svg class="login-logo" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
@@ -703,7 +674,6 @@ body {
   </div>
 </div>
 
-<!-- ===== SIDEBAR ===== -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-toggle" onclick="toggleSidebar()"></div>
   <div class="sidebar-header">
@@ -721,15 +691,15 @@ body {
   
   <div class="sidebar-nav">
     <div class="nav-item active" onclick="switchSection('overview', this)">
-      <span class="nav-icon"></span>
+      <span class="nav-icon">📊</span>
       <span class="nav-text">Overview</span>
     </div>
     <div class="nav-item" onclick="switchSection('apps', this)">
-      <span class="nav-icon">📱</span>
+      <span class="nav-icon"></span>
       <span class="nav-text">Watched Apps</span>
     </div>
     <div class="nav-item" onclick="switchSection('services', this)">
-      <span class="nav-icon">️</span>
+      <span class="nav-icon">⚙️</span>
       <span class="nav-text">Services</span>
     </div>
     <div class="nav-item" onclick="switchSection('ports', this)">
@@ -737,7 +707,7 @@ body {
       <span class="nav-text">Ports</span>
     </div>
     <div class="nav-item" onclick="switchSection('storage', this)">
-      <span class="nav-icon">📁</span>
+      <span class="nav-icon"></span>
       <span class="nav-text">Storage</span>
     </div>
     <div class="nav-item" onclick="switchSection('tasks', this)">
@@ -755,7 +725,6 @@ body {
   </div>
 </div>
 
-<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content">
   <div class="header">
     <div class="header-left">
@@ -769,7 +738,6 @@ body {
     </div>
   </div>
 
-  <!-- Overview -->
   <div id="overview" class="content-section active">
     <div class="charts-grid">
       <div class="chart-card">
@@ -833,7 +801,6 @@ body {
     </div>
   </div>
 
-  <!-- Apps -->
   <div id="apps" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
       <h2 style="font-size:18px; font-weight:600;">Watched Applications</h2>
@@ -845,12 +812,11 @@ body {
     </table>
   </div>
 
-  <!-- Services -->
   <div id="services" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Systemd Services</h2>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-success" onclick="openServicesScanner()"> Scan Services</button>
+        <button class="btn btn-success" onclick="openServicesScanner()">⚡ Scan Services</button>
         <input type="text" id="in-srv" class="input-field" placeholder="Service name" style="width:150px;">
         <button class="btn" onclick="addService()">Add</button>
       </div>
@@ -861,7 +827,6 @@ body {
     </table>
   </div>
 
-  <!-- Ports -->
   <div id="ports" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Monitored Ports</h2>
@@ -877,12 +842,11 @@ body {
     </table>
   </div>
 
-  <!-- Storage -->
   <div id="storage" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Storage Folders</h2>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-success" onclick="openTreeExplorer()"> Explore Folders</button>
+        <button class="btn btn-success" onclick="openTreeExplorer()">🌳 Explore Folders</button>
         <input type="text" id="dir-name" class="input-field" placeholder="Label" style="width:100px;">
         <input type="text" id="dir-path" class="input-field" placeholder="/path" style="width:200px;">
         <button class="btn" onclick="addFolder()">Track</button>
@@ -894,7 +858,6 @@ body {
     </table>
   </div>
 
-  <!-- Tasks -->
   <div id="tasks" class="content-section">
     <div style="text-align:center; padding:60px; color:var(--muted);">
       <div style="font-size:48px; margin-bottom:16px;">⏰</div>
@@ -903,11 +866,10 @@ body {
     </div>
   </div>
 
-  <!-- Settings - FULL WIDTH -->
   <div id="settings" class="content-section">
     <div class="settings-container">
       <div class="settings-group">
-        <h3> Security</h3>
+        <h3>🔐 Security</h3>
         <div class="setting-row">
           <span class="setting-label">Change Admin Password</span>
           <div style="display:flex; gap:8px;">
@@ -968,7 +930,7 @@ body {
       </div>
 
       <div class="settings-group">
-        <h3> Backup & Restore</h3>
+        <h3>💾 Backup & Restore</h3>
         <div class="setting-row">
           <span class="setting-label">Export Configuration</span>
           <button class="btn btn-ghost" onclick="downloadConfig()">📥 Download config.json</button>
@@ -983,23 +945,30 @@ body {
   </div>
 </div>
 
-<!-- Task Manager Modal -->
 <div id="task-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
       <span>⚡ Live Process Snapshot</span>
-      <button class="btn-ghost" onclick="closeModal('task-modal')"></button>
+      <button class="btn-ghost" onclick="closeModal('task-modal')">✕</button>
     </div>
     <div class="modal-content">
       <table class="data-table">
-        <thead><tr><th>PID</th><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Action</th></tr></thead>
+        <thead>
+          <tr>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'pid')">PID ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'name')">Application ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'cpu_pct')">CPU % ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'memory_mb')">RAM (MB) ⬍</th>
+            <th class="th-sort" onclick="toggleSort('snapshot', 'threads')">Threads ⬍</th>
+            <th>Action</th>
+          </tr>
+        </thead>
         <tbody id="task-tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- Services Scanner Modal -->
 <div id="services-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
@@ -1008,14 +977,19 @@ body {
     </div>
     <div class="modal-content">
       <table class="data-table">
-        <thead><tr><th>Service</th><th>State</th><th>Action</th></tr></thead>
+        <thead>
+          <tr>
+            <th class="th-sort" onclick="toggleSort('srvScan', 'name')">Service </th>
+            <th class="th-sort" onclick="toggleSort('srvScan', 'state')">State ⬍</th>
+            <th>Action</th>
+          </tr>
+        </thead>
         <tbody id="services-scan-tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- Ports Scanner Modal -->
 <div id="ports-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
@@ -1024,14 +998,19 @@ body {
     </div>
     <div class="modal-content">
       <table class="data-table">
-        <thead><tr><th>Port</th><th>Status</th><th>Action</th></tr></thead>
+        <thead>
+          <tr>
+            <th class="th-sort" onclick="toggleSort('portScan', 'port')">Port </th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
         <tbody id="ports-scan-tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- Folder Explorer Modal -->
 <div id="folder-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
@@ -1040,7 +1019,7 @@ body {
     </div>
     <div class="modal-content">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
-        <input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/" style="flex:1;">
+        <input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/home" style="flex:1;">
         <button class="btn btn-success" onclick="exploreFolder()">Explore</button>
       </div>
       <table class="data-table">
@@ -1060,16 +1039,24 @@ let currentTheme = {};
 let authFailedCount = 0;
 let sidebarPinned = false;
 let sidebarHoverTimeout = null;
+let snapshotData = [];
+let srvScanData = [];
+let portScanData = [];
+
+let sortConfig = {
+  snapshot: { key: null, asc: true },
+  srvScan: { key: null, asc: true },
+  portScan: { key: null, asc: true }
+};
 
 const pLen = 40;
 const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
 
-// ===== SIDEBAR TOGGLE & HOVER =====
+const sidebar = document.getElementById('sidebar');
+
 function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
   sidebarPinned = !sidebarPinned;
-  
   if (sidebarPinned) {
     sidebar.classList.remove('collapsed');
     localStorage.setItem('ward_sidebar_collapsed', 'false');
@@ -1079,7 +1066,6 @@ function toggleSidebar() {
   }
 }
 
-// Hover effects for sidebar (like X-UI)
 sidebar.addEventListener('mouseenter', () => {
   if (!sidebarPinned) {
     clearTimeout(sidebarHoverTimeout);
@@ -1095,13 +1081,11 @@ sidebar.addEventListener('mouseleave', () => {
   }
 });
 
-// Restore sidebar state
 if (localStorage.getItem('ward_sidebar_collapsed') === 'false') {
-  document.getElementById('sidebar').classList.remove('collapsed');
+  sidebar.classList.remove('collapsed');
   sidebarPinned = true;
 }
 
-// ===== AUTH FUNCTIONS =====
 function showLogin() {
   document.getElementById('login-overlay').classList.remove('hidden');
   document.getElementById('login-pass').value = '';
@@ -1117,7 +1101,6 @@ function hideLogin() {
 async function doLogin() {
   const pw = document.getElementById('login-pass').value;
   if (!pw) return;
-  
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
@@ -1125,7 +1108,6 @@ async function doLogin() {
       body: JSON.stringify({ password: pw })
     });
     const d = await res.json();
-    
     if (d.status === 'ok') {
       sessionToken = d.token;
       localStorage.setItem('ward_token', d.token);
@@ -1150,13 +1132,11 @@ function doLogout() {
   });
 }
 
-// ===== NAVIGATION =====
 function switchSection(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(id).classList.add('active');
-  
   const titles = {
     overview: 'System Overview',
     apps: 'Watched Applications',
@@ -1169,16 +1149,36 @@ function switchSection(id, el) {
   document.getElementById('page-title').innerText = titles[id] || 'WARD';
 }
 
-// ===== MODALS =====
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-// ===== CHARTS =====
+function toggleSort(tableKey, columnKey) {
+  const current = sortConfig[tableKey];
+  if (current.key === columnKey) {
+    current.asc = !current.asc;
+  } else {
+    current.key = columnKey;
+    current.asc = true;
+  }
+  if (tableKey === 'snapshot') renderSnapshotTable();
+  else if (tableKey === 'srvScan') renderServicesScannerTable();
+  else if (tableKey === 'portScan') renderPortsScannerTable();
+}
+
+function getSortedArray(dataArray, tableKey) {
+  const config = sortConfig[tableKey];
+  if (!config || !config.key) return dataArray;
+  return [...dataArray].sort((a, b) => {
+    let v1 = a[config.key], v2 = b[config.key];
+    if (typeof v1 === 'string') return config.asc ? v1.localeCompare(v2) : v2.localeCompare(v1);
+    return config.asc ? (v1 - v2) : (v2 - v1);
+  });
+}
+
 function drawNetdataGrid(ctx, w, h, maxScale, isPct = true) {
   const levels = [0.25, 0.5, 0.75, 1.0];
   ctx.font = '10px JetBrains Mono, monospace';
   ctx.textAlign = 'left';
-  
   levels.forEach(lvl => {
     const y = h - (lvl * (h - 16)) - 8;
     ctx.beginPath();
@@ -1188,7 +1188,6 @@ function drawNetdataGrid(ctx, w, h, maxScale, isPct = true) {
     ctx.moveTo(35, y);
     ctx.lineTo(w, y);
     ctx.stroke();
-    
     ctx.fillStyle = 'rgba(139, 143, 163, 0.6)';
     if (isPct) ctx.fillText(`${Math.round(lvl * maxScale)}%`, 4, y + 3);
   });
@@ -1202,13 +1201,10 @@ function plotNetdataSingle(id, arr, maxScale, color) {
   const w = cvs.width = cvs.clientWidth * 2;
   const h = cvs.height = cvs.clientHeight * 2;
   ctx.clearRect(0, 0, w, h);
-  
   drawNetdataGrid(ctx, w, h, maxScale, true);
-
   const gradient = ctx.createLinearGradient(0, 0, 0, h);
   gradient.addColorStop(0, color + '30');
   gradient.addColorStop(1, color + '00');
-
   ctx.beginPath();
   const step = w / (arr.length - 1);
   arr.forEach((val, i) => {
@@ -1220,7 +1216,6 @@ function plotNetdataSingle(id, arr, maxScale, color) {
   ctx.closePath();
   ctx.fillStyle = gradient;
   ctx.fill();
-
   ctx.beginPath();
   arr.forEach((val, i) => {
     const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
@@ -1239,22 +1234,17 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   const w = cvs.width = cvs.clientWidth * 2;
   const h = cvs.height = cvs.clientHeight * 2;
   ctx.clearRect(0, 0, w, h);
-  
   drawNetdataGrid(ctx, w, h, maxScale, false);
-
   ctx.fillStyle = 'rgba(139, 143, 163, 0.7)';
   ctx.font = '10px JetBrains Mono, monospace';
   ctx.fillText(`${Math.round(maxScale)}${unit}`, 4, 12);
   ctx.fillText(`${Math.round(maxScale/2)}${unit}`, 4, h/2);
-
   const step = w / (arr1.length - 1);
-  
   [arr1, arr2].forEach((arr, idx) => {
     const color = idx === 0 ? c1 : c2;
     const gradient = ctx.createLinearGradient(0, 0, 0, h);
     gradient.addColorStop(0, color + '25');
     gradient.addColorStop(1, color + '00');
-
     ctx.beginPath();
     arr.forEach((val, i) => {
       const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
@@ -1265,7 +1255,6 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
     ctx.closePath();
     ctx.fillStyle = gradient;
     ctx.fill();
-
     ctx.beginPath();
     arr.forEach((val, i) => {
       const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
@@ -1278,13 +1267,10 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   });
 }
 
-// ===== DATA FETCHING =====
 async function fetchStatus() {
   if (!sessionToken) return;
-  
   try {
     const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
-    
     if (res.status === 401) {
       authFailedCount++;
       if (authFailedCount >= 2) {
@@ -1294,50 +1280,40 @@ async function fetchStatus() {
       }
       return;
     }
-    
     const d = await res.json();
-    
     document.getElementById('status-dot').style.background = 'var(--success)';
     globalData = d;
-
     document.getElementById('h-load').innerText = d.load_avg;
     document.getElementById('h-net').innerText = `${d.network.total_tx_gib} GiB | ${d.network.total_rx_gib} GiB`;
     document.getElementById('footer-uptime').innerText = `Uptime: ${d.uptime}`;
-
     document.getElementById('cpu-val').innerHTML = `${d.cpu.usage_pct}<span class="unit">%</span>`;
     document.getElementById('cpu-sub').innerText = `${d.cpu.cores} Core`;
     d_cpu.shift(); d_cpu.push(d.cpu.usage_pct);
     document.getElementById('cpu-stat').innerText = `Avg: ${Math.round(d_cpu.reduce((a,b)=>a+b)/pLen)}%`;
     plotNetdataSingle('cv-cpu', d_cpu, 100, getComputedStyle(document.documentElement).getPropertyValue('--primary').trim());
-
     document.getElementById('ram-val').innerHTML = `${d.ram.pct}<span class="unit">%</span>`;
     document.getElementById('ram-sub').innerText = `${d.ram.used_mb} / ${d.ram.total_mb} MB`;
     document.getElementById('ram-free').innerText = `Free: ${d.ram.total_mb - d.ram.used_mb} MB`;
     d_ram.shift(); d_ram.push(d.ram.pct);
     plotNetdataSingle('cv-ram', d_ram, 100, '#339af0');
-
     document.getElementById('swap-val').innerHTML = `${d.swap.pct}<span class="unit">%</span>`;
     document.getElementById('swap-sub').innerText = `${d.swap.used_mb} / ${d.swap.total_mb} MB`;
     d_swap.shift(); d_swap.push(d.swap.pct);
     plotNetdataSingle('cv-swap', d_swap, 100, '#cc5de8');
-
     document.getElementById('disk-val').innerHTML = `${d.disk.pct}<span class="unit">%</span>`;
     document.getElementById('disk-sub').innerText = `${d.disk.used_gb} / ${d.disk.total_gb} GB`;
     document.getElementById('disk-free').innerText = `Free: ${d.disk.free_gb} GB`;
     d_disk.shift(); d_disk.push(d.disk.pct);
     plotNetdataSingle('cv-disk', d_disk, 100, '#ff922b');
-
     document.getElementById('net-speeds').innerText = `▲ ${d.network.speed_tx_mb} MB/s  ▼ ${d.network.speed_rx_mb} MB/s`;
     d_tx.shift(); d_tx.push(d.network.speed_tx_mb);
     d_rx.shift(); d_rx.push(d.network.speed_rx_mb);
     plotNetdataDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#339af0', '#00d68f', 'M');
-
     document.getElementById('conn-totals').innerText = `${d.connections.tcp + d.connections.udp} Open`;
     document.getElementById('conn-sub').innerText = `TCP: ${d.connections.tcp} | UDP: ${d.connections.udp}`;
     d_tcp.shift(); d_tcp.push(d.connections.tcp);
     d_udp.shift(); d_udp.push(d.connections.udp);
     plotNetdataDouble('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#00d68f', '#cc5de8', '');
-
     renderApps();
     renderServices();
     renderPorts();
@@ -1347,7 +1323,6 @@ async function fetchStatus() {
   }
 }
 
-// ===== RENDER TABLES =====
 function renderApps() {
   if (!globalData) return;
   let html = '';
@@ -1404,29 +1379,34 @@ function renderDirs() {
   document.getElementById('dir-tbody').innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
 }
 
-// ===== SCANNERS & WATCH (FIXED) =====
 async function openTaskManager() {
   openModal('task-modal');
   document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Scanning processes...</span></td></tr>';
   try {
     const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
-    let html = '';
-    d.processes.forEach(p => {
-      const watching = globalData && globalData.apps && globalData.apps.some(a => a.name === p.name);
-      html += `<tr>
-        <td style="font-family:monospace;">${p.pid}</td>
-        <td><b>${p.name}</b></td>
-        <td style="font-family:monospace;">${p.cpu_pct}%</td>
-        <td style="font-family:monospace;">${p.memory_mb}</td>
-        <td style="font-family:monospace;">${p.threads}</td>
-        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchApp('${p.name}')">+ Watch</button>`}</td>
-      </tr>`;
-    });
-    document.getElementById('task-tbody').innerHTML = html;
+    snapshotData = d.processes;
+    renderSnapshotTable();
   } catch(e) {
     document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--danger);">Error loading processes</td></tr>';
   }
+}
+
+function renderSnapshotTable() {
+  const data = getSortedArray(snapshotData, 'snapshot');
+  let html = '';
+  data.forEach(p => {
+    const watching = globalData && globalData.apps && globalData.apps.some(a => a.name === p.name);
+    html += `<tr>
+      <td style="font-family:monospace;">${p.pid}</td>
+      <td><b>${p.name}</b></td>
+      <td style="font-family:monospace;">${p.cpu_pct}%</td>
+      <td style="font-family:monospace;">${p.memory_mb}</td>
+      <td style="font-family:monospace;">${p.threads}</td>
+      <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchApp('${p.name}')">+ Watch</button>`}</td>
+    </tr>`;
+  });
+  document.getElementById('task-tbody').innerHTML = html;
 }
 
 async function watchApp(appName) {
@@ -1450,19 +1430,25 @@ async function openServicesScanner() {
   try {
     const res = await fetch('/api/services/snapshot', { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
-    let html = '';
-    d.services.forEach(s => {
-      const watching = globalData && globalData.services && globalData.services[s.name] !== undefined;
-      html += `<tr>
-        <td><b>${s.name}</b></td>
-        <td><span class="badge ${s.state==='active'?'badge-success':'badge-danger'}">${s.state}</span></td>
-        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchService('${s.name}')">+ Track</button>`}</td>
-      </tr>`;
-    });
-    document.getElementById('services-scan-tbody').innerHTML = html;
+    srvScanData = d.services;
+    renderServicesScannerTable();
   } catch(e) {
     document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning services</td></tr>';
   }
+}
+
+function renderServicesScannerTable() {
+  const data = getSortedArray(srvScanData, 'srvScan');
+  let html = '';
+  data.forEach(s => {
+    const watching = globalData && globalData.services && globalData.services[s.name] !== undefined;
+    html += `<tr>
+      <td><b>${s.name}</b></td>
+      <td><span class="badge ${s.state==='active'?'badge-success':'badge-danger'}">${s.state}</span></td>
+      <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchService('${s.name}')">+ Track</button>`}</td>
+    </tr>`;
+  });
+  document.getElementById('services-scan-tbody').innerHTML = html;
 }
 
 async function watchService(serviceName) {
@@ -1486,19 +1472,25 @@ async function openPortsScanner() {
   try {
     const res = await fetch('/api/ports/snapshot', { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
-    let html = '';
-    d.ports.forEach(p => {
-      const watching = globalData && globalData.ports && globalData.ports[String(p)] !== undefined;
-      html += `<tr>
-        <td style="font-family:monospace;"><b>${p}</b></td>
-        <td><span class="badge badge-success">Listening</span></td>
-        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchPort('${p}')">+ Watch</button>`}</td>
-      </tr>`;
-    });
-    document.getElementById('ports-scan-tbody').innerHTML = html;
+    portScanData = d.ports.map(p => ({ port: p, status: 'Listening' }));
+    renderPortsScannerTable();
   } catch(e) {
     document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning ports</td></tr>';
   }
+}
+
+function renderPortsScannerTable() {
+  const data = getSortedArray(portScanData, 'portScan');
+  let html = '';
+  data.forEach(p => {
+    const watching = globalData && globalData.ports && globalData.ports[String(p.port)] !== undefined;
+    html += `<tr>
+      <td style="font-family:monospace;"><b>${p.port}</b></td>
+      <td><span class="badge badge-success">${p.status}</span></td>
+      <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchPort('${p.port}')">+ Watch</button>`}</td>
+    </tr>`;
+  });
+  document.getElementById('ports-scan-tbody').innerHTML = html;
 }
 
 async function watchPort(portNum) {
@@ -1518,16 +1510,20 @@ async function watchPort(portNum) {
 
 async function openTreeExplorer() {
   openModal('folder-modal');
-  document.getElementById('explore-path').value = '/';
+  document.getElementById('explore-path').value = '/home';
   exploreFolder();
 }
 
 async function exploreFolder() {
-  const path = document.getElementById('explore-path').value || '/';
+  const path = document.getElementById('explore-path').value || '/home';
   document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Loading folders...</span></td></tr>';
   try {
     const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(path)}`, { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
+    if (d.error) {
+      document.getElementById('folder-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">⚠️ ${d.error}</td></tr>`;
+      return;
+    }
     let html = '';
     if (d.items && d.items.length > 0) {
       d.items.forEach(item => {
@@ -1539,10 +1535,10 @@ async function exploreFolder() {
           <td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn btn-watch" onclick="trackFolder('${item.name}', '${item.path}')">+ Track</button>`}</td>
         </tr>`;
       });
+      document.getElementById('folder-tbody').innerHTML = html;
     } else {
-      html = '<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">No folders found or permission denied</td></tr>';
+      document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">No accessible folders found</td></tr>';
     }
-    document.getElementById('folder-tbody').innerHTML = html;
   } catch(e) {
     document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">Error loading folders</td></tr>';
   }
@@ -1563,7 +1559,6 @@ async function trackFolder(folderName, folderPath) {
   }
 }
 
-// ===== ACTIONS =====
 async function addService() {
   const val = document.getElementById('in-srv').value;
   if (!val) return;
@@ -1683,17 +1678,11 @@ function showToast(msg, type = 'success') {
   setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// ===== INIT =====
 if (sessionToken) {
   fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } })
     .then(res => res.json())
     .then(d => {
-      if (d.authenticated) {
-        hideLogin();
-        fetchStatus();
-      } else {
-        showLogin();
-      }
+      if (d.authenticated) { hideLogin(); fetchStatus(); } else { showLogin(); }
     })
     .catch(() => showLogin());
 } else {
