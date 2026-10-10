@@ -158,48 +158,50 @@ def explore_directory_tree(path):
     if not os.path.exists(path) or not os.path.isdir(path):
         return {"items": [], "error": "Path does not exist"}
     
+    # فیلتر کردن filesystemهای مجازی
+    virtual_fs = {'proc', 'sys', 'dev', 'run', 'snap'}
+    
     items = []
     try:
-        # لیست کردن تمام محتویات دایرکتوری
         entries = os.listdir(path)
         
         for entry in entries:
             full_path = os.path.join(path, entry)
             
-            # فقط دایرکتوری‌ها را نشان بده
-            if os.path.isdir(full_path):
-                try:
-                    # محاسبه حجم دایرکتوری با Python
-                    total_size = 0
-                    for dirpath, dirnames, filenames in os.walk(full_path):
-                        for f in filenames:
-                            fp = os.path.join(dirpath, f)
-                            try:
-                                total_size += os.path.getsize(fp)
-                            except (OSError, PermissionError):
-                                pass
-                    
-                    size_mb = round(total_size / (1024 * 1024), 2)
-                    items.append({
-                        "name": entry,
-                        "path": full_path,
-                        "size_mb": size_mb
-                    })
-                except (PermissionError, OSError) as e:
-                    # اگر دسترسی نداشت، با حجم 0 اضافه کن
-                    items.append({
-                        "name": entry,
-                        "path": full_path,
-                        "size_mb": 0
-                    })
-                    continue
+            if not os.path.isdir(full_path):
+                continue
+            
+            # رد کردن filesystemهای مجازی
+            if entry in virtual_fs:
+                continue
+            
+            try:
+                # استفاده از du برای محاسبه دقیق حجم
+                cmd = f"du -sm '{full_path}' 2>/dev/null"
+                res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
+                
+                if res.returncode == 0 and res.stdout.strip():
+                    size_mb = float(res.stdout.strip().split()[0])
+                else:
+                    size_mb = 0
+                
+                items.append({
+                    "name": entry,
+                    "path": full_path,
+                    "size_mb": size_mb
+                })
+            except (subprocess.TimeoutExpired, Exception):
+                items.append({
+                    "name": entry,
+                    "path": full_path,
+                    "size_mb": 0
+                })
         
-        # مرتب‌سازی بر اساس حجم (از بزرگ به کوچک)
         items.sort(key=lambda x: x["size_mb"], reverse=True)
         return {"items": items}
         
     except PermissionError:
-        return {"items": [], "error": "Permission denied to access this directory"}
+        return {"items": [], "error": "Permission denied"}
     except Exception as e:
         return {"items": [], "error": str(e)}
 
