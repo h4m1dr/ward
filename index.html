@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WARD Monitor</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300ab44'/%3E%3Cstop offset='100%25' stop-color='%2300d68f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M32 4L8 16v16c0 14 10 24 24 28 14-4 24-14 24-28V16L32 4z' fill='url(%23g)'/%3E%3Cpath d='M20 32l6 6 10-12 8 10' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -127,6 +127,12 @@ body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.sidebar.collapsed {
+  width: 60px;
 }
 
 .sidebar-header {
@@ -135,6 +141,13 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-header {
+  padding: 20px 12px;
+  justify-content: center;
 }
 
 .sidebar-logo {
@@ -157,6 +170,36 @@ body {
   margin-top: 2px;
 }
 
+.sidebar-toggle {
+  position: absolute;
+  right: -11px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  z-index: 10;
+  transition: all 0.2s;
+}
+
+.sidebar-toggle:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.sidebar.collapsed .sidebar-toggle {
+  transform: translateY(-50%) rotate(180deg);
+}
+
 .sidebar-nav {
   flex: 1;
   padding: 12px 0;
@@ -174,6 +217,13 @@ body {
   color: var(--muted);
   border-left: 3px solid transparent;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .nav-item {
+  padding: 11px 12px;
+  justify-content: center;
 }
 
 .nav-item:hover { background: var(--sidebar-hover); color: var(--text); }
@@ -192,6 +242,13 @@ body {
   border-top: 1px solid var(--border);
   font-size: 12px;
   color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-footer {
+  padding: 16px 12px;
+  text-align: center;
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -199,6 +256,7 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 24px 28px;
+  transition: all 0.3s;
 }
 
 .header {
@@ -347,6 +405,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
+  margin-top: 16px;
 }
 
 .data-table th, .data-table td {
@@ -402,6 +461,23 @@ body {
 }
 .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
 
+.btn-watch {
+  background: var(--success);
+  color: #1a1d29;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+.btn-watch:hover { background: #00c482; }
+
+.btn-watched {
+  background: rgba(0, 214, 143, 0.2);
+  color: var(--success);
+  border: 1px solid var(--success);
+  font-size: 11px;
+  padding: 4px 8px;
+  cursor: default;
+}
+
 /* ===== BADGES ===== */
 .badge {
   padding: 3px 9px;
@@ -429,8 +505,11 @@ body {
 
 .input-field:focus { outline: none; border-color: var(--primary); }
 
-/* ===== SETTINGS ===== */
-.settings-container { max-width: 900px; }
+/* ===== SETTINGS - FULL WIDTH ===== */
+.settings-container {
+  width: 100%;
+  max-width: 100%;
+}
 
 .settings-group {
   background: var(--card);
@@ -492,6 +571,43 @@ body {
   background: var(--bg);
   padding: 3px;
 }
+
+/* ===== MODALS ===== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s;
+}
+
+.modal.active { display: flex; align-items: center; justify-content: center; }
+
+.modal-body {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 900px;
+  width: 90%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-content { padding: 20px; overflow-y: auto; flex: 1; }
 
 /* ===== TOAST ===== */
 #toast-container {
@@ -555,7 +671,8 @@ body {
 </div>
 
 <!-- ===== SIDEBAR ===== -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-toggle" onclick="toggleSidebar()">◀</div>
   <div class="sidebar-header">
     <svg class="sidebar-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -581,13 +698,13 @@ body {
       <span class="nav-icon">📱</span><span>Watched Apps</span>
     </div>
     <div class="nav-item" onclick="switchSection('services', this)">
-      <span class="nav-icon">️</span><span>Services</span>
+      <span class="nav-icon">⚙️</span><span>Services</span>
     </div>
     <div class="nav-item" onclick="switchSection('ports', this)">
       <span class="nav-icon">🔌</span><span>Ports</span>
     </div>
     <div class="nav-item" onclick="switchSection('storage', this)">
-      <span class="nav-icon">📁</span><span>Storage</span>
+      <span class="nav-icon"></span><span>Storage</span>
     </div>
     <div class="nav-item" onclick="switchSection('tasks', this)">
       <span class="nav-icon">⏰</span><span>Scheduled Tasks</span>
@@ -682,6 +799,10 @@ body {
 
   <!-- Apps -->
   <div id="apps" class="content-section">
+    <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="font-size:18px; font-weight:600;">Watched Applications</h2>
+      <button class="btn btn-success" onclick="openTaskManager()">⚡ Open Task Manager</button>
+    </div>
     <table class="data-table">
       <thead><tr><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Status</th><th>Action</th></tr></thead>
       <tbody id="app-tbody"></tbody>
@@ -690,9 +811,13 @@ body {
 
   <!-- Services -->
   <div id="services" class="content-section">
-    <div style="margin-bottom:16px; display:flex; gap:8px;">
-      <input type="text" id="in-srv" class="input-field" placeholder="Service name (e.g. nginx)">
-      <button class="btn" onclick="addService()">Add Service</button>
+    <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+      <h2 style="font-size:18px; font-weight:600;">Systemd Services</h2>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-success" onclick="openServicesScanner()">⚡ Scan Services</button>
+        <input type="text" id="in-srv" class="input-field" placeholder="Service name" style="width:150px;">
+        <button class="btn" onclick="addService()">Add</button>
+      </div>
     </div>
     <table class="data-table">
       <thead><tr><th>Service</th><th>State</th><th>Action</th></tr></thead>
@@ -702,9 +827,13 @@ body {
 
   <!-- Ports -->
   <div id="ports" class="content-section">
-    <div style="margin-bottom:16px; display:flex; gap:8px;">
-      <input type="number" id="in-port" class="input-field" placeholder="Port number">
-      <button class="btn" onclick="addPort()">Watch Port</button>
+    <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+      <h2 style="font-size:18px; font-weight:600;">Monitored Ports</h2>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-success" onclick="openPortsScanner()"> Scan Ports</button>
+        <input type="number" id="in-port" class="input-field" placeholder="Port" style="width:100px;">
+        <button class="btn" onclick="addPort()">Watch</button>
+      </div>
     </div>
     <table class="data-table">
       <thead><tr><th>Port</th><th>Status</th><th>Action</th></tr></thead>
@@ -714,10 +843,14 @@ body {
 
   <!-- Storage -->
   <div id="storage" class="content-section">
-    <div style="margin-bottom:16px; display:flex; gap:8px;">
-      <input type="text" id="dir-name" class="input-field" placeholder="Label">
-      <input type="text" id="dir-path" class="input-field" placeholder="/path/to/folder" style="flex:1;">
-      <button class="btn" onclick="addFolder()">Track Folder</button>
+    <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+      <h2 style="font-size:18px; font-weight:600;">Storage Folders</h2>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-success" onclick="openTreeExplorer()">🌳 Explore</button>
+        <input type="text" id="dir-name" class="input-field" placeholder="Label" style="width:100px;">
+        <input type="text" id="dir-path" class="input-field" placeholder="/path" style="width:200px;">
+        <button class="btn" onclick="addFolder()">Track</button>
+      </div>
     </div>
     <table class="data-table">
       <thead><tr><th>Label</th><th>Path</th><th>Size</th><th>Action</th></tr></thead>
@@ -728,13 +861,13 @@ body {
   <!-- Tasks -->
   <div id="tasks" class="content-section">
     <div style="text-align:center; padding:60px; color:var(--muted);">
-      <div style="font-size:48px; margin-bottom:16px;"></div>
+      <div style="font-size:48px; margin-bottom:16px;">⏰</div>
       <div style="font-size:16px; font-weight:600; margin-bottom:8px;">Scheduled Tasks</div>
       <div style="font-size:13px;">Coming in next release</div>
     </div>
   </div>
 
-  <!-- Settings -->
+  <!-- Settings - FULL WIDTH -->
   <div id="settings" class="content-section">
     <div class="settings-container">
       <div class="settings-group">
@@ -784,7 +917,7 @@ body {
       </div>
 
       <div class="settings-group">
-        <h3>🚀 Update Manager</h3>
+        <h3> Update Manager</h3>
         <div class="setting-row">
           <span class="setting-label">Current Version</span>
           <span class="setting-value" id="set-current-ver">v1.1.0</span>
@@ -814,17 +947,99 @@ body {
   </div>
 </div>
 
+<!-- Task Manager Modal -->
+<div id="task-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <span>⚡ Live Process Snapshot</span>
+      <button class="btn-ghost" onclick="closeModal('task-modal')">✕</button>
+    </div>
+    <div class="modal-content">
+      <table class="data-table">
+        <thead><tr><th>PID</th><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Action</th></tr></thead>
+        <tbody id="task-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Services Scanner Modal -->
+<div id="services-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <span>⚡ All Systemd Services</span>
+      <button class="btn-ghost" onclick="closeModal('services-modal')">✕</button>
+    </div>
+    <div class="modal-content">
+      <table class="data-table">
+        <thead><tr><th>Service</th><th>State</th><th>Action</th></tr></thead>
+        <tbody id="services-scan-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Ports Scanner Modal -->
+<div id="ports-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <span>🔌 All Listening Ports</span>
+      <button class="btn-ghost" onclick="closeModal('ports-modal')">✕</button>
+    </div>
+    <div class="modal-content">
+      <table class="data-table">
+        <thead><tr><th>Port</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="ports-scan-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Folder Explorer Modal -->
+<div id="folder-modal" class="modal">
+  <div class="modal-body">
+    <div class="modal-head">
+      <span>🌳 Folder Explorer</span>
+      <button class="btn-ghost" onclick="closeModal('folder-modal')">✕</button>
+    </div>
+    <div class="modal-content">
+      <div style="margin-bottom:12px; display:flex; gap:8px;">
+        <input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/" style="flex:1;">
+        <button class="btn" onclick="exploreFolder()">Explore</button>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Folder</th><th>Path</th><th>Size (MB)</th><th>Action</th></tr></thead>
+        <tbody id="folder-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 
 <script>
 let sessionToken = localStorage.getItem('ward_token') || '';
 let globalData = null;
 let currentTheme = {};
-let authFailedCount = 0; // Track consecutive auth failures
+let authFailedCount = 0;
+let sidebarPinned = false;
 
 const pLen = 40;
 const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
+
+// ===== SIDEBAR TOGGLE =====
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('collapsed');
+  sidebarPinned = sidebar.classList.contains('collapsed');
+  localStorage.setItem('ward_sidebar_collapsed', sidebarPinned);
+}
+
+// Restore sidebar state
+if (localStorage.getItem('ward_sidebar_collapsed') === 'true') {
+  document.getElementById('sidebar').classList.add('collapsed');
+}
 
 // ===== AUTH FUNCTIONS =====
 function showLogin() {
@@ -894,7 +1109,11 @@ function switchSection(id, el) {
   document.getElementById('page-title').innerText = titles[id] || 'WARD';
 }
 
-// ===== NETDATA-STYLE CHARTS =====
+// ===== MODALS =====
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ===== CHARTS =====
 function drawNetdataGrid(ctx, w, h, maxScale, isPct = true) {
   const levels = [0.25, 0.5, 0.75, 1.0];
   ctx.font = '10px JetBrains Mono, monospace';
@@ -1001,16 +1220,14 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
 
 // ===== DATA FETCHING =====
 async function fetchStatus() {
-  if (!sessionToken) return; // Don't fetch if not logged in
+  if (!sessionToken) return;
   
   try {
     const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
     
-    // ✅ FIX: Instead of reload, show login overlay
     if (res.status === 401) {
       authFailedCount++;
       if (authFailedCount >= 2) {
-        // After 2 consecutive failures, show login
         localStorage.removeItem('ward_token');
         sessionToken = '';
         showLogin();
@@ -1125,6 +1342,104 @@ function renderDirs() {
     </tr>`;
   });
   document.getElementById('dir-tbody').innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
+}
+
+// ===== SCANNERS & WATCH =====
+async function openTaskManager() {
+  openModal('task-modal');
+  document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Scanning...</td></tr>';
+  try {
+    const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    let html = '';
+    d.processes.forEach(p => {
+      const watching = globalData && globalData.apps && globalData.apps.some(a => a.name === p.name);
+      html += `<tr>
+        <td>${p.pid}</td>
+        <td><b>${p.name}</b></td>
+        <td>${p.cpu_pct}%</td>
+        <td>${p.memory_mb}</td>
+        <td>${p.threads}</td>
+        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="addCfg('app', '${p.name}')">+ Watch</button>`}</td>
+      </tr>`;
+    });
+    document.getElementById('task-tbody').innerHTML = html;
+  } catch(e) {
+    document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--danger);">Error loading processes</td></tr>';
+  }
+}
+
+async function openServicesScanner() {
+  openModal('services-modal');
+  document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Scanning...</td></tr>';
+  try {
+    const res = await fetch('/api/services/snapshot', { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    let html = '';
+    d.services.forEach(s => {
+      const watching = globalData && globalData.services && globalData.services[s.name] !== undefined;
+      html += `<tr>
+        <td><b>${s.name}</b></td>
+        <td><span class="badge ${s.state==='active'?'badge-success':'badge-danger'}">${s.state}</span></td>
+        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="addCfg('service', '${s.name}')">+ Track</button>`}</td>
+      </tr>`;
+    });
+    document.getElementById('services-scan-tbody').innerHTML = html;
+  } catch(e) {
+    document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error</td></tr>';
+  }
+}
+
+async function openPortsScanner() {
+  openModal('ports-modal');
+  document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Scanning...</td></tr>';
+  try {
+    const res = await fetch('/api/ports/snapshot', { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    let html = '';
+    d.ports.forEach(p => {
+      const watching = globalData && globalData.ports && globalData.ports[String(p)] !== undefined;
+      html += `<tr>
+        <td><b>${p}</b></td>
+        <td><span class="badge badge-success">Listening</span></td>
+        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="addCfg('port', '${p}')">+ Watch</button>`}</td>
+      </tr>`;
+    });
+    document.getElementById('ports-scan-tbody').innerHTML = html;
+  } catch(e) {
+    document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error</td></tr>';
+  }
+}
+
+async function openTreeExplorer() {
+  openModal('folder-modal');
+  exploreFolder();
+}
+
+async function exploreFolder() {
+  const path = document.getElementById('explore-path').value || '/';
+  document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Loading...</td></tr>';
+  try {
+    const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(path)}`, { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    let html = '';
+    if (d.items && d.items.length > 0) {
+      d.items.forEach(item => {
+        const tracking = globalData && globalData.caches && globalData.caches[item.name] !== undefined;
+        html += `<tr>
+          <td><b>${item.name}</b></td>
+          <td style="font-family:monospace; font-size:12px;">${item.path}</td>
+          <td>${item.size_mb} MB</td>
+          <td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn btn-watch" onclick="addCfg('directory', '${item.name}', '${item.path}')">+ Track</button>`}</td>
+        </tr>`;
+      });
+    } else {
+      html = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">No folders found</td></tr>';
+    }
+    document.getElementById('folder-tbody').innerHTML = html;
+  } catch(e) {
+    document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--danger);">Error</td></tr>';
+  }
 }
 
 // ===== ACTIONS =====
@@ -1248,9 +1563,7 @@ function showToast(msg, type = 'success') {
 }
 
 // ===== INIT =====
-// Check if we have a valid session
 if (sessionToken) {
-  // Try to verify the token
   fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } })
     .then(res => res.json())
     .then(d => {
