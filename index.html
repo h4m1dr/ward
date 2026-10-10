@@ -63,8 +63,8 @@ body {
 }
 
 .login-logo {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   margin: 0 auto 16px;
 }
 
@@ -129,6 +129,7 @@ body {
   flex-shrink: 0;
   transition: width 0.3s ease;
   position: relative;
+  overflow: hidden;
 }
 
 .sidebar.collapsed {
@@ -148,6 +149,7 @@ body {
 .sidebar.collapsed .sidebar-header {
   padding: 20px 12px;
   justify-content: center;
+  gap: 0;
 }
 
 .sidebar-logo {
@@ -161,6 +163,12 @@ body {
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.3px;
+  transition: opacity 0.2s;
+}
+
+.sidebar.collapsed .sidebar-title {
+  opacity: 0;
+  width: 0;
 }
 
 .sidebar-version {
@@ -168,12 +176,18 @@ body {
   color: var(--primary);
   font-weight: 600;
   margin-top: 2px;
+  transition: opacity 0.2s;
+}
+
+.sidebar.collapsed .sidebar-version {
+  opacity: 0;
+  width: 0;
 }
 
 .sidebar-toggle {
   position: absolute;
   right: -11px;
-  top: 50%;
+  top: 65px;
   transform: translateY(-50%);
   background: var(--card);
   border: 1px solid var(--border);
@@ -198,6 +212,7 @@ body {
 
 .sidebar.collapsed .sidebar-toggle {
   transform: translateY(-50%) rotate(180deg);
+  right: -11px;
 }
 
 .sidebar-nav {
@@ -224,6 +239,7 @@ body {
 .sidebar.collapsed .nav-item {
   padding: 11px 12px;
   justify-content: center;
+  gap: 0;
 }
 
 .nav-item:hover { background: var(--sidebar-hover); color: var(--text); }
@@ -235,7 +251,26 @@ body {
   font-weight: 600;
 }
 
-.nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-icon { 
+  font-size: 16px; 
+  width: 22px; 
+  text-align: center; 
+  flex-shrink: 0;
+}
+
+.sidebar.collapsed .nav-icon {
+  width: 100%;
+}
+
+.nav-text {
+  transition: opacity 0.2s;
+}
+
+.sidebar.collapsed .nav-text {
+  opacity: 0;
+  width: 0;
+  display: none;
+}
 
 .sidebar-footer {
   padding: 16px 20px;
@@ -244,9 +279,11 @@ body {
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
+  transition: opacity 0.2s;
 }
 
 .sidebar.collapsed .sidebar-footer {
+  opacity: 0;
   padding: 16px 12px;
   text-align: center;
 }
@@ -652,15 +689,11 @@ body {
 <!-- ===== LOGIN OVERLAY ===== -->
 <div id="login-overlay">
   <div class="login-box">
-    <svg class="login-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#00ab44"/>
-          <stop offset="100%" stop-color="#00d68f"/>
-        </linearGradient>
-      </defs>
-      <path d="M32 4L8 16v16c0 14 10 24 24 28 14-4 24-14 24-28V16L32 4z" fill="url(#logoGrad)"/>
-      <path d="M20 32l6 6 10-12 8 10" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="login-logo" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+      <rect width="128" height="128" rx="26" fill="#141824"/>
+      <path d="M58 122L56 86Q54 64 45 48Q37 34 45 20Q53 8 64 8Q75 8 83 20Q91 34 83 48Q74 64 72 86L70 122Z" fill="#4d3727" stroke="#110c07" stroke-width="2"/>
+      <circle cx="64" cy="36" r="19" fill="#ffea00" stroke="#92400e" stroke-width="1.2"/>
+      <circle cx="64" cy="36" r="8" fill="#000"/>
     </svg>
     <h3>WARD Monitor</h3>
     <div class="subtitle">v1.1.0 - Enter admin password</div>
@@ -672,45 +705,48 @@ body {
 
 <!-- ===== SIDEBAR ===== -->
 <div class="sidebar" id="sidebar">
-  <div class="sidebar-toggle" onclick="toggleSidebar()">◀</div>
+  <div class="sidebar-toggle" onclick="toggleSidebar()"></div>
   <div class="sidebar-header">
-    <svg class="sidebar-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="logoGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#00ab44"/>
-          <stop offset="100%" stop-color="#00d68f"/>
-        </linearGradient>
-      </defs>
-      <path d="M32 4L8 16v16c0 14 10 24 24 28 14-4 24-14 24-28V16L32 4z" fill="url(#logoGrad2)"/>
-      <path d="M20 32l6 6 10-12 8 10" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="sidebar-logo" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+      <rect width="128" height="128" rx="26" fill="#141824"/>
+      <path d="M58 122L56 86Q54 64 45 48Q37 34 45 20Q53 8 64 8Q75 8 83 20Q91 34 83 48Q74 64 72 86L70 122Z" fill="#4d3727" stroke="#110c07" stroke-width="2"/>
+      <circle cx="64" cy="36" r="19" fill="#ffea00" stroke="#92400e" stroke-width="1.2"/>
+      <circle cx="64" cy="36" r="8" fill="#000"/>
     </svg>
     <div>
-      <div class="sidebar-title" id="sidebar-title">WARD</div>
+      <div class="sidebar-title">WARD</div>
       <div class="sidebar-version">v1.1.0</div>
     </div>
   </div>
   
   <div class="sidebar-nav">
     <div class="nav-item active" onclick="switchSection('overview', this)">
-      <span class="nav-icon">📊</span><span>Overview</span>
+      <span class="nav-icon"></span>
+      <span class="nav-text">Overview</span>
     </div>
     <div class="nav-item" onclick="switchSection('apps', this)">
-      <span class="nav-icon">📱</span><span>Watched Apps</span>
+      <span class="nav-icon">📱</span>
+      <span class="nav-text">Watched Apps</span>
     </div>
     <div class="nav-item" onclick="switchSection('services', this)">
-      <span class="nav-icon">⚙️</span><span>Services</span>
+      <span class="nav-icon">️</span>
+      <span class="nav-text">Services</span>
     </div>
     <div class="nav-item" onclick="switchSection('ports', this)">
-      <span class="nav-icon">🔌</span><span>Ports</span>
+      <span class="nav-icon">🔌</span>
+      <span class="nav-text">Ports</span>
     </div>
     <div class="nav-item" onclick="switchSection('storage', this)">
-      <span class="nav-icon"></span><span>Storage</span>
+      <span class="nav-icon">📁</span>
+      <span class="nav-text">Storage</span>
     </div>
     <div class="nav-item" onclick="switchSection('tasks', this)">
-      <span class="nav-icon">⏰</span><span>Scheduled Tasks</span>
+      <span class="nav-icon">⏰</span>
+      <span class="nav-text">Scheduled Tasks</span>
     </div>
     <div class="nav-item" onclick="switchSection('settings', this)">
-      <span class="nav-icon">🔧</span><span>Settings</span>
+      <span class="nav-icon">🔧</span>
+      <span class="nav-text">Settings</span>
     </div>
   </div>
 
@@ -814,7 +850,7 @@ body {
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Systemd Services</h2>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-success" onclick="openServicesScanner()">⚡ Scan Services</button>
+        <button class="btn btn-success" onclick="openServicesScanner()"> Scan Services</button>
         <input type="text" id="in-srv" class="input-field" placeholder="Service name" style="width:150px;">
         <button class="btn" onclick="addService()">Add</button>
       </div>
@@ -830,7 +866,7 @@ body {
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Monitored Ports</h2>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-success" onclick="openPortsScanner()"> Scan Ports</button>
+        <button class="btn btn-success" onclick="openPortsScanner()">🔍 Scan Ports</button>
         <input type="number" id="in-port" class="input-field" placeholder="Port" style="width:100px;">
         <button class="btn" onclick="addPort()">Watch</button>
       </div>
@@ -846,7 +882,7 @@ body {
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Storage Folders</h2>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-success" onclick="openTreeExplorer()">🌳 Explore</button>
+        <button class="btn btn-success" onclick="openTreeExplorer()"> Explore Folders</button>
         <input type="text" id="dir-name" class="input-field" placeholder="Label" style="width:100px;">
         <input type="text" id="dir-path" class="input-field" placeholder="/path" style="width:200px;">
         <button class="btn" onclick="addFolder()">Track</button>
@@ -871,7 +907,7 @@ body {
   <div id="settings" class="content-section">
     <div class="settings-container">
       <div class="settings-group">
-        <h3>🔐 Security</h3>
+        <h3> Security</h3>
         <div class="setting-row">
           <span class="setting-label">Change Admin Password</span>
           <div style="display:flex; gap:8px;">
@@ -883,7 +919,7 @@ body {
       </div>
 
       <div class="settings-group">
-        <h3> Theme Colors</h3>
+        <h3>🎨 Theme Colors</h3>
         <div class="theme-grid">
           <div class="theme-color-item">
             <label>Primary</label>
@@ -917,7 +953,7 @@ body {
       </div>
 
       <div class="settings-group">
-        <h3> Update Manager</h3>
+        <h3>🚀 Update Manager</h3>
         <div class="setting-row">
           <span class="setting-label">Current Version</span>
           <span class="setting-value" id="set-current-ver">v1.1.0</span>
@@ -932,7 +968,7 @@ body {
       </div>
 
       <div class="settings-group">
-        <h3>💾 Backup & Restore</h3>
+        <h3> Backup & Restore</h3>
         <div class="setting-row">
           <span class="setting-label">Export Configuration</span>
           <button class="btn btn-ghost" onclick="downloadConfig()">📥 Download config.json</button>
@@ -952,7 +988,7 @@ body {
   <div class="modal-body">
     <div class="modal-head">
       <span>⚡ Live Process Snapshot</span>
-      <button class="btn-ghost" onclick="closeModal('task-modal')">✕</button>
+      <button class="btn-ghost" onclick="closeModal('task-modal')"></button>
     </div>
     <div class="modal-content">
       <table class="data-table">
@@ -999,13 +1035,13 @@ body {
 <div id="folder-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
-      <span>🌳 Folder Explorer</span>
+      <span>📁 Folder Explorer</span>
       <button class="btn-ghost" onclick="closeModal('folder-modal')">✕</button>
     </div>
     <div class="modal-content">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
         <input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/" style="flex:1;">
-        <button class="btn" onclick="exploreFolder()">Explore</button>
+        <button class="btn btn-success" onclick="exploreFolder()">Explore</button>
       </div>
       <table class="data-table">
         <thead><tr><th>Folder</th><th>Path</th><th>Size (MB)</th><th>Action</th></tr></thead>
@@ -1023,22 +1059,46 @@ let globalData = null;
 let currentTheme = {};
 let authFailedCount = 0;
 let sidebarPinned = false;
+let sidebarHoverTimeout = null;
 
 const pLen = 40;
 const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
 
-// ===== SIDEBAR TOGGLE =====
+// ===== SIDEBAR TOGGLE & HOVER =====
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
-  sidebar.classList.toggle('collapsed');
-  sidebarPinned = sidebar.classList.contains('collapsed');
-  localStorage.setItem('ward_sidebar_collapsed', sidebarPinned);
+  sidebarPinned = !sidebarPinned;
+  
+  if (sidebarPinned) {
+    sidebar.classList.remove('collapsed');
+    localStorage.setItem('ward_sidebar_collapsed', 'false');
+  } else {
+    sidebar.classList.add('collapsed');
+    localStorage.setItem('ward_sidebar_collapsed', 'true');
+  }
 }
 
+// Hover effects for sidebar (like X-UI)
+sidebar.addEventListener('mouseenter', () => {
+  if (!sidebarPinned) {
+    clearTimeout(sidebarHoverTimeout);
+    sidebar.classList.remove('collapsed');
+  }
+});
+
+sidebar.addEventListener('mouseleave', () => {
+  if (!sidebarPinned) {
+    sidebarHoverTimeout = setTimeout(() => {
+      sidebar.classList.add('collapsed');
+    }, 200);
+  }
+});
+
 // Restore sidebar state
-if (localStorage.getItem('ward_sidebar_collapsed') === 'true') {
-  document.getElementById('sidebar').classList.add('collapsed');
+if (localStorage.getItem('ward_sidebar_collapsed') === 'false') {
+  document.getElementById('sidebar').classList.remove('collapsed');
+  sidebarPinned = true;
 }
 
 // ===== AUTH FUNCTIONS =====
@@ -1344,10 +1404,10 @@ function renderDirs() {
   document.getElementById('dir-tbody').innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
 }
 
-// ===== SCANNERS & WATCH =====
+// ===== SCANNERS & WATCH (FIXED) =====
 async function openTaskManager() {
   openModal('task-modal');
-  document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Scanning...</td></tr>';
+  document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Scanning processes...</span></td></tr>';
   try {
     const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
@@ -1355,12 +1415,12 @@ async function openTaskManager() {
     d.processes.forEach(p => {
       const watching = globalData && globalData.apps && globalData.apps.some(a => a.name === p.name);
       html += `<tr>
-        <td>${p.pid}</td>
+        <td style="font-family:monospace;">${p.pid}</td>
         <td><b>${p.name}</b></td>
-        <td>${p.cpu_pct}%</td>
-        <td>${p.memory_mb}</td>
-        <td>${p.threads}</td>
-        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="addCfg('app', '${p.name}')">+ Watch</button>`}</td>
+        <td style="font-family:monospace;">${p.cpu_pct}%</td>
+        <td style="font-family:monospace;">${p.memory_mb}</td>
+        <td style="font-family:monospace;">${p.threads}</td>
+        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchApp('${p.name}')">+ Watch</button>`}</td>
       </tr>`;
     });
     document.getElementById('task-tbody').innerHTML = html;
@@ -1369,9 +1429,24 @@ async function openTaskManager() {
   }
 }
 
+async function watchApp(appName) {
+  try {
+    await fetch('/api/config/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ type: 'app', value: appName })
+    });
+    showToast(`Added ${appName} to watched apps`, 'success');
+    await fetchStatus();
+    openTaskManager();
+  } catch(e) {
+    showToast('Failed to add app', 'error');
+  }
+}
+
 async function openServicesScanner() {
   openModal('services-modal');
-  document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Scanning...</td></tr>';
+  document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Scanning services...</span></td></tr>';
   try {
     const res = await fetch('/api/services/snapshot', { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
@@ -1381,18 +1456,33 @@ async function openServicesScanner() {
       html += `<tr>
         <td><b>${s.name}</b></td>
         <td><span class="badge ${s.state==='active'?'badge-success':'badge-danger'}">${s.state}</span></td>
-        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="addCfg('service', '${s.name}')">+ Track</button>`}</td>
+        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchService('${s.name}')">+ Track</button>`}</td>
       </tr>`;
     });
     document.getElementById('services-scan-tbody').innerHTML = html;
   } catch(e) {
-    document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error</td></tr>';
+    document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning services</td></tr>';
+  }
+}
+
+async function watchService(serviceName) {
+  try {
+    await fetch('/api/config/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ type: 'service', value: serviceName })
+    });
+    showToast(`Added ${serviceName} to tracked services`, 'success');
+    await fetchStatus();
+    openServicesScanner();
+  } catch(e) {
+    showToast('Failed to add service', 'error');
   }
 }
 
 async function openPortsScanner() {
   openModal('ports-modal');
-  document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Scanning...</td></tr>';
+  document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Scanning ports...</span></td></tr>';
   try {
     const res = await fetch('/api/ports/snapshot', { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
@@ -1400,25 +1490,41 @@ async function openPortsScanner() {
     d.ports.forEach(p => {
       const watching = globalData && globalData.ports && globalData.ports[String(p)] !== undefined;
       html += `<tr>
-        <td><b>${p}</b></td>
+        <td style="font-family:monospace;"><b>${p}</b></td>
         <td><span class="badge badge-success">Listening</span></td>
-        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="addCfg('port', '${p}')">+ Watch</button>`}</td>
+        <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchPort('${p}')">+ Watch</button>`}</td>
       </tr>`;
     });
     document.getElementById('ports-scan-tbody').innerHTML = html;
   } catch(e) {
-    document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error</td></tr>';
+    document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning ports</td></tr>';
+  }
+}
+
+async function watchPort(portNum) {
+  try {
+    await fetch('/api/config/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ type: 'port', value: portNum })
+    });
+    showToast(`Added port ${portNum} to watched ports`, 'success');
+    await fetchStatus();
+    openPortsScanner();
+  } catch(e) {
+    showToast('Failed to add port', 'error');
   }
 }
 
 async function openTreeExplorer() {
   openModal('folder-modal');
+  document.getElementById('explore-path').value = '/';
   exploreFolder();
 }
 
 async function exploreFolder() {
   const path = document.getElementById('explore-path').value || '/';
-  document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Loading...</td></tr>';
+  document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Loading folders...</span></td></tr>';
   try {
     const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(path)}`, { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
@@ -1429,16 +1535,31 @@ async function exploreFolder() {
         html += `<tr>
           <td><b>${item.name}</b></td>
           <td style="font-family:monospace; font-size:12px;">${item.path}</td>
-          <td>${item.size_mb} MB</td>
-          <td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn btn-watch" onclick="addCfg('directory', '${item.name}', '${item.path}')">+ Track</button>`}</td>
+          <td style="font-family:monospace;">${item.size_mb} MB</td>
+          <td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn btn-watch" onclick="trackFolder('${item.name}', '${item.path}')">+ Track</button>`}</td>
         </tr>`;
       });
     } else {
-      html = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">No folders found</td></tr>';
+      html = '<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">No folders found or permission denied</td></tr>';
     }
     document.getElementById('folder-tbody').innerHTML = html;
   } catch(e) {
-    document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--danger);">Error</td></tr>';
+    document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">Error loading folders</td></tr>';
+  }
+}
+
+async function trackFolder(folderName, folderPath) {
+  try {
+    await fetch('/api/config/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ type: 'directory', name: folderName, value: folderPath })
+    });
+    showToast(`Added ${folderName} to tracked folders`, 'success');
+    await fetchStatus();
+    exploreFolder();
+  } catch(e) {
+    showToast('Failed to track folder', 'error');
   }
 }
 
