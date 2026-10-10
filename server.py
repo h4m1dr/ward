@@ -156,12 +156,15 @@ def get_dir_size_mb(path):
 
 def explore_directory_tree(path):
     if not os.path.exists(path) or not os.path.isdir(path):
-        return []
+        return {"items": [], "error": "Path does not exist"}
     items = []
     try:
+        restricted_paths = ['/proc', '/sys', '/dev', '/run', '/snap']
+        if any(path.startswith(rp) for rp in restricted_paths):
+            return {"items": [], "error": "Access to system directories is restricted for stability."}
         cmd = f"du -sm --max-depth=1 '{path}' 2>/dev/null"
-        res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        if res.returncode == 0:
+        res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10)
+        if res.returncode == 0 and res.stdout.strip():
             for line in res.stdout.strip().split("\n"):
                 parts = line.split("\t")
                 if len(parts) == 2:
@@ -176,10 +179,14 @@ def explore_directory_tree(path):
                             })
                     except ValueError:
                         continue
-        items.sort(key=lambda x: x["size_mb"], reverse=True)
-    except Exception:
-        pass
-    return items
+            items.sort(key=lambda x: x["size_mb"], reverse=True)
+            return {"items": items}
+        else:
+            return {"items": [], "error": "Permission denied or directory is empty"}
+    except subprocess.TimeoutExpired:
+        return {"items": [], "error": "Request timed out (directory too large)"}
+    except Exception as e:
+        return {"items": [], "error": str(e)}
 
 def scan_all_processes():
     global _proc_cpu_prev
@@ -193,7 +200,6 @@ def scan_all_processes():
                     break
     except Exception:
         pass
-
     now = time.time()
     for pid in [p for p in os.listdir('/proc') if p.isdigit()]:
         try:
@@ -219,7 +225,6 @@ def scan_all_processes():
                 if dt > 0:
                     cpu = round(((total_time - old_time) / (dt * 100)), 1)
             _proc_cpu_prev[pid] = (total_time, now)
-
             procs.append({
                 "pid": int(pid),
                 "name": comm,
@@ -259,7 +264,6 @@ def get_pinned_apps(pinned_names):
             proc_dict[p["name"]]["memory_pct"] = round(proc_dict[p["name"]]["memory_pct"] + p["memory_pct"], 1)
             proc_dict[p["name"]]["cpu_pct"] = round(proc_dict[p["name"]]["cpu_pct"] + p["cpu_pct"], 1)
             proc_dict[p["name"]]["threads"] += p["threads"]
-
     result = []
     for name in pinned_names:
         if name in proc_dict:
@@ -278,7 +282,6 @@ def collect_metrics():
     cpu_data = get_cpu_info()
     net_data = get_network_stats()
     active_ports = get_active_listening_ports()
-
     mem = {}
     try:
         with open('/proc/meminfo', 'r') as f:
@@ -287,15 +290,12 @@ def collect_metrics():
                 mem[parts[0].strip()] = int(parts[1].split()[0]) // 1024
     except Exception:
         pass
-        
     avail_ram = mem.get('MemAvailable', 0)
     total_ram = mem.get('MemTotal', 1)
     used_ram = total_ram - avail_ram
-
     total_swap = mem.get('SwapTotal', 1)
     free_swap = mem.get('SwapFree', 0)
     used_swap = total_swap - free_swap
-
     try:
         st = os.statvfs('/')
         total_disk = round((st.f_blocks * st.f_frsize) / (1024**3), 2)
@@ -304,22 +304,17 @@ def collect_metrics():
         used_disk_pct = round((used_disk / total_disk) * 100, 1)
     except Exception:
         total_disk = free_disk = used_disk = used_disk_pct = 0.0
-
     services_state = {}
     for s in cfg.get("monitored_services", []):
         res = subprocess.run(["systemctl", "is-active", "--quiet", s])
         services_state[s] = "Running" if res.returncode == 0 else "Down"
-
     watched_ports = {}
     for p in cfg.get("monitored_ports", []):
         watched_ports[str(p)] = "Listening" if int(p) in active_ports else "Closed"
-
     dir_sizes = {}
     for name, path in cfg.get("monitored_directories", {}).items():
         dir_sizes[name] = {"path": path, "size_mb": get_dir_size_mb(path)}
-
     pinned_apps = get_pinned_apps(cfg.get("monitored_apps", []))
-
     tcp_count = 0
     udp_count = 0
     try:
@@ -327,7 +322,6 @@ def collect_metrics():
         udp_count = len([1 for l in open("/proc/net/udp").readlines() if not l.strip().startswith("sl")])
     except Exception:
         pass
-
     uptime = "0d 0h 0m"
     load_avg = "0.0 / 0.0 / 0.0"
     try:
@@ -339,7 +333,6 @@ def collect_metrics():
             load_avg = f"{p[0]} / {p[1]} / {p[2]}"
     except Exception:
         pass
-
     default_theme = {
         "primary": "#00ab44",
         "success": "#00d68f",
@@ -348,7 +341,6 @@ def collect_metrics():
         "card": "#252836",
         "text": "#e8e8e8"
     }
-
     return {
         "panel_name": cfg.get("panel_name", "WARD"),
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -463,7 +455,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"path": target, "items": explore_directory_tree(target)}).encode("utf-8"))
+            result = explore_directory_tree(target)
+            self.wfile.write(json.dumps(result).encode("utf-8"))
             
         elif self.path.startswith("/api/service/logs?"):
             qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
@@ -559,7 +552,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b'{"error": "update.sh script not found"}')
                 return
-
             def do_up():
                 time.sleep(1.5)
                 try:
@@ -567,7 +559,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                     subprocess.run(["bash", update_script], capture_output=True, text=True)
                 except Exception:
                     pass
-
             threading.Thread(target=do_up, daemon=True).start()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
