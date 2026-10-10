@@ -41,14 +41,26 @@ def load_config():
         "blocked_ports_trigger": [21, 23, 3306, 5432, 6379],
         "monitored_directories": {"system_cache": "/var/cache", "tmp": "/tmp"},
         "monitored_apps": ["dockerd", "xray"],
-        "scheduled_tasks": []
+        "scheduled_tasks": [],
+        # NEW: Theme Customizer Default Values
+        "theme": {
+            "primary": "#4a9eff",
+            "success": "#00d68f",
+            "danger": "#ff4757",
+            "bg": "#0f1419",
+            "card": "#1a2332",
+            "text": "#e4e8f1"
+        }
     }
     if os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, 'r') as f:
                 data = json.load(f)
-                default_config.update(data)
-                return default_config
+                # Merge safely to ensure new keys (like theme) are added to old configs
+                for key, value in default_config.items():
+                    if key not in data:
+                        data[key] = value
+                return data
         except Exception:
             return default_config
     return default_config
@@ -61,6 +73,7 @@ def save_config(cfg):
     except Exception:
         return False
 
+# ... [get_cpu_info, get_network_stats, get_active_listening_ports, get_dir_size_mb remain EXACTLY the same as before] ...
 def get_cpu_info():
     global _prev_idle, _prev_total
     model = "Linux Processor"
@@ -74,7 +87,6 @@ def get_cpu_info():
                     cores += 1
     except Exception:
         pass
-
     cpu_percent = 0.0
     try:
         with open("/proc/stat", "r") as f:
@@ -106,7 +118,6 @@ def get_network_stats():
                     total_tx += int(parts[9])
     except Exception:
         pass
-
     now = time.time()
     diff_t = max(now - _prev_net_time, 0.001) if _prev_net_time > 0 else 1.0
     speed_rx = round(max((total_rx - _prev_net_rx), 0) / (diff_t * 1024 * 1024), 2) if _prev_net_time > 0 else 0.0
@@ -122,7 +133,6 @@ def get_network_stats():
     }
 
 def get_active_listening_ports():
-    global _known_listening_ports
     ports = set()
     try:
         res = subprocess.run(["ss", "-tuln"], capture_output=True, text=True)
@@ -148,27 +158,34 @@ def get_dir_size_mb(path):
         pass
     return 0.0
 
+# --- FIXED: Robust Folder Explorer ---
 def explore_directory_tree(path):
     if not os.path.exists(path) or not os.path.isdir(path):
         return []
     items = []
     try:
-        res = subprocess.run(["du", "-sm", "--max-depth=1", path], capture_output=True, text=True)
+        # Use 2>/dev/null to suppress "Permission denied" errors and ensure clean output
+        cmd = f"du -sm --max-depth=1 '{path}' 2>/dev/null"
+        res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if res.returncode == 0:
             for line in res.stdout.strip().split("\n"):
                 parts = line.split("\t")
                 if len(parts) == 2:
-                    sz_mb = float(parts[0])
-                    sub_path = parts[1].strip()
-                    if sub_path != path:
-                        items.append({
-                            "name": os.path.basename(sub_path),
-                            "path": sub_path,
-                            "size_mb": sz_mb
-                        })
+                    try:
+                        sz_mb = float(parts[0])
+                        sub_path = parts[1].strip()
+                        if sub_path != path and os.path.basename(sub_path):
+                            items.append({
+                                "name": os.path.basename(sub_path),
+                                "path": sub_path,
+                                "size_mb": sz_mb
+                            })
+                    except ValueError:
+                        continue # Skip malformed lines
+        # Sort by size descending
+        items.sort(key=lambda x: x["size_mb"], reverse=True)
     except Exception:
         pass
-    items.sort(key=lambda x: x["size_mb"], reverse=True)
     return items
 
 def scan_all_processes():
@@ -347,12 +364,13 @@ def collect_metrics():
         "blocked_ports": cfg.get("blocked_ports_trigger", []),
         "caches": dir_sizes,
         "apps": pinned_apps,
-        "tasks": cfg.get("scheduled_tasks", [])
+        "tasks": cfg.get("scheduled_tasks", []),
+        "theme": cfg.get("theme", default_config["theme"]) # Return theme to frontend
     }
 
 class RequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        pass  # Suppress default HTTP logging to keep journalctl clean
+        pass
 
     def is_authenticated(self):
         cfg = load_config()
@@ -374,7 +392,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             cfg = load_config()
             self.wfile.write(json.dumps({
                 "authenticated": self.is_authenticated(),
-                "panel_name": cfg.get("panel_name", "WARD")
+                "panel_name": cfg.get("panel_name", "WARD"),
+                "theme": cfg.get("theme", {})
             }).encode("utf-8"))
             return
 
@@ -456,7 +475,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(logs.encode("utf-8"))
 
-        # --- NEW: Settings & Tasks GET Endpoints ---
         elif self.path == "/api/tasks/list":
             cfg = load_config()
             self.send_response(200)
@@ -490,7 +508,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         length = int(self.headers.get('content-length', 0))
         payload = json.loads(self.rfile.read(length).decode('utf-8')) if length > 0 else {}
         
-        # Handle login separately (before auth check)
         if self.path == "/api/auth/login":
             pw = payload.get("password", "")
             cfg = load_config()
@@ -509,7 +526,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(b'{"status": "error", "message": "Invalid Password"}')
             return
 
-        # Strict auth check for all other POST requests
         if not self.is_authenticated():
             self.send_response(401)
             self.send_header("Content-Type", "application/json")
@@ -529,12 +545,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return
 
             def do_up():
-                time.sleep(1.5)  # Short delay to ensure response is sent before server restarts
+                time.sleep(1.5)
                 try:
                     os.chmod(update_script, 0o755)
                     subprocess.run(["bash", update_script], capture_output=True, text=True)
                 except Exception:
-                    pass  # Service will be restarted by the script
+                    pass
 
             threading.Thread(target=do_up, daemon=True).start()
             self.send_response(200)
@@ -553,7 +569,19 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'{"status": "ok"}')
             return
 
-        # --- NEW: Settings Endpoints ---
+        # --- NEW: Theme Update Endpoint ---
+        if self.path == "/api/settings/update-theme":
+            new_theme = payload.get("theme", {})
+            if "theme" not in cfg:
+                cfg["theme"] = {}
+            cfg["theme"].update(new_theme)
+            save_config(cfg)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
+            return
+
         if self.path == "/api/settings/change-password":
             old_pw = payload.get("old_password", "")
             new_pw = payload.get("new_password", "")
@@ -573,7 +601,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         elif self.path == "/api/settings/restore-config":
             new_cfg = payload.get("config", {})
-            # Basic validation to prevent corrupting the config
             if "admin_password_hash" in new_cfg and "panel_port" in new_cfg:
                 save_config(new_cfg)
                 self.send_response(200)
@@ -587,7 +614,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(b'{"status": "error", "message": "Invalid config format"}')
             return
 
-        # --- NEW: Scheduled Tasks Endpoints ---
         elif self.path == "/api/tasks/add":
             tasks = cfg.setdefault("scheduled_tasks", [])
             tasks.append({
@@ -628,7 +654,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'{"status": "ok"}')
             return
 
-        # --- Existing Config Endpoints ---
         if self.path == "/api/config/add":
             t, v = payload.get("type"), payload.get("value")
             if t == "app" and v not in cfg.get("monitored_apps", []):
