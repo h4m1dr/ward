@@ -347,6 +347,16 @@ def collect_metrics():
     except Exception:
         pass
 
+    # ✅ FIX: استفاده از dict literal به جای default_config
+    default_theme = {
+        "primary": "#4a9eff",
+        "success": "#00d68f",
+        "danger": "#ff4757",
+        "bg": "#0f1419",
+        "card": "#1a2332",
+        "text": "#e4e8f1"
+    }
+
     return {
         "panel_name": cfg.get("panel_name", "WARD"),
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -365,7 +375,7 @@ def collect_metrics():
         "caches": dir_sizes,
         "apps": pinned_apps,
         "tasks": cfg.get("scheduled_tasks", []),
-        "theme": cfg.get("theme", default_config["theme"]) # Return theme to frontend
+        "theme": cfg.get("theme", default_theme)
     }
 
 class RequestHandler(BaseHTTPRequestHandler):
