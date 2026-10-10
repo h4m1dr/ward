@@ -157,34 +157,49 @@ def get_dir_size_mb(path):
 def explore_directory_tree(path):
     if not os.path.exists(path) or not os.path.isdir(path):
         return {"items": [], "error": "Path does not exist"}
+    
     items = []
     try:
-        restricted_paths = ['/proc', '/sys', '/dev', '/run', '/snap']
-        if any(path.startswith(rp) for rp in restricted_paths):
-            return {"items": [], "error": "Access to system directories is restricted for stability."}
-        cmd = f"du -sm --max-depth=1 '{path}' 2>/dev/null"
-        res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10)
-        if res.returncode == 0 and res.stdout.strip():
-            for line in res.stdout.strip().split("\n"):
-                parts = line.split("\t")
-                if len(parts) == 2:
-                    try:
-                        sz_mb = float(parts[0])
-                        sub_path = parts[1].strip()
-                        if sub_path != path and os.path.basename(sub_path):
-                            items.append({
-                                "name": os.path.basename(sub_path),
-                                "path": sub_path,
-                                "size_mb": sz_mb
-                            })
-                    except ValueError:
-                        continue
-            items.sort(key=lambda x: x["size_mb"], reverse=True)
-            return {"items": items}
-        else:
-            return {"items": [], "error": "Permission denied or directory is empty"}
-    except subprocess.TimeoutExpired:
-        return {"items": [], "error": "Request timed out (directory too large)"}
+        # لیست کردن تمام محتویات دایرکتوری
+        entries = os.listdir(path)
+        
+        for entry in entries:
+            full_path = os.path.join(path, entry)
+            
+            # فقط دایرکتوری‌ها را نشان بده
+            if os.path.isdir(full_path):
+                try:
+                    # محاسبه حجم دایرکتوری با Python
+                    total_size = 0
+                    for dirpath, dirnames, filenames in os.walk(full_path):
+                        for f in filenames:
+                            fp = os.path.join(dirpath, f)
+                            try:
+                                total_size += os.path.getsize(fp)
+                            except (OSError, PermissionError):
+                                pass
+                    
+                    size_mb = round(total_size / (1024 * 1024), 2)
+                    items.append({
+                        "name": entry,
+                        "path": full_path,
+                        "size_mb": size_mb
+                    })
+                except (PermissionError, OSError) as e:
+                    # اگر دسترسی نداشت، با حجم 0 اضافه کن
+                    items.append({
+                        "name": entry,
+                        "path": full_path,
+                        "size_mb": 0
+                    })
+                    continue
+        
+        # مرتب‌سازی بر اساس حجم (از بزرگ به کوچک)
+        items.sort(key=lambda x: x["size_mb"], reverse=True)
+        return {"items": items}
+        
+    except PermissionError:
+        return {"items": [], "error": "Permission denied to access this directory"}
     except Exception as e:
         return {"items": [], "error": str(e)}
 
