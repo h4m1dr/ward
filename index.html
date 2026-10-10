@@ -814,7 +814,7 @@ let lockStates = {
   storage: true
 };
 
-// Custom order for each list (persisted in localStorage)
+// Custom order (array of item identifiers in display order)
 let customOrders = {
   apps: null,
   services: null,
@@ -822,14 +822,40 @@ let customOrders = {
   storage: null
 };
 
-// Load saved orders from localStorage
+// Row numbers mapping: { tableKey: { itemId: rowNumber } }
+// This persists row numbers even when items are reordered
+let rowNumbers = {
+  apps: {},
+  services: {},
+  ports: {},
+  storage: {}
+};
+
+// Counter for next row number in each table
+let nextRowNumber = {
+  apps: 1,
+  services: 1,
+  ports: 1,
+  storage: 1
+};
+
+// Load saved data from localStorage
 ['apps', 'services', 'ports', 'storage'].forEach(key => {
-  const saved = localStorage.getItem(`ward_order_${key}`);
-  if (saved) {
-    try { customOrders[key] = JSON.parse(saved); } catch(e) {}
+  const savedOrder = localStorage.getItem(`ward_order_${key}`);
+  if (savedOrder) {
+    try { customOrders[key] = JSON.parse(savedOrder); } catch(e) {}
   }
   const savedLock = localStorage.getItem(`ward_lock_${key}`);
   if (savedLock !== null) { lockStates[key] = savedLock === 'true'; }
+  const savedRows = localStorage.getItem(`ward_rows_${key}`);
+  if (savedRows) {
+    try {
+      rowNumbers[key] = JSON.parse(savedRows);
+      // Find max row number to set nextRowNumber
+      const maxRow = Math.max(...Object.values(rowNumbers[key]), 0);
+      nextRowNumber[key] = maxRow + 1;
+    } catch(e) {}
+  }
 });
 
 let sortConfig = {
