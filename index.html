@@ -1014,16 +1014,23 @@ body {
 <div id="folder-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
-      <span>📁 Folder Explorer</span>
+      <span> Folder Explorer</span>
       <button class="btn-ghost" onclick="closeModal('folder-modal')">✕</button>
     </div>
     <div class="modal-content">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
-        <input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/home" style="flex:1;">
+        <input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/root" style="flex:1;">
         <button class="btn btn-success" onclick="exploreFolder()">Explore</button>
       </div>
       <table class="data-table">
-        <thead><tr><th>Folder</th><th>Path</th><th>Size (MB)</th><th>Action</th></tr></thead>
+        <thead>
+          <tr>
+            <th class="th-sort" onclick="toggleSort('folder', 'name')">Folder ⬍</th>
+            <th class="th-sort" onclick="toggleSort('folder', 'path')">Path ⬍</th>
+            <th class="th-sort" onclick="toggleSort('folder', 'size_mb')">Size (MB) ⬍</th>
+            <th>Action</th>
+          </tr>
+        </thead>
         <tbody id="folder-tbody"></tbody>
       </table>
     </div>
@@ -1042,11 +1049,13 @@ let sidebarHoverTimeout = null;
 let snapshotData = [];
 let srvScanData = [];
 let portScanData = [];
+let folderData = [];
 
 let sortConfig = {
   snapshot: { key: null, asc: true },
   srvScan: { key: null, asc: true },
-  portScan: { key: null, asc: true }
+  portScan: { key: null, asc: true },
+  folder: { key: null, asc: true }
 };
 
 const pLen = 40;
@@ -1163,6 +1172,7 @@ function toggleSort(tableKey, columnKey) {
   if (tableKey === 'snapshot') renderSnapshotTable();
   else if (tableKey === 'srvScan') renderServicesScannerTable();
   else if (tableKey === 'portScan') renderPortsScannerTable();
+  else if (tableKey === 'folder') renderFolderTable();
 }
 
 function getSortedArray(dataArray, tableKey) {
@@ -1515,7 +1525,7 @@ async function openTreeExplorer() {
 }
 
 async function exploreFolder() {
-  const path = document.getElementById('explore-path').value || '/home';
+  const path = document.getElementById('explore-path').value || '/root';
   document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Loading folders...</span></td></tr>';
   try {
     const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(path)}`, { headers: { 'X-Session-Token': sessionToken } });
@@ -1524,23 +1534,29 @@ async function exploreFolder() {
       document.getElementById('folder-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">⚠️ ${d.error}</td></tr>`;
       return;
     }
-    let html = '';
-    if (d.items && d.items.length > 0) {
-      d.items.forEach(item => {
-        const tracking = globalData && globalData.caches && globalData.caches[item.name] !== undefined;
-        html += `<tr>
-          <td><b>${item.name}</b></td>
-          <td style="font-family:monospace; font-size:12px;">${item.path}</td>
-          <td style="font-family:monospace;">${item.size_mb} MB</td>
-          <td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn btn-watch" onclick="trackFolder('${item.name}', '${item.path}')">+ Track</button>`}</td>
-        </tr>`;
-      });
-      document.getElementById('folder-tbody').innerHTML = html;
-    } else {
-      document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">No accessible folders found</td></tr>';
-    }
+    folderData = d.items || [];
+    renderFolderTable();
   } catch(e) {
     document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">Error loading folders</td></tr>';
+  }
+}
+
+function renderFolderTable() {
+  const data = getSortedArray(folderData, 'folder');
+  let html = '';
+  if (data && data.length > 0) {
+    data.forEach(item => {
+      const tracking = globalData && globalData.caches && globalData.caches[item.name] !== undefined;
+      html += `<tr>
+        <td><b>${item.name}</b></td>
+        <td style="font-family:monospace; font-size:12px;">${item.path}</td>
+        <td style="font-family:monospace;">${item.size_mb} MB</td>
+        <td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn btn-watch" onclick="trackFolder('${item.name}', '${item.path}')">+ Track</button>`}</td>
+      </tr>`;
+    });
+    document.getElementById('folder-tbody').innerHTML = html;
+  } else {
+    document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">No accessible folders found</td></tr>';
   }
 }
 
@@ -1553,7 +1569,7 @@ async function trackFolder(folderName, folderPath) {
     });
     showToast(`Added ${folderName} to tracked folders`, 'success');
     await fetchStatus();
-    exploreFolder();
+    renderFolderTable(); // به جای exploreFolder()
   } catch(e) {
     showToast('Failed to track folder', 'error');
   }
