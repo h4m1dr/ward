@@ -1,5 +1,24 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "build": "20261010",
+  "release_date": "2026-10-10",
   "project": "WARD",
-  "description": "Watchdog for Applications, Resources & Directories"
+  "description": "Watchdog for Applications, Resources & Directories",
+  "changelog": [
+    "UI overhaul: Netdata-style dashboard with larger cards and charts",
+    "Added Theme Customizer with 5 presets and 6 color pickers",
+    "Fixed Folder Explorer bug (now handles permission errors gracefully)",
+    "Fixed Watch/Watched button states in all scanners",
+    "Added Scheduled Tasks (Cron Jobs) management",
+    "Added Settings page: password change, backup/restore config",
+    "Added Update Manager with manual check and auto-apply",
+    "Optimized table spacing and reduced padding",
+    "Improved chart grid visibility and font sizes",
+    "Added drag-and-drop persistence for dashboard cards",
+    "Enhanced security: strict auth checks on all POST endpoints",
+    "Safe update mechanism with config backup before git pull"
+  ],
+  "author": "h4m1dr",
+  "repository": "https://github.com/h4m1dr/ward",
+  "license": "MIT"
 }
