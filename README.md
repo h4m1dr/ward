@@ -1,4 +1,4 @@
-# WARD (v1.0.0)
+# WARD (v1.1.0)
 
 > **Watchdog for Applications, Resources & Directories**  
 > An ultra-lightweight, zero-database Linux server monitoring daemon, interactive drag-and-drop web dashboard, and Telegram Mini App.
