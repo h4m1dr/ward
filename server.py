@@ -12,7 +12,6 @@ import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
-# Dynamic base path resolution
 INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(INSTALL_DIR, "config.json")
 VERSION_PATH = os.path.join(INSTALL_DIR, "version.json")
@@ -42,21 +41,19 @@ def load_config():
         "monitored_directories": {"system_cache": "/var/cache", "tmp": "/tmp"},
         "monitored_apps": ["dockerd", "xray"],
         "scheduled_tasks": [],
-        # NEW: Theme Customizer Default Values
         "theme": {
-            "primary": "#4a9eff",
+            "primary": "#00ab44",
             "success": "#00d68f",
-            "danger": "#ff4757",
-            "bg": "#0f1419",
-            "card": "#1a2332",
-            "text": "#e4e8f1"
+            "danger": "#ff3366",
+            "bg": "#1a1d29",
+            "card": "#252836",
+            "text": "#e8e8e8"
         }
     }
     if os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, 'r') as f:
                 data = json.load(f)
-                # Merge safely to ensure new keys (like theme) are added to old configs
                 for key, value in default_config.items():
                     if key not in data:
                         data[key] = value
@@ -73,7 +70,6 @@ def save_config(cfg):
     except Exception:
         return False
 
-# ... [get_cpu_info, get_network_stats, get_active_listening_ports, get_dir_size_mb remain EXACTLY the same as before] ...
 def get_cpu_info():
     global _prev_idle, _prev_total
     model = "Linux Processor"
@@ -158,13 +154,11 @@ def get_dir_size_mb(path):
         pass
     return 0.0
 
-# --- FIXED: Robust Folder Explorer ---
 def explore_directory_tree(path):
     if not os.path.exists(path) or not os.path.isdir(path):
         return []
     items = []
     try:
-        # Use 2>/dev/null to suppress "Permission denied" errors and ensure clean output
         cmd = f"du -sm --max-depth=1 '{path}' 2>/dev/null"
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if res.returncode == 0:
@@ -181,8 +175,7 @@ def explore_directory_tree(path):
                                 "size_mb": sz_mb
                             })
                     except ValueError:
-                        continue # Skip malformed lines
-        # Sort by size descending
+                        continue
         items.sort(key=lambda x: x["size_mb"], reverse=True)
     except Exception:
         pass
@@ -347,14 +340,13 @@ def collect_metrics():
     except Exception:
         pass
 
-    # ✅ FIX: استفاده از dict literal به جای default_config
     default_theme = {
-        "primary": "#4a9eff",
+        "primary": "#00ab44",
         "success": "#00d68f",
-        "danger": "#ff4757",
-        "bg": "#0f1419",
-        "card": "#1a2332",
-        "text": "#e4e8f1"
+        "danger": "#ff3366",
+        "bg": "#1a1d29",
+        "card": "#252836",
+        "text": "#e8e8e8"
     }
 
     return {
@@ -405,17 +397,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "panel_name": cfg.get("panel_name", "WARD"),
                 "theme": cfg.get("theme", {})
             }).encode("utf-8"))
-        elif self.path in ["/favicon.svg", "/favicon.ico"]:
-    self.send_response(200)
-    self.send_header("Content-Type", "image/svg+xml")
-    self.send_header("Access-Control-Allow-Origin", "*")
-    self.send_header("Cache-Control", "public, max-age=86400")
-    self.end_headers()
-    with open("/opt/ward/favicon.svg", "rb") as f:
-        self.wfile.write(f.read())
             return
 
-        if not self.is_authenticated() and self.path not in ["/", "/index.html"]:
+        if not self.is_authenticated() and self.path not in ["/", "/index.html", "/favicon.svg", "/favicon.ico"]:
             self.send_response(401)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
@@ -429,11 +413,11 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(collect_metrics()).encode("utf-8"))
             
         elif self.path == "/api/system/check-update":
-            curr_v = "1.0.0"
+            curr_v = "1.1.0"
             if os.path.exists(VERSION_PATH):
                 try:
                     with open(VERSION_PATH) as f:
-                        curr_v = json.load(f).get("version", "1.0.0")
+                        curr_v = json.load(f).get("version", "1.1.0")
                 except Exception:
                     pass
             remote_v = curr_v
@@ -506,6 +490,20 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"config": cfg}).encode("utf-8"))
+
+        elif self.path in ["/favicon.svg", "/favicon.ico"]:
+            self.send_response(200)
+            self.send_header("Content-Type", "image/svg+xml")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Cache-Control", "public, max-age=86400")
+            self.end_headers()
+            favicon_path = os.path.join(INSTALL_DIR, "favicon.svg")
+            if os.path.exists(favicon_path):
+                with open(favicon_path, "rb") as f:
+                    self.wfile.write(f.read())
+            else:
+                self.send_response(404)
+                self.end_headers()
             
         elif self.path in ["/", "/index.html"]:
             self.send_response(200)
@@ -587,19 +585,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'{"status": "ok"}')
             return
 
-        # --- NEW: Theme Update Endpoint ---
-        if self.path == "/api/settings/update-theme":
-            new_theme = payload.get("theme", {})
-            if "theme" not in cfg:
-                cfg["theme"] = {}
-            cfg["theme"].update(new_theme)
-            save_config(cfg)
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(b'{"status": "ok"}')
-            return
-
         if self.path == "/api/settings/change-password":
             old_pw = payload.get("old_password", "")
             new_pw = payload.get("new_password", "")
@@ -630,6 +615,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(b'{"status": "error", "message": "Invalid config format"}')
+            return
+
+        elif self.path == "/api/settings/update-theme":
+            new_theme = payload.get("theme", {})
+            if "theme" not in cfg:
+                cfg["theme"] = {}
+            cfg["theme"].update(new_theme)
+            save_config(cfg)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
             return
 
         elif self.path == "/api/tasks/add":
