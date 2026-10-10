@@ -13,25 +13,22 @@
   --border: #2d3a4f;
   --text: #e4e8f1;
   --muted: #8899aa;
-  --blue: #4a9eff;
-  --green: #00d68f;
-  --purple: #a855f7;
-  --red: #ff4757;
-  --cyan: #00d4ff;
-  --orange: #ff9f43;
-  --yellow: #ffd93d;
+  --primary: #4a9eff;
+  --success: #00d68f;
+  --danger: #ff4757;
+  --warning: #ff9f43;
+  --info: #00d4ff;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
-  margin: 0;
-  padding: 16px;
+  padding: 20px;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 /* Login Overlay */
@@ -40,51 +37,52 @@ body {
   background: rgba(7, 11, 17, 0.95);
   display: flex; align-items: center; justify-content: center;
   z-index: 9999;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 .login-box {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 32px;
-  width: 320px;
+  padding: 40px;
+  width: 340px;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
-.login-box h3 { margin: 0 0 20px 0; color: #fff; font-size: 20px; }
+.login-box h3 { margin: 0 0 24px 0; color: #fff; font-size: 22px; font-weight: 700; }
 .login-box input {
   width: 100%; box-sizing: border-box;
   background: var(--bg); border: 1px solid var(--border);
-  color: #fff; padding: 12px; border-radius: 8px;
-  margin-bottom: 14px; font-size: 14px;
+  color: #fff; padding: 14px; border-radius: 8px;
+  margin-bottom: 16px; font-size: 14px;
+  transition: border-color 0.2s;
 }
-.login-box input:focus { outline: none; border-color: var(--blue); }
+.login-box input:focus { outline: none; border-color: var(--primary); }
 .login-box button {
-  width: 100%; background: var(--blue); color: #fff;
-  border: none; padding: 12px; border-radius: 8px;
-  cursor: pointer; font-weight: bold; font-size: 14px;
-  transition: background 0.2s;
+  width: 100%; background: var(--primary); color: #fff;
+  border: none; padding: 14px; border-radius: 8px;
+  cursor: pointer; font-weight: 600; font-size: 14px;
+  transition: all 0.2s;
 }
-.login-box button:hover { background: #3a8eef; }
-.login-err { color: var(--red); font-size: 12px; margin-top: 10px; display: none; }
+.login-box button:hover { background: var(--primary); opacity: 0.9; transform: translateY(-1px); }
+.login-err { color: var(--danger); font-size: 12px; margin-top: 12px; display: none; }
 
 /* Header */
 .header {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 14px 20px;
-  margin-bottom: 16px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
   display: flex; justify-content: space-between; align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
-.header-left { display: flex; align-items: center; gap: 12px; }
-.header-right { text-align: right; font-size: 12px; color: var(--muted); }
-.header-right b { color: var(--text); }
+.header-left { display: flex; align-items: center; gap: 14px; }
+.header-right { text-align: right; font-size: 13px; color: var(--muted); }
+.header-right b { color: var(--text); font-weight: 600; }
 
 /* Tabs */
 .tabs {
-  display: flex; gap: 8px; margin-bottom: 16px;
+  display: flex; gap: 8px; margin-bottom: 20px;
   overflow-x: auto; padding-bottom: 4px;
 }
 .tab-btn {
@@ -101,62 +99,62 @@ body {
 }
 .tab-btn:hover { background: var(--card-hover); color: var(--text); }
 .tab-btn.active {
-  background: var(--blue);
+  background: var(--primary);
   color: #fff;
-  border-color: var(--blue);
+  border-color: var(--primary);
   box-shadow: 0 2px 8px rgba(74, 158, 255, 0.3);
 }
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeIn 0.3s; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Grid & Cards - X-UI Style */
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-@media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+/* Grid & Cards - Netdata Style */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 1200px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 18px;
+  padding: 20px;
   cursor: grab;
   user-select: none;
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
-.card.dragging { opacity: 0.4; border: 2px dashed var(--blue); }
+.card.dragging { opacity: 0.4; border: 2px dashed var(--primary); }
 
-.card-top { min-height: 200px; }
-.card-wide { grid-column: span 2; min-height: 240px; }
-@media (max-width: 600px) { .card-wide { grid-column: span 1; } }
+.card-top { min-height: 220px; }
+.card-wide { grid-column: span 2; min-height: 260px; }
+@media (max-width: 700px) { .card-wide { grid-column: span 1; } }
 
 .c-head {
   display: flex; justify-content: space-between; align-items: center;
-  font-weight: 600; font-size: 13px; color: var(--muted);
-  margin-bottom: 8px;
+  font-weight: 600; font-size: 14px; color: var(--muted);
+  margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 .c-val {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
   color: #fff;
-  margin: 6px 0;
+  margin: 8px 0;
   line-height: 1.1;
 }
 .c-sub {
   display: flex; justify-content: space-between;
   font-size: 12px; color: var(--muted);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
-.chart-sm { width: 100%; height: 70px; margin-top: 12px; }
-.chart-lg { width: 100%; height: 130px; margin-top: 12px; }
+.chart-sm { width: 100%; height: 90px; margin-top: 14px; }
+.chart-lg { width: 100%; height: 150px; margin-top: 14px; }
 canvas { width: 100%; height: 100%; display: block; }
 
-/* Tables */
+/* Tables - Optimized Spacing */
 .list-table {
   width: 100%; border-collapse: collapse;
   background: var(--card);
@@ -166,7 +164,7 @@ canvas { width: 100%; height: 100%; display: block; }
   margin-top: 12px;
 }
 .list-table th, .list-table td {
-  padding: 12px 14px;
+  padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid var(--border);
   font-size: 13px;
@@ -183,33 +181,27 @@ canvas { width: 100%; height: 100%; display: block; }
 .list-table tr:hover td { background: var(--card-hover); }
 
 .th-sort { cursor: pointer; transition: color 0.2s; user-select: none; }
-.th-sort:hover { color: var(--blue); }
-.th-sort.sorted { color: var(--blue); }
+.th-sort:hover { color: var(--primary); }
+.th-sort.sorted { color: var(--primary); }
 
 /* Buttons */
 .btn {
-  background: var(--blue); color: #fff; border: none;
+  background: var(--primary); color: #fff; border: none;
   padding: 8px 14px; border-radius: 6px;
   cursor: pointer; font-size: 12px; font-weight: 500;
   transition: all 0.2s;
 }
-.btn:hover { background: #3a8eef; transform: translateY(-1px); }
-.btn-green { background: var(--green); }
-.btn-green:hover { background: #00c482; }
-.btn-red { background: transparent; border: none; color: var(--red); cursor: pointer; font-weight: bold; font-size: 16px; }
-.btn-red:hover { color: #ff6b7a; }
-.btn-orange { background: var(--orange); }
-.btn-orange:hover { background: #ff8f33; }
+.btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-green { background: var(--success); }
+.btn-green:hover { opacity: 0.9; }
+.btn-red { background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: bold; font-size: 16px; }
+.btn-red:hover { opacity: 0.8; }
+.btn-orange { background: var(--warning); }
 .btn-watched {
-  background: var(--green); color: #fff; border: none;
+  background: var(--success); color: #fff; border: none;
   padding: 6px 12px; border-radius: 6px;
   font-size: 11px; font-weight: 600;
-  cursor: default; opacity: 0.8;
-}
-.btn-disabled {
-  background: #2d3a4f; color: var(--muted); border: none;
-  padding: 6px 12px; border-radius: 6px;
-  font-size: 11px; cursor: not-allowed; opacity: 0.6;
+  cursor: default; opacity: 0.85;
 }
 
 /* Badges */
@@ -218,8 +210,8 @@ canvas { width: 100%; height: 100%; display: block; }
   font-size: 11px; font-weight: 600;
   display: inline-block;
 }
-.badge-up { background: rgba(0, 214, 143, 0.15); color: var(--green); }
-.badge-down { background: rgba(255, 71, 87, 0.15); color: var(--red); }
+.badge-up { background: rgba(0, 214, 143, 0.15); color: var(--success); }
+.badge-down { background: rgba(255, 71, 87, 0.15); color: var(--danger); }
 .badge-neutral { background: rgba(136, 153, 170, 0.15); color: var(--muted); }
 
 /* Inputs */
@@ -232,7 +224,7 @@ canvas { width: 100%; height: 100%; display: block; }
   font-size: 13px;
   transition: border-color 0.2s;
 }
-.input-field:focus { outline: none; border-color: var(--blue); }
+.input-field:focus { outline: none; border-color: var(--primary); }
 
 /* Modals */
 .modal {
@@ -301,7 +293,7 @@ canvas { width: 100%; height: 100%; display: block; }
 }
 .settings-card h3 {
   margin: 0 0 16px 0; font-size: 15px;
-  color: var(--blue); font-weight: 600;
+  color: var(--primary); font-weight: 600;
   display: flex; align-items: center; gap: 8px;
 }
 .settings-row {
@@ -324,13 +316,39 @@ canvas { width: 100%; height: 100%; display: block; }
   padding: 10px 12px; border-radius: 6px; font-size: 13px;
 }
 .form-group input:focus, .form-group select:focus {
-  outline: none; border-color: var(--blue);
+  outline: none; border-color: var(--primary);
+}
+
+/* Theme Customizer */
+.theme-presets {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  margin-bottom: 16px;
+}
+.theme-preset {
+  padding: 10px; border-radius: 8px; cursor: pointer;
+  border: 2px solid var(--border);
+  text-align: center; font-size: 11px; font-weight: 600;
+  transition: all 0.2s;
+}
+.theme-preset:hover { border-color: var(--primary); transform: translateY(-2px); }
+.theme-preset.active { border-color: var(--primary); box-shadow: 0 2px 8px rgba(74, 158, 255, 0.3); }
+.color-picker-row {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  margin-top: 12px;
+}
+.color-picker-item {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.color-picker-item label { font-size: 11px; color: var(--muted); font-weight: 500; }
+.color-picker-item input[type="color"] {
+  width: 100%; height: 40px; border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; background: var(--bg);
 }
 
 /* Update Badge */
 .update-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  background: var(--green); color: #fff;
+  background: var(--success); color: #fff;
   padding: 4px 10px; border-radius: 6px;
   font-size: 11px; font-weight: 600;
   cursor: pointer;
@@ -353,7 +371,7 @@ canvas { width: 100%; height: 100%; display: block; }
 .task-info { flex: 1; }
 .task-name { font-weight: 600; font-size: 14px; color: #fff; }
 .task-schedule { font-size: 12px; color: var(--muted); margin-top: 4px; }
-.task-command { font-size: 11px; color: var(--cyan); font-family: monospace; margin-top: 4px; }
+.task-command { font-size: 11px; color: var(--info); font-family: monospace; margin-top: 4px; }
 .task-actions { display: flex; gap: 8px; }
 
 /* Toggle Switch */
@@ -375,7 +393,7 @@ canvas { width: 100%; height: 100%; display: block; }
   background-color: white;
   transition: 0.3s; border-radius: 50%;
 }
-input:checked + .toggle-slider { background-color: var(--green); }
+input:checked + .toggle-slider { background-color: var(--success); }
 input:checked + .toggle-slider:before { transform: translateX(20px); }
 
 /* Scrollbar */
@@ -402,9 +420,9 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 <!-- Header -->
 <div class="header">
   <div class="header-left">
-    <span id="conn-status" style="width:10px; height:10px; border-radius:50%; background:var(--red); display:inline-block; transition: background 0.3s;"></span>
+    <span id="conn-status" style="width:10px; height:10px; border-radius:50%; background:var(--danger); display:inline-block; transition: background 0.3s;"></span>
     <b style="font-size: 18px; color:#fff;" id="p-name">WARD</b>
-    <span style="color:var(--green); font-size:12px; font-weight:600;" id="panel-ver">v1.0.0</span>
+    <span style="color:var(--success); font-size:12px; font-weight:600;" id="panel-ver">v1.1.0</span>
     <span id="update-badge-container"></span>
   </div>
   <div class="header-right">
@@ -416,13 +434,13 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 
 <!-- Tabs -->
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('res', this)">📊 Overview</button>
+  <button class="tab-btn active" onclick="switchTab('res', this)"> Overview</button>
   <button class="tab-btn" onclick="switchTab('apps', this)">📱 Watched Apps</button>
-  <button class="tab-btn" onclick="switchTab('srv', this)">️ Services</button>
+  <button class="tab-btn" onclick="switchTab('srv', this)">⚙️ Services</button>
   <button class="tab-btn" onclick="switchTab('net', this)">🔌 Ports</button>
   <button class="tab-btn" onclick="switchTab('dir', this)">📁 Storage</button>
-  <button class="tab-btn" onclick="switchTab('cron', this)">⏰ Scheduled Tasks</button>
-  <button class="tab-btn" onclick="switchTab('settings', this)">🔧 Settings</button>
+  <button class="tab-btn" onclick="switchTab('cron', this)">⏰ Tasks</button>
+  <button class="tab-btn" onclick="switchTab('settings', this)"> Settings</button>
 </div>
 
 <!-- Tab: Overview -->
@@ -431,7 +449,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
     <div class="card card-top" draggable="true" id="c-cpu">
       <div class="c-head"><span>CPU Usage</span><span id="cpu-stat">Avg: 0%</span></div>
       <div class="c-val" id="cpu-val">0%</div>
-      <div class="c-sub"><span id="cpu-sub">1 Core</span><span id="cpu-peak" style="color:var(--red);">Peak: 0%</span></div>
+      <div class="c-sub"><span id="cpu-sub">1 Core</span><span id="cpu-peak" style="color:var(--danger);">Peak: 0%</span></div>
       <div class="chart-sm"><canvas id="cv-cpu"></canvas></div>
     </div>
     <div class="card card-top" draggable="true" id="c-ram">
@@ -447,7 +465,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
       <div class="chart-sm"><canvas id="cv-swap"></canvas></div>
     </div>
     <div class="card card-top" draggable="true" id="c-disk">
-      <div class="c-head"><span>Storage</span><span id="disk-free" style="color:var(--green);">0 GB Free</span></div>
+      <div class="c-head"><span>Storage</span><span id="disk-free" style="color:var(--success);">0 GB Free</span></div>
       <div class="c-val" id="disk-val">0%</div>
       <div class="c-sub"><span id="disk-sub">0/0 GB</span><span>Root FS</span></div>
       <div class="chart-sm"><canvas id="cv-disk"></canvas></div>
@@ -476,10 +494,10 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
   <table class="list-table">
     <thead>
       <tr>
-        <th class="th-sort" onclick="toggleSort('apps', 'name')">Application </th>
+        <th class="th-sort" onclick="toggleSort('apps', 'name')">Application ⬍</th>
         <th class="th-sort" onclick="toggleSort('apps', 'cpu_pct')">CPU % ⬍</th>
         <th class="th-sort" onclick="toggleSort('apps', 'memory_mb')">RAM (MB) ⬍</th>
-        <th class="th-sort" onclick="toggleSort('apps', 'threads')">Threads </th>
+        <th class="th-sort" onclick="toggleSort('apps', 'threads')">Threads ⬍</th>
         <th class="th-sort" onclick="toggleSort('apps', 'status')">Status ⬍</th>
         <th>Unpin</th>
       </tr>
@@ -502,7 +520,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
     <thead>
       <tr>
         <th class="th-sort" onclick="toggleSort('services', 'name')">Service ⬍</th>
-        <th class="th-sort" onclick="toggleSort('services', 'state')">State </th>
+        <th class="th-sort" onclick="toggleSort('services', 'state')">State ⬍</th>
         <th>Journalctl Logs</th>
         <th>Action</th>
       </tr>
@@ -534,7 +552,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 
   <div style="margin-top:24px;">
     <div class="section-header">
-      <div class="section-title" style="color:var(--red);"> Monitored Blocked Ports (Telegram Alert if Opened)</div>
+      <div class="section-title" style="color:var(--danger);">🚨 Monitored Blocked Ports (Telegram Alert if Opened)</div>
     </div>
     <div style="display:flex; gap:8px; margin-bottom:12px;">
       <input type="number" id="in-bport" class="input-field" placeholder="Port (e.g. 3306)" style="width:140px;">
@@ -568,7 +586,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
   </table>
 </div>
 
-<!-- Tab: Scheduled Tasks (NEW) -->
+<!-- Tab: Scheduled Tasks -->
 <div id="cron" class="tab-content">
   <div class="section-header">
     <div class="section-title">⏰ Scheduled Tasks (Cron Jobs)</div>
@@ -583,10 +601,10 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
   </div>
 </div>
 
-<!-- Tab: Settings (NEW) -->
+<!-- Tab: Settings -->
 <div id="settings" class="tab-content">
   <div class="section-header">
-    <div class="section-title"> Panel Settings</div>
+    <div class="section-title">🔧 Panel Settings</div>
   </div>
   <div class="settings-grid">
     <!-- Security Settings -->
@@ -612,7 +630,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
       </div>
       <div class="settings-row">
         <span class="settings-label">Version</span>
-        <span class="settings-value" id="set-panel-version">v1.0.0</span>
+        <span class="settings-value" id="set-panel-version">v1.1.0</span>
       </div>
       <div class="settings-row">
         <span class="settings-label">Port</span>
@@ -624,12 +642,57 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
       </div>
     </div>
 
+    <!-- Theme Customizer -->
+    <div class="settings-card" style="grid-column: span 2;">
+      <h3>🎨 Theme Customizer</h3>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px; color:var(--muted); font-weight:500; display:block; margin-bottom:8px;">Quick Presets</label>
+        <div class="theme-presets">
+          <div class="theme-preset active" onclick="applyThemePreset('dark')" style="background:#0f1419; color:#e4e8f1;">Dark</div>
+          <div class="theme-preset" onclick="applyThemePreset('light')" style="background:#f5f7fa; color:#2c3e50;">Light</div>
+          <div class="theme-preset" onclick="applyThemePreset('blue')" style="background:#1e3a5f; color:#fff;">Blue</div>
+          <div class="theme-preset" onclick="applyThemePreset('purple')" style="background:#2d1b4e; color:#fff;">Purple</div>
+          <div class="theme-preset" onclick="applyThemePreset('green')" style="background:#1a3d2e; color:#fff;">Green</div>
+        </div>
+      </div>
+      <div class="color-picker-row">
+        <div class="color-picker-item">
+          <label>Primary Color</label>
+          <input type="color" id="theme-primary" value="#4a9eff" onchange="updateThemeColor('primary', this.value)">
+        </div>
+        <div class="color-picker-item">
+          <label>Success Color</label>
+          <input type="color" id="theme-success" value="#00d68f" onchange="updateThemeColor('success', this.value)">
+        </div>
+        <div class="color-picker-item">
+          <label>Danger Color</label>
+          <input type="color" id="theme-danger" value="#ff4757" onchange="updateThemeColor('danger', this.value)">
+        </div>
+        <div class="color-picker-item">
+          <label>Background</label>
+          <input type="color" id="theme-bg" value="#0f1419" onchange="updateThemeColor('bg', this.value)">
+        </div>
+        <div class="color-picker-item">
+          <label>Card Background</label>
+          <input type="color" id="theme-card" value="#1a2332" onchange="updateThemeColor('card', this.value)">
+        </div>
+        <div class="color-picker-item">
+          <label>Text Color</label>
+          <input type="color" id="theme-text" value="#e4e8f1" onchange="updateThemeColor('text', this.value)">
+        </div>
+      </div>
+      <div style="margin-top:16px; display:flex; gap:8px;">
+        <button class="btn" onclick="resetTheme()" style="flex:1;"> Reset to Default</button>
+        <button class="btn btn-green" onclick="saveTheme()" style="flex:1;">💾 Save Theme</button>
+      </div>
+    </div>
+
     <!-- Update Manager -->
     <div class="settings-card">
       <h3>🚀 Update Manager</h3>
       <div class="settings-row">
         <span class="settings-label">Current Version</span>
-        <span class="settings-value" id="set-current-ver">v1.0.0</span>
+        <span class="settings-value" id="set-current-ver">v1.1.0</span>
       </div>
       <div class="settings-row">
         <span class="settings-label">Latest Version</span>
@@ -637,7 +700,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
       </div>
       <div style="display:flex; gap:8px; margin-top:12px;">
         <button class="btn" onclick="checkUpdateManual()" style="flex:1;">🔄 Check for Updates</button>
-        <button class="btn btn-green" onclick="applyUpdateNow()" id="btn-apply-update" disabled style="flex:1;"> Apply Update</button>
+        <button class="btn btn-green" onclick="applyUpdateNow()" id="btn-apply-update" disabled style="flex:1;">⬆ Apply Update</button>
       </div>
     </div>
 
@@ -651,10 +714,10 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
       <div class="settings-row">
         <span class="settings-label">Import Configuration</span>
         <input type="file" id="config-file-input" accept=".json" style="display:none;" onchange="uploadConfig(event)">
-        <button class="btn btn-orange" onclick="document.getElementById('config-file-input').click()"> Upload & Restore</button>
+        <button class="btn btn-orange" onclick="document.getElementById('config-file-input').click()">📤 Upload & Restore</button>
       </div>
       <div style="margin-top:12px; padding:10px; background:var(--bg); border-radius:6px; font-size:11px; color:var(--muted);">
-        ⚠️ Restoring config will restart the service. Make sure the file is valid JSON.
+        ️ Restoring config will restart the service. Make sure the file is valid JSON.
       </div>
     </div>
   </div>
@@ -720,7 +783,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
     <div class="modal-head">
       <b>⚡ All Open & Listening Ports</b>
       <div>
-        <button class="btn" onclick="openPortsScanner()"> Refresh</button>
+        <button class="btn" onclick="openPortsScanner()">🔄 Refresh</button>
         <button class="btn-red" onclick="document.getElementById('port-modal').style.display='none'">✕</button>
       </div>
     </div>
@@ -743,7 +806,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 <div id="tree-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head">
-      <b>🌳 Subfolder Tree Explorer</b>
+      <b> Subfolder Tree Explorer</b>
       <div style="display:flex; gap:8px;">
         <input type="text" id="tree-search-path" class="input-field" value="/" style="width:200px;">
         <button class="btn" onclick="fetchTreeData(document.getElementById('tree-search-path').value)">🔍 Inspect</button>
@@ -808,14 +871,14 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 <div id="update-modal" class="modal">
   <div class="modal-body" style="max-width:500px;">
     <div class="modal-head">
-      <b>🚀 WARD System Update Available</b>
+      <b> WARD System Update Available</b>
       <button class="btn-red" onclick="document.getElementById('update-modal').style.display='none'">✕</button>
     </div>
     <div class="modal-content" style="line-height:1.6;">
       <p id="up-msg">A new version is ready to install.</p>
       <div style="background:var(--bg); border:1px solid var(--border); padding:14px; border-radius:8px; margin:14px 0;">
         <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">Update via Server Terminal:</div>
-        <code style="color:var(--green); font-size:14px; font-family:monospace;">ward-update</code>
+        <code style="color:var(--success); font-size:14px; font-family:monospace;">ward-update</code>
         <div style="font-size:11px; color:var(--muted); margin-top:6px;">Or: bash /opt/ward/update.sh</div>
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
@@ -846,8 +909,9 @@ let snapshotData = [];
 let srvScanData = [];
 let portScanData = [];
 let tasksData = [];
+let currentTheme = {};
 
-// Sort configuration for all tables
+// Sort configuration
 let sortConfig = {
   apps: { key: null, asc: true },
   services: { key: null, asc: true },
@@ -859,7 +923,16 @@ let sortConfig = {
 };
 
 // Update state
-let updateState = { hasUpdate: false, current: '1.0.0', latest: '1.0.0' };
+let updateState = { hasUpdate: false, current: '1.1.0', latest: '1.1.0' };
+
+// Theme presets
+const themePresets = {
+  dark: { primary: '#4a9eff', success: '#00d68f', danger: '#ff4757', bg: '#0f1419', card: '#1a2332', text: '#e4e8f1' },
+  light: { primary: '#2563eb', success: '#10b981', danger: '#ef4444', bg: '#f5f7fa', card: '#ffffff', text: '#2c3e50' },
+  blue: { primary: '#60a5fa', success: '#34d399', danger: '#f87171', bg: '#1e3a5f', card: '#2d4a7f', text: '#ffffff' },
+  purple: { primary: '#a78bfa', success: '#34d399', danger: '#f87171', bg: '#2d1b4e', card: '#3d2b5e', text: '#ffffff' },
+  green: { primary: '#34d399', success: '#10b981', danger: '#ef4444', bg: '#1a3d2e', card: '#2d5d4e', text: '#ffffff' }
+};
 
 // ==================== AUTH ====================
 async function checkAuth() {
@@ -868,6 +941,13 @@ async function checkAuth() {
     const d = await res.json();
     document.getElementById('login-title').innerText = d.panel_name || 'WARD System';
     document.getElementById('p-name').innerText = d.panel_name || 'WARD';
+    
+    // Load theme
+    if (d.theme) {
+      currentTheme = d.theme;
+      applyTheme(currentTheme);
+    }
+    
     if (d.authenticated) {
       document.getElementById('login-overlay').style.display = 'none';
       fetchStatus();
@@ -941,12 +1021,10 @@ const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap =
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
 
 function drawGrid(ctx, w, h, maxScale, isPct = true) {
-  // Draw more visible grid lines - X-UI style
   const levels = [0.25, 0.5, 0.75, 1.0];
   levels.forEach((lvl, idx) => {
     const y = h - (lvl * (h - 10)) - 5;
     ctx.beginPath();
-    // Make 50% and 100% lines more prominent
     if (idx === 1 || idx === 3) {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
       ctx.lineWidth = 1;
@@ -960,7 +1038,6 @@ function drawGrid(ctx, w, h, maxScale, isPct = true) {
     ctx.lineTo(w, y);
     ctx.stroke();
     
-    // Labels
     ctx.fillStyle = 'rgba(136, 153, 170, 0.8)';
     ctx.font = '10px sans-serif';
     if (isPct) {
@@ -1015,15 +1092,13 @@ async function fetchStatus() {
     if (res.status === 401) { checkAuth(); return; }
     const d = await res.json();
     
-    document.getElementById('conn-status').style.background = 'var(--green)';
+    document.getElementById('conn-status').style.background = 'var(--success)';
     globalData = d;
 
     document.getElementById('p-name').innerText = d.panel_name || 'WARD';
-    document.getElementById('h-specs') && (document.getElementById('h-specs').innerText = `CPU: ${d.cpu.model} (${d.cpu.cores} Core) | Uptime: ${d.uptime}`);
     document.getElementById('h-load').innerText = d.load_avg;
     document.getElementById('h-net').innerText = `${d.network.total_tx_gib} GiB | ${d.network.total_rx_gib} GiB`;
 
-    // Update settings panel if visible
     document.getElementById('set-panel-name').innerText = d.panel_name || 'WARD';
     document.getElementById('set-panel-uptime').innerText = d.uptime;
 
@@ -1032,7 +1107,7 @@ async function fetchStatus() {
     d_cpu.shift(); d_cpu.push(d.cpu.usage_pct);
     document.getElementById('cpu-stat').innerText = `Avg: ${Math.round(d_cpu.reduce((a,b)=>a+b)/pLen)}%`;
     document.getElementById('cpu-peak').innerText = `Peak: ${Math.max(...d_cpu)}%`;
-    plotSingle('cv-cpu', d_cpu, 100, '#4a9eff', 'rgba(74,158,255,0.12)');
+    plotSingle('cv-cpu', d_cpu, 100, getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(), 'rgba(74,158,255,0.12)');
 
     document.getElementById('ram-val').innerText = `${d.ram.pct}%`;
     document.getElementById('ram-sub').innerText = `${d.ram.used_mb} / ${d.ram.total_mb} MB`;
@@ -1067,12 +1142,11 @@ async function fetchStatus() {
     renderPortsTable();
     renderDirsTable();
     
-    // Re-render scanner modals if open (to update Watch/Watched buttons)
     if (document.getElementById('tm-modal').style.display === 'block') renderSnapshotTable();
     if (document.getElementById('srv-modal').style.display === 'block') renderServicesScannerTable();
     if (document.getElementById('port-modal').style.display === 'block') renderPortsScannerTable();
   } catch(e) {
-    document.getElementById('conn-status').style.background = 'var(--red)';
+    document.getElementById('conn-status').style.background = 'var(--danger)';
   }
 }
 
@@ -1132,7 +1206,7 @@ function renderServicesTable() {
     html += `<tr>
       <td><b>${item.name}</b></td>
       <td><span class="badge ${item.state==='Running'?'badge-up':'badge-down'}">${item.state}</span></td>
-      <td><button class="btn" onclick="viewLogs('${item.name}')"> Logs</button></td>
+      <td><button class="btn" onclick="viewLogs('${item.name}')">📋 Logs</button></td>
       <td><button class="btn-red" onclick="remCfg('service', '${item.name}')">✕</button></td>
     </tr>`;
   });
@@ -1148,7 +1222,7 @@ function renderPortsTable() {
     html += `<tr>
       <td><b>Port ${item.port}</b></td>
       <td><span class="badge ${item.status==='Listening'?'badge-up':'badge-down'}">${item.status}</span></td>
-      <td><button class="btn-red" onclick="remCfg('port', '${item.port}')">✕</button></td>
+      <td><button class="btn-red" onclick="remCfg('port', '${item.port}')"></button></td>
     </tr>`;
   });
   document.getElementById('port-tbody').innerHTML = html;
@@ -1295,7 +1369,7 @@ async function fetchTreeData(p) {
       document.getElementById('tree-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">No accessible subfolders found.</td></tr>';
     }
   } catch(e) {
-    document.getElementById('tree-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--red);">Error fetching folder data.</td></tr>';
+    document.getElementById('tree-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--danger);">Error fetching folder data.</td></tr>';
   }
 }
 
@@ -1542,6 +1616,60 @@ function uploadConfig(event) {
   reader.readAsText(file);
 }
 
+// ==================== THEME CUSTOMIZER ====================
+function applyTheme(theme) {
+  const root = document.documentElement;
+  root.style.setProperty('--primary', theme.primary || '#4a9eff');
+  root.style.setProperty('--success', theme.success || '#00d68f');
+  root.style.setProperty('--danger', theme.danger || '#ff4757');
+  root.style.setProperty('--bg', theme.bg || '#0f1419');
+  root.style.setProperty('--card', theme.card || '#1a2332');
+  root.style.setProperty('--text', theme.text || '#e4e8f1');
+  
+  // Update color pickers
+  document.getElementById('theme-primary').value = theme.primary || '#4a9eff';
+  document.getElementById('theme-success').value = theme.success || '#00d68f';
+  document.getElementById('theme-danger').value = theme.danger || '#ff4757';
+  document.getElementById('theme-bg').value = theme.bg || '#0f1419';
+  document.getElementById('theme-card').value = theme.card || '#1a2332';
+  document.getElementById('theme-text').value = theme.text || '#e4e8f1';
+}
+
+function applyThemePreset(presetName) {
+  currentTheme = themePresets[presetName];
+  applyTheme(currentTheme);
+  
+  // Update active preset
+  document.querySelectorAll('.theme-preset').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function updateThemeColor(key, value) {
+  currentTheme[key] = value;
+  applyTheme(currentTheme);
+}
+
+async function saveTheme() {
+  try {
+    await fetch('/api/settings/update-theme', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ theme: currentTheme })
+    });
+    showToast('Theme saved successfully', 'success');
+  } catch(e) {
+    showToast('Failed to save theme', 'error');
+  }
+}
+
+function resetTheme() {
+  currentTheme = themePresets.dark;
+  applyTheme(currentTheme);
+  document.querySelectorAll('.theme-preset').forEach(el => el.classList.remove('active'));
+  document.querySelector('.theme-preset').classList.add('active');
+  showToast('Theme reset to default', 'info');
+}
+
 // ==================== CONFIG HELPERS ====================
 async function addCfg(type, value) {
   if (!value) return;
@@ -1611,7 +1739,6 @@ function showToast(message, type = 'success') {
 // ==================== INIT ====================
 checkAuth();
 setInterval(() => { if (sessionToken) fetchStatus(); }, 2000);
-// Auto-check updates every 24 hours
 setInterval(() => { if (sessionToken) checkUpdate(); }, 24 * 60 * 60 * 1000);
 </script>
 </body>
