@@ -61,24 +61,10 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
-.login-logo {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 16px;
-}
+.login-logo { width: 64px; height: 64px; margin: 0 auto 16px; }
 
-.login-box h3 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: var(--text);
-}
-
-.login-box .subtitle {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 24px;
-}
+.login-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.login-box .subtitle { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
 
 .login-box input {
   width: 100%;
@@ -111,12 +97,7 @@ body {
 
 .login-box button:hover { background: #009a3d; }
 
-.login-err {
-  color: var(--danger);
-  font-size: 12px;
-  margin-top: 12px;
-  display: none;
-}
+.login-err { color: var(--danger); font-size: 12px; margin-top: 12px; display: none; }
 
 .sidebar {
   width: 240px;
@@ -142,32 +123,14 @@ body {
   overflow: hidden;
 }
 
-.sidebar.collapsed .sidebar-header {
-  padding: 20px 12px;
-  justify-content: center;
-  gap: 0;
-}
+.sidebar.collapsed .sidebar-header { padding: 20px 12px; justify-content: center; gap: 0; }
 
 .sidebar-logo { width: 36px; height: 36px; flex-shrink: 0; }
 
-.sidebar-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.3px;
-  transition: opacity 0.2s;
-}
-
+.sidebar-title { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; transition: opacity 0.2s; }
 .sidebar.collapsed .sidebar-title { opacity: 0; width: 0; }
 
-.sidebar-version {
-  font-size: 11px;
-  color: var(--primary);
-  font-weight: 600;
-  margin-top: 2px;
-  transition: opacity 0.2s;
-}
-
+.sidebar-version { font-size: 11px; color: var(--primary); font-weight: 600; margin-top: 2px; transition: opacity 0.2s; }
 .sidebar.collapsed .sidebar-version { opacity: 0; width: 0; }
 
 .sidebar-toggle {
@@ -190,22 +153,10 @@ body {
   transition: all 0.2s;
 }
 
-.sidebar-toggle:hover {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
+.sidebar-toggle:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+.sidebar.collapsed .sidebar-toggle { transform: translateY(-50%) rotate(180deg); right: -11px; }
 
-.sidebar.collapsed .sidebar-toggle {
-  transform: translateY(-50%) rotate(180deg);
-  right: -11px;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 12px 0;
-  overflow-y: auto;
-}
+.sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
 
 .nav-item {
   padding: 11px 20px;
@@ -222,11 +173,7 @@ body {
   overflow: hidden;
 }
 
-.sidebar.collapsed .nav-item {
-  padding: 11px 12px;
-  justify-content: center;
-  gap: 0;
-}
+.sidebar.collapsed .nav-item { padding: 11px 12px; justify-content: center; gap: 0; }
 
 .nav-item:hover { background: var(--sidebar-hover); color: var(--text); }
 
@@ -237,22 +184,11 @@ body {
   font-weight: 600;
 }
 
-.nav-icon { 
-  font-size: 16px; 
-  width: 22px; 
-  text-align: center; 
-  flex-shrink: 0;
-}
-
+.nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
 .sidebar.collapsed .nav-icon { width: 100%; }
 
 .nav-text { transition: opacity 0.2s; }
-
-.sidebar.collapsed .nav-text {
-  opacity: 0;
-  width: 0;
-  display: none;
-}
+.sidebar.collapsed .nav-text { opacity: 0; width: 0; display: none; }
 
 .sidebar-footer {
   padding: 16px 20px;
@@ -264,18 +200,9 @@ body {
   transition: opacity 0.2s;
 }
 
-.sidebar.collapsed .sidebar-footer {
-  opacity: 0;
-  padding: 16px 12px;
-  text-align: center;
-}
+.sidebar.collapsed .sidebar-footer { opacity: 0; padding: 16px 12px; text-align: center; }
 
-.main-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px 28px;
-  transition: all 0.3s;
-}
+.main-content { flex: 1; overflow-y: auto; padding: 24px 28px; transition: all 0.3s; }
 
 .header {
   display: flex;
@@ -297,26 +224,12 @@ body {
   animation: pulse 2s infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
 .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
 
-.header-right {
-  display: flex;
-  gap: 20px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.header-right b {
-  color: var(--text);
-  font-weight: 600;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-}
+.header-right { display: flex; gap: 20px; font-size: 13px; color: var(--muted); }
+.header-right b { color: var(--text); font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 
 .logout-btn {
   background: transparent;
@@ -335,18 +248,9 @@ body {
 .content-section { display: none; }
 .content-section.active { display: block; animation: fadeIn 0.25s; }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-.charts-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
+.charts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
 @media (max-width: 1400px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
 
@@ -360,20 +264,9 @@ body {
 
 .chart-card:hover { background: var(--card-hover); }
 
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 
-.chart-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
+.chart-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
 
 .chart-value {
   font-size: 26px;
@@ -384,27 +277,11 @@ body {
   letter-spacing: -0.5px;
 }
 
-.chart-value .unit {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--muted);
-  margin-left: 2px;
-}
+.chart-value .unit { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 2px; }
 
-.chart-sub {
-  font-size: 11px;
-  color: var(--muted);
-  display: flex;
-  justify-content: space-between;
-  font-family: 'JetBrains Mono', monospace;
-}
+.chart-sub { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; }
 
-.chart-container {
-  width: 100%;
-  height: 100px;
-  margin-top: 14px;
-}
-
+.chart-container { width: 100%; height: 100px; margin-top: 14px; }
 .chart-container canvas { width: 100%; height: 100%; display: block; }
 
 .chart-card.full-width { grid-column: span 2; }
@@ -446,6 +323,32 @@ body {
 .th-sort:hover { color: var(--primary); }
 .th-sort.sorted { color: var(--primary); }
 
+/* Drag & Drop Styles */
+.draggable-row { cursor: grab; transition: background 0.15s; }
+.draggable-row:hover { background: var(--card-hover); }
+.draggable-row.dragging { opacity: 0.5; background: var(--primary-dim); }
+.draggable-row.drag-over { border-top: 2px solid var(--primary); }
+
+.drag-handle {
+  cursor: grab;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 0 8px;
+  user-select: none;
+}
+
+.drag-handle:hover { color: var(--primary); }
+.drag-handle:active { cursor: grabbing; }
+
+.row-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  width: 30px;
+  text-align: center;
+}
+
 .btn {
   background: var(--primary);
   color: #fff;
@@ -463,48 +366,18 @@ body {
 .btn-success { background: var(--success); color: #1a1d29; }
 .btn-success:hover { background: #00c482; }
 
-.btn-danger {
-  background: transparent;
-  color: var(--danger);
-  border: 1px solid var(--danger);
-  padding: 5px 10px;
-  font-size: 11px;
-}
+.btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 11px; }
 .btn-danger:hover { background: var(--danger); color: #fff; }
 
-.btn-ghost {
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--border);
-}
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
 
-.btn-watch {
-  background: var(--success);
-  color: #1a1d29;
-  font-size: 11px;
-  padding: 4px 8px;
-}
+.btn-watch { background: var(--success); color: #1a1d29; font-size: 11px; padding: 4px 8px; }
 .btn-watch:hover { background: #00c482; }
 
-.btn-watched {
-  background: rgba(0, 214, 143, 0.2);
-  color: var(--success);
-  border: 1px solid var(--success);
-  font-size: 11px;
-  padding: 4px 8px;
-  cursor: default;
-}
+.btn-watched { background: rgba(0, 214, 143, 0.2); color: var(--success); border: 1px solid var(--success); font-size: 11px; padding: 4px 8px; cursor: default; }
 
-.badge {
-  padding: 3px 9px;
-  border-radius: 4px;
-  font-size: 10.5px;
-  font-weight: 600;
-  display: inline-block;
-  font-family: 'JetBrains Mono', monospace;
-}
-
+.badge { padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-weight: 600; display: inline-block; font-family: 'JetBrains Mono', monospace; }
 .badge-success { background: rgba(0, 214, 143, 0.15); color: var(--success); }
 .badge-danger { background: rgba(255, 51, 102, 0.15); color: var(--danger); }
 
@@ -523,77 +396,21 @@ body {
 
 .settings-container { width: 100%; max-width: 100%; }
 
-.settings-group {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 16px;
-}
+.settings-group { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+.settings-group h3 { font-size: 15px; color: var(--text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); font-weight: 600; }
 
-.settings-group h3 {
-  font-size: 15px;
-  color: var(--text);
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-  font-weight: 600;
-}
-
-.setting-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(45, 49, 66, 0.5);
-}
-
+.setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(45, 49, 66, 0.5); }
 .setting-row:last-child { border-bottom: none; }
 
 .setting-label { font-size: 13px; color: var(--text); font-weight: 500; }
-.setting-value {
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'JetBrains Mono', monospace;
-}
+.setting-value { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-.theme-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 14px;
-}
-
+.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
 .theme-color-item { display: flex; flex-direction: column; gap: 6px; }
+.theme-color-item label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.theme-color-item input[type="color"] { width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--bg); padding: 3px; }
 
-.theme-color-item label {
-  font-size: 10.5px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-}
-
-.theme-color-item input[type="color"] {
-  width: 100%;
-  height: 38px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  cursor: pointer;
-  background: var(--bg);
-  padding: 3px;
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.8);
-  z-index: 9999;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s;
-}
-
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(4px); animation: fadeIn 0.2s; }
 .modal.active { display: flex; align-items: center; justify-content: center; }
 
 .modal-body {
@@ -608,52 +425,42 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
-.modal-head {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
-  font-weight: 600;
-}
-
+.modal-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 600; }
 .modal-content { padding: 20px; overflow-y: auto; flex: 1; }
 
-#toast-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
 
-.toast {
-  padding: 11px 18px;
-  border-radius: 6px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  animation: slideIn 0.25s;
-  font-family: 'Inter', sans-serif;
-}
-
+.toast { padding: 11px 18px; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.25s; font-family: 'Inter', sans-serif; }
 .toast-success { background: var(--primary); }
 .toast-error { background: var(--danger); }
 .toast-info { background: var(--info); }
 
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* Lock Toggle Button */
+.lock-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.lock-toggle:hover { color: var(--text); border-color: var(--muted); }
+.lock-toggle.unlocked { color: var(--warning); border-color: var(--warning); background: rgba(255, 204, 0, 0.1); }
+.lock-toggle.unlocked:hover { background: rgba(255, 204, 0, 0.2); }
 </style>
 </head>
 <body>
@@ -690,34 +497,13 @@ body {
   </div>
   
   <div class="sidebar-nav">
-    <div class="nav-item active" onclick="switchSection('overview', this)">
-      <span class="nav-icon">📊</span>
-      <span class="nav-text">Overview</span>
-    </div>
-    <div class="nav-item" onclick="switchSection('apps', this)">
-      <span class="nav-icon"></span>
-      <span class="nav-text">Watched Apps</span>
-    </div>
-    <div class="nav-item" onclick="switchSection('services', this)">
-      <span class="nav-icon">⚙️</span>
-      <span class="nav-text">Services</span>
-    </div>
-    <div class="nav-item" onclick="switchSection('ports', this)">
-      <span class="nav-icon">🔌</span>
-      <span class="nav-text">Ports</span>
-    </div>
-    <div class="nav-item" onclick="switchSection('storage', this)">
-      <span class="nav-icon"></span>
-      <span class="nav-text">Storage</span>
-    </div>
-    <div class="nav-item" onclick="switchSection('tasks', this)">
-      <span class="nav-icon">⏰</span>
-      <span class="nav-text">Scheduled Tasks</span>
-    </div>
-    <div class="nav-item" onclick="switchSection('settings', this)">
-      <span class="nav-icon">🔧</span>
-      <span class="nav-text">Settings</span>
-    </div>
+    <div class="nav-item active" onclick="switchSection('overview', this)"><span class="nav-icon">📊</span><span class="nav-text">Overview</span></div>
+    <div class="nav-item" onclick="switchSection('apps', this)"><span class="nav-icon">📱</span><span class="nav-text">Watched Apps</span></div>
+    <div class="nav-item" onclick="switchSection('services', this)"><span class="nav-icon">️</span><span class="nav-text">Services</span></div>
+    <div class="nav-item" onclick="switchSection('ports', this)"><span class="nav-icon">🔌</span><span class="nav-text">Ports</span></div>
+    <div class="nav-item" onclick="switchSection('storage', this)"><span class="nav-icon">📁</span><span class="nav-text">Storage</span></div>
+    <div class="nav-item" onclick="switchSection('tasks', this)"><span class="nav-icon">⏰</span><span class="nav-text">Scheduled Tasks</span></div>
+    <div class="nav-item" onclick="switchSection('settings', this)"><span class="nav-icon">🔧</span><span class="nav-text">Settings</span></div>
   </div>
 
   <div class="sidebar-footer">
@@ -743,59 +529,34 @@ body {
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">CPU Usage</div></div>
         <div class="chart-value" id="cpu-val">0<span class="unit">%</span></div>
-        <div class="chart-sub">
-          <span id="cpu-sub">1 Core</span>
-          <span id="cpu-stat" style="color:var(--muted);">Avg: 0%</span>
-        </div>
+        <div class="chart-sub"><span id="cpu-sub">1 Core</span><span id="cpu-stat" style="color:var(--muted);">Avg: 0%</span></div>
         <div class="chart-container"><canvas id="cv-cpu"></canvas></div>
       </div>
-
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">RAM Usage</div></div>
         <div class="chart-value" id="ram-val">0<span class="unit">%</span></div>
-        <div class="chart-sub">
-          <span id="ram-sub">0/0 MB</span>
-          <span id="ram-free">Free: 0 MB</span>
-        </div>
+        <div class="chart-sub"><span id="ram-sub">0/0 MB</span><span id="ram-free">Free: 0 MB</span></div>
         <div class="chart-container"><canvas id="cv-ram"></canvas></div>
       </div>
-
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">SWAP</div></div>
         <div class="chart-value" id="swap-val">0<span class="unit">%</span></div>
-        <div class="chart-sub">
-          <span id="swap-sub">0/0 MB</span>
-          <span>Virtual</span>
-        </div>
+        <div class="chart-sub"><span id="swap-sub">0/0 MB</span><span>Virtual</span></div>
         <div class="chart-container"><canvas id="cv-swap"></canvas></div>
       </div>
-
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Storage</div></div>
         <div class="chart-value" id="disk-val">0<span class="unit">%</span></div>
-        <div class="chart-sub">
-          <span id="disk-sub">0/0 GB</span>
-          <span id="disk-free" style="color:var(--success);">Free: 0 GB</span>
-        </div>
+        <div class="chart-sub"><span id="disk-sub">0/0 GB</span><span id="disk-free" style="color:var(--success);">Free: 0 GB</span></div>
         <div class="chart-container"><canvas id="cv-disk"></canvas></div>
       </div>
-
       <div class="chart-card full-width">
-        <div class="chart-header">
-          <div class="chart-title">Network Traffic</div>
-          <div id="net-speeds" style="font-size:12px; color:var(--text); font-family:'JetBrains Mono',monospace;">▲ 0 MB/s ▼ 0 MB/s</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">Network Traffic</div><div id="net-speeds" style="font-size:12px; color:var(--text); font-family:'JetBrains Mono',monospace;">▲ 0 MB/s ▼ 0 MB/s</div></div>
         <div class="chart-container"><canvas id="cv-net"></canvas></div>
       </div>
-
       <div class="chart-card full-width">
-        <div class="chart-header">
-          <div class="chart-title">Socket Connections</div>
-          <div id="conn-totals" style="font-size:12px; color:var(--text); font-family:'JetBrains Mono',monospace;">0 Open</div>
-        </div>
-        <div class="chart-sub" style="margin-bottom:10px;">
-          <span id="conn-sub">TCP: 0 | UDP: 0</span>
-        </div>
+        <div class="chart-header"><div class="chart-title">Socket Connections</div><div id="conn-totals" style="font-size:12px; color:var(--text); font-family:'JetBrains Mono',monospace;">0 Open</div></div>
+        <div class="chart-sub" style="margin-bottom:10px;"><span id="conn-sub">TCP: 0 | UDP: 0</span></div>
         <div class="chart-container"><canvas id="cv-conn"></canvas></div>
       </div>
     </div>
@@ -804,10 +565,23 @@ body {
   <div id="apps" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
       <h2 style="font-size:18px; font-weight:600;">Watched Applications</h2>
-      <button class="btn btn-success" onclick="openTaskManager()">⚡ Open Task Manager</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="lock-toggle" id="lock-apps" onclick="toggleLock('apps')">🔒 Locked</button>
+        <button class="btn btn-success" onclick="openTaskManager()">⚡ Open Task Manager</button>
+      </div>
     </div>
     <table class="data-table">
-      <thead><tr><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Status</th><th>Action</th></tr></thead>
+      <thead>
+        <tr>
+          <th style="width:30px;">#</th>
+          <th class="th-sort" onclick="toggleSort('apps', 'name')">Application ⬍</th>
+          <th class="th-sort" onclick="toggleSort('apps', 'cpu_pct')">CPU % ⬍</th>
+          <th class="th-sort" onclick="toggleSort('apps', 'memory_mb')">RAM (MB) ⬍</th>
+          <th class="th-sort" onclick="toggleSort('apps', 'threads')">Threads ⬍</th>
+          <th class="th-sort" onclick="toggleSort('apps', 'status')">Status </th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody id="app-tbody"></tbody>
     </table>
   </div>
@@ -816,13 +590,21 @@ body {
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Systemd Services</h2>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-success" onclick="openServicesScanner()">⚡ Scan Services</button>
+        <button class="lock-toggle" id="lock-services" onclick="toggleLock('services')">🔒 Locked</button>
+        <button class="btn btn-success" onclick="openServicesScanner()"> Scan Services</button>
         <input type="text" id="in-srv" class="input-field" placeholder="Service name" style="width:150px;">
         <button class="btn" onclick="addService()">Add</button>
       </div>
     </div>
     <table class="data-table">
-      <thead><tr><th>Service</th><th>State</th><th>Action</th></tr></thead>
+      <thead>
+        <tr>
+          <th style="width:30px;">#</th>
+          <th class="th-sort" onclick="toggleSort('services', 'name')">Service ⬍</th>
+          <th class="th-sort" onclick="toggleSort('services', 'state')">State ⬍</th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody id="srv-tbody"></tbody>
     </table>
   </div>
@@ -831,13 +613,21 @@ body {
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Monitored Ports</h2>
       <div style="display:flex; gap:8px; align-items:center;">
+        <button class="lock-toggle" id="lock-ports" onclick="toggleLock('ports')">🔒 Locked</button>
         <button class="btn btn-success" onclick="openPortsScanner()">🔍 Scan Ports</button>
         <input type="number" id="in-port" class="input-field" placeholder="Port" style="width:100px;">
         <button class="btn" onclick="addPort()">Watch</button>
       </div>
     </div>
     <table class="data-table">
-      <thead><tr><th>Port</th><th>Status</th><th>Action</th></tr></thead>
+      <thead>
+        <tr>
+          <th style="width:30px;">#</th>
+          <th class="th-sort" onclick="toggleSort('ports', 'port')">Port ⬍</th>
+          <th class="th-sort" onclick="toggleSort('ports', 'status')">Status ⬍</th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody id="port-tbody"></tbody>
     </table>
   </div>
@@ -846,6 +636,7 @@ body {
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <h2 style="font-size:18px; font-weight:600;">Storage Folders</h2>
       <div style="display:flex; gap:8px; align-items:center;">
+        <button class="lock-toggle" id="lock-storage" onclick="toggleLock('storage')"> Locked</button>
         <button class="btn btn-success" onclick="openTreeExplorer()">🌳 Explore Folders</button>
         <input type="text" id="dir-name" class="input-field" placeholder="Label" style="width:100px;">
         <input type="text" id="dir-path" class="input-field" placeholder="/path" style="width:200px;">
@@ -853,14 +644,22 @@ body {
       </div>
     </div>
     <table class="data-table">
-      <thead><tr><th>Label</th><th>Path</th><th>Size</th><th>Action</th></tr></thead>
+      <thead>
+        <tr>
+          <th style="width:30px;">#</th>
+          <th class="th-sort" onclick="toggleSort('storage', 'name')">Label ⬍</th>
+          <th class="th-sort" onclick="toggleSort('storage', 'path')">Path </th>
+          <th class="th-sort" onclick="toggleSort('storage', 'size_mb')">Size ⬍</th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody id="dir-tbody"></tbody>
     </table>
   </div>
 
   <div id="tasks" class="content-section">
     <div style="text-align:center; padding:60px; color:var(--muted);">
-      <div style="font-size:48px; margin-bottom:16px;">⏰</div>
+      <div style="font-size:48px; margin-bottom:16px;"></div>
       <div style="font-size:16px; font-weight:600; margin-bottom:8px;">Scheduled Tasks</div>
       <div style="font-size:13px;">Coming in next release</div>
     </div>
@@ -879,78 +678,40 @@ body {
           </div>
         </div>
       </div>
-
       <div class="settings-group">
         <h3>🎨 Theme Colors</h3>
         <div class="theme-grid">
-          <div class="theme-color-item">
-            <label>Primary</label>
-            <input type="color" id="theme-primary" value="#00ab44" onchange="updateTheme('primary', this.value)">
-          </div>
-          <div class="theme-color-item">
-            <label>Success</label>
-            <input type="color" id="theme-success" value="#00d68f" onchange="updateTheme('success', this.value)">
-          </div>
-          <div class="theme-color-item">
-            <label>Danger</label>
-            <input type="color" id="theme-danger" value="#ff3366" onchange="updateTheme('danger', this.value)">
-          </div>
-          <div class="theme-color-item">
-            <label>Background</label>
-            <input type="color" id="theme-bg" value="#1a1d29" onchange="updateTheme('bg', this.value)">
-          </div>
-          <div class="theme-color-item">
-            <label>Card</label>
-            <input type="color" id="theme-card" value="#252836" onchange="updateTheme('card', this.value)">
-          </div>
-          <div class="theme-color-item">
-            <label>Text</label>
-            <input type="color" id="theme-text" value="#e8e8e8" onchange="updateTheme('text', this.value)">
-          </div>
+          <div class="theme-color-item"><label>Primary</label><input type="color" id="theme-primary" value="#00ab44" onchange="updateTheme('primary', this.value)"></div>
+          <div class="theme-color-item"><label>Success</label><input type="color" id="theme-success" value="#00d68f" onchange="updateTheme('success', this.value)"></div>
+          <div class="theme-color-item"><label>Danger</label><input type="color" id="theme-danger" value="#ff3366" onchange="updateTheme('danger', this.value)"></div>
+          <div class="theme-color-item"><label>Background</label><input type="color" id="theme-bg" value="#1a1d29" onchange="updateTheme('bg', this.value)"></div>
+          <div class="theme-color-item"><label>Card</label><input type="color" id="theme-card" value="#252836" onchange="updateTheme('card', this.value)"></div>
+          <div class="theme-color-item"><label>Text</label><input type="color" id="theme-text" value="#e8e8e8" onchange="updateTheme('text', this.value)"></div>
         </div>
         <div style="margin-top:16px; display:flex; gap:8px;">
           <button class="btn btn-ghost" onclick="resetTheme()">Reset to Default</button>
           <button class="btn" onclick="saveTheme()">Save Theme</button>
         </div>
       </div>
-
       <div class="settings-group">
         <h3>🚀 Update Manager</h3>
-        <div class="setting-row">
-          <span class="setting-label">Current Version</span>
-          <span class="setting-value" id="set-current-ver">v1.1.0</span>
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Latest Version</span>
-          <span class="setting-value" id="set-latest-ver">Checking...</span>
-        </div>
-        <div style="margin-top:12px;">
-          <button class="btn" onclick="checkUpdate()">🔄 Check for Updates</button>
-        </div>
+        <div class="setting-row"><span class="setting-label">Current Version</span><span class="setting-value" id="set-current-ver">v1.1.0</span></div>
+        <div class="setting-row"><span class="setting-label">Latest Version</span><span class="setting-value" id="set-latest-ver">Checking...</span></div>
+        <div style="margin-top:12px;"><button class="btn" onclick="checkUpdate()">🔄 Check for Updates</button></div>
       </div>
-
       <div class="settings-group">
         <h3>💾 Backup & Restore</h3>
-        <div class="setting-row">
-          <span class="setting-label">Export Configuration</span>
-          <button class="btn btn-ghost" onclick="downloadConfig()">📥 Download config.json</button>
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Import Configuration</span>
-          <input type="file" id="config-file-input" accept=".json" style="display:none;" onchange="uploadConfig(event)">
-          <button class="btn btn-ghost" onclick="document.getElementById('config-file-input').click()">📤 Upload & Restore</button>
-        </div>
+        <div class="setting-row"><span class="setting-label">Export Configuration</span><button class="btn btn-ghost" onclick="downloadConfig()">📥 Download config.json</button></div>
+        <div class="setting-row"><span class="setting-label">Import Configuration</span><input type="file" id="config-file-input" accept=".json" style="display:none;" onchange="uploadConfig(event)"><button class="btn btn-ghost" onclick="document.getElementById('config-file-input').click()">📤 Upload & Restore</button></div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Task Manager Modal -->
 <div id="task-modal" class="modal">
   <div class="modal-body">
-    <div class="modal-head">
-      <span>⚡ Live Process Snapshot</span>
-      <button class="btn-ghost" onclick="closeModal('task-modal')">✕</button>
-    </div>
+    <div class="modal-head"><span>⚡ Live Process Snapshot</span><button class="btn-ghost" onclick="closeModal('task-modal')">✕</button></div>
     <div class="modal-content">
       <table class="data-table">
         <thead>
@@ -969,18 +730,16 @@ body {
   </div>
 </div>
 
+<!-- Services Scanner Modal -->
 <div id="services-modal" class="modal">
   <div class="modal-body">
-    <div class="modal-head">
-      <span>⚡ All Systemd Services</span>
-      <button class="btn-ghost" onclick="closeModal('services-modal')">✕</button>
-    </div>
+    <div class="modal-head"><span> All Systemd Services</span><button class="btn-ghost" onclick="closeModal('services-modal')">✕</button></div>
     <div class="modal-content">
       <table class="data-table">
         <thead>
           <tr>
-            <th class="th-sort" onclick="toggleSort('srvScan', 'name')">Service </th>
-            <th class="th-sort" onclick="toggleSort('srvScan', 'state')">State ⬍</th>
+            <th class="th-sort" onclick="toggleSort('srvScan', 'name')">Service ⬍</th>
+            <th class="th-sort" onclick="toggleSort('srvScan', 'state')">State </th>
             <th>Action</th>
           </tr>
         </thead>
@@ -990,17 +749,15 @@ body {
   </div>
 </div>
 
+<!-- Ports Scanner Modal -->
 <div id="ports-modal" class="modal">
   <div class="modal-body">
-    <div class="modal-head">
-      <span>🔌 All Listening Ports</span>
-      <button class="btn-ghost" onclick="closeModal('ports-modal')">✕</button>
-    </div>
+    <div class="modal-head"><span>🔌 All Listening Ports</span><button class="btn-ghost" onclick="closeModal('ports-modal')">✕</button></div>
     <div class="modal-content">
       <table class="data-table">
         <thead>
           <tr>
-            <th class="th-sort" onclick="toggleSort('portScan', 'port')">Port </th>
+            <th class="th-sort" onclick="toggleSort('portScan', 'port')">Port ⬍</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
@@ -1011,12 +768,10 @@ body {
   </div>
 </div>
 
+<!-- Folder Explorer Modal -->
 <div id="folder-modal" class="modal">
   <div class="modal-body">
-    <div class="modal-head">
-      <span> Folder Explorer</span>
-      <button class="btn-ghost" onclick="closeModal('folder-modal')">✕</button>
-    </div>
+    <div class="modal-head"><span> Folder Explorer</span><button class="btn-ghost" onclick="closeModal('folder-modal')">✕</button></div>
     <div class="modal-content">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
         <input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/root" style="flex:1;">
@@ -1027,7 +782,7 @@ body {
           <tr>
             <th class="th-sort" onclick="toggleSort('folder', 'name')">Folder ⬍</th>
             <th class="th-sort" onclick="toggleSort('folder', 'path')">Path ⬍</th>
-            <th class="th-sort" onclick="toggleSort('folder', 'size_mb')">Size (MB) ⬍</th>
+            <th class="th-sort" onclick="toggleSort('folder', 'size_mb')">Size (MB) </th>
             <th>Action</th>
           </tr>
         </thead>
@@ -1051,11 +806,41 @@ let srvScanData = [];
 let portScanData = [];
 let folderData = [];
 
+// Lock states for each bookmarked list
+let lockStates = {
+  apps: true,
+  services: true,
+  ports: true,
+  storage: true
+};
+
+// Custom order for each list (persisted in localStorage)
+let customOrders = {
+  apps: null,
+  services: null,
+  ports: null,
+  storage: null
+};
+
+// Load saved orders from localStorage
+['apps', 'services', 'ports', 'storage'].forEach(key => {
+  const saved = localStorage.getItem(`ward_order_${key}`);
+  if (saved) {
+    try { customOrders[key] = JSON.parse(saved); } catch(e) {}
+  }
+  const savedLock = localStorage.getItem(`ward_lock_${key}`);
+  if (savedLock !== null) { lockStates[key] = savedLock === 'true'; }
+});
+
 let sortConfig = {
   snapshot: { key: null, asc: true },
   srvScan: { key: null, asc: true },
   portScan: { key: null, asc: true },
-  folder: { key: null, asc: true }
+  folder: { key: null, asc: true },
+  apps: { key: null, asc: true },
+  services: { key: null, asc: true },
+  ports: { key: null, asc: true },
+  storage: { key: null, asc: true }
 };
 
 const pLen = 40;
@@ -1076,103 +861,91 @@ function toggleSidebar() {
 }
 
 sidebar.addEventListener('mouseenter', () => {
-  if (!sidebarPinned) {
-    clearTimeout(sidebarHoverTimeout);
-    sidebar.classList.remove('collapsed');
-  }
+  if (!sidebarPinned) { clearTimeout(sidebarHoverTimeout); sidebar.classList.remove('collapsed'); }
 });
 
 sidebar.addEventListener('mouseleave', () => {
-  if (!sidebarPinned) {
-    sidebarHoverTimeout = setTimeout(() => {
-      sidebar.classList.add('collapsed');
-    }, 200);
-  }
+  if (!sidebarPinned) { sidebarHoverTimeout = setTimeout(() => { sidebar.classList.add('collapsed'); }, 200); }
 });
 
-if (localStorage.getItem('ward_sidebar_collapsed') === 'false') {
-  sidebar.classList.remove('collapsed');
-  sidebarPinned = true;
-}
+if (localStorage.getItem('ward_sidebar_collapsed') === 'false') { sidebar.classList.remove('collapsed'); sidebarPinned = true; }
 
-function showLogin() {
-  document.getElementById('login-overlay').classList.remove('hidden');
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-err').style.display = 'none';
-  setTimeout(() => document.getElementById('login-pass').focus(), 100);
-}
-
-function hideLogin() {
-  document.getElementById('login-overlay').classList.add('hidden');
-  authFailedCount = 0;
-}
+function showLogin() { document.getElementById('login-overlay').classList.remove('hidden'); document.getElementById('login-pass').value = ''; document.getElementById('login-err').style.display = 'none'; setTimeout(() => document.getElementById('login-pass').focus(), 100); }
+function hideLogin() { document.getElementById('login-overlay').classList.add('hidden'); authFailedCount = 0; }
 
 async function doLogin() {
   const pw = document.getElementById('login-pass').value;
   if (!pw) return;
   try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw })
-    });
+    const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
     const d = await res.json();
-    if (d.status === 'ok') {
-      sessionToken = d.token;
-      localStorage.setItem('ward_token', d.token);
-      hideLogin();
-      fetchStatus();
-      showToast('Authorized successfully', 'success');
-    } else {
-      document.getElementById('login-err').style.display = 'block';
-      document.getElementById('login-pass').value = '';
-    }
-  } catch(e) {
-    document.getElementById('login-err').innerText = 'Connection error';
-    document.getElementById('login-err').style.display = 'block';
-  }
+    if (d.status === 'ok') { sessionToken = d.token; localStorage.setItem('ward_token', d.token); hideLogin(); fetchStatus(); showToast('Authorized successfully', 'success'); }
+    else { document.getElementById('login-err').style.display = 'block'; document.getElementById('login-pass').value = ''; }
+  } catch(e) { document.getElementById('login-err').innerText = 'Connection error'; document.getElementById('login-err').style.display = 'block'; }
 }
 
-function doLogout() {
-  fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Session-Token': sessionToken } }).finally(() => {
-    localStorage.removeItem('ward_token');
-    sessionToken = '';
-    showLogin();
-  });
-}
+function doLogout() { fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Session-Token': sessionToken } }).finally(() => { localStorage.removeItem('ward_token'); sessionToken = ''; showLogin(); }); }
 
 function switchSection(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(id).classList.add('active');
-  const titles = {
-    overview: 'System Overview',
-    apps: 'Watched Applications',
-    services: 'Systemd Services',
-    ports: 'Monitored Ports',
-    storage: 'Storage Folders',
-    tasks: 'Scheduled Tasks',
-    settings: 'Settings'
-  };
+  const titles = { overview: 'System Overview', apps: 'Watched Applications', services: 'Systemd Services', ports: 'Monitored Ports', storage: 'Storage Folders', tasks: 'Scheduled Tasks', settings: 'Settings' };
   document.getElementById('page-title').innerText = titles[id] || 'WARD';
 }
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
+// ===== LOCK SYSTEM =====
+function toggleLock(listKey) {
+  lockStates[listKey] = !lockStates[listKey];
+  localStorage.setItem(`ward_lock_${listKey}`, lockStates[listKey]);
+  updateLockButton(listKey);
+  // Re-render to apply/remove drag handles
+  if (listKey === 'apps') renderApps();
+  else if (listKey === 'services') renderServices();
+  else if (listKey === 'ports') renderPorts();
+  else if (listKey === 'storage') renderDirs();
+}
+
+function updateLockButton(listKey) {
+  const btn = document.getElementById(`lock-${listKey}`);
+  if (btn) {
+    if (lockStates[listKey]) {
+      btn.innerHTML = '🔒 Locked';
+      btn.classList.remove('unlocked');
+    } else {
+      btn.innerHTML = '🔓 Unlocked';
+      btn.classList.add('unlocked');
+    }
+  }
+}
+
+// Initialize lock buttons
+['apps', 'services', 'ports', 'storage'].forEach(key => updateLockButton(key));
+
+// ===== SORTING =====
 function toggleSort(tableKey, columnKey) {
   const current = sortConfig[tableKey];
-  if (current.key === columnKey) {
-    current.asc = !current.asc;
-  } else {
-    current.key = columnKey;
-    current.asc = true;
+  if (current.key === columnKey) { current.asc = !current.asc; }
+  else { current.key = columnKey; current.asc = true; }
+  
+  // Clear custom order when sorting
+  if (['apps', 'services', 'ports', 'storage'].includes(tableKey)) {
+    customOrders[tableKey] = null;
+    localStorage.removeItem(`ward_order_${tableKey}`);
   }
+  
   if (tableKey === 'snapshot') renderSnapshotTable();
   else if (tableKey === 'srvScan') renderServicesScannerTable();
   else if (tableKey === 'portScan') renderPortsScannerTable();
   else if (tableKey === 'folder') renderFolderTable();
+  else if (tableKey === 'apps') renderApps();
+  else if (tableKey === 'services') renderServices();
+  else if (tableKey === 'ports') renderPorts();
+  else if (tableKey === 'storage') renderDirs();
 }
 
 function getSortedArray(dataArray, tableKey) {
@@ -1185,6 +958,112 @@ function getSortedArray(dataArray, tableKey) {
   });
 }
 
+function applyCustomOrder(dataArray, tableKey) {
+  const order = customOrders[tableKey];
+  if (!order || order.length === 0) return dataArray;
+  
+  // Reorder based on saved order
+  const ordered = [];
+  order.forEach(id => {
+    const item = dataArray.find(d => {
+      if (tableKey === 'apps') return d.name === id;
+      if (tableKey === 'services') return d.name === id;
+      if (tableKey === 'ports') return String(d.port) === id;
+      if (tableKey === 'storage') return d.name === id;
+      return false;
+    });
+    if (item) ordered.push(item);
+  });
+  
+  // Add any new items not in order
+  dataArray.forEach(item => {
+    let id;
+    if (tableKey === 'apps') id = item.name;
+    else if (tableKey === 'services') id = item.name;
+    else if (tableKey === 'ports') id = String(item.port);
+    else if (tableKey === 'storage') id = item.name;
+    if (!order.includes(id)) ordered.push(item);
+  });
+  
+  return ordered;
+}
+
+function saveCustomOrder(tableKey, dataArray) {
+  const ids = dataArray.map(item => {
+    if (tableKey === 'apps') return item.name;
+    if (tableKey === 'services') return item.name;
+    if (tableKey === 'ports') return String(item.port);
+    if (tableKey === 'storage') return item.name;
+    return null;
+  }).filter(id => id !== null);
+  
+  customOrders[tableKey] = ids;
+  localStorage.setItem(`ward_order_${tableKey}`, JSON.stringify(ids));
+}
+
+// ===== DRAG & DROP FOR BOOKMARKED LISTS =====
+let dragRow = null;
+let dragTableKey = null;
+
+function setupDragDrop(tbody, tableKey, dataArray) {
+  const rows = tbody.querySelectorAll('tr.draggable-row');
+  rows.forEach(row => {
+    row.draggable = !lockStates[tableKey];
+    
+    row.addEventListener('dragstart', (e) => {
+      if (lockStates[tableKey]) { e.preventDefault(); return; }
+      dragRow = row;
+      dragTableKey = tableKey;
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      
+      if (dragRow && dragTableKey) {
+        // Reorder dataArray based on new DOM order
+        const newOrder = [];
+        tbody.querySelectorAll('tr.draggable-row').forEach(r => {
+          const idx = parseInt(r.dataset.index);
+          if (!isNaN(idx) && dataArray[idx]) newOrder.push(dataArray[idx]);
+        });
+        if (newOrder.length > 0) {
+          dataArray.length = 0;
+          dataArray.push(...newOrder);
+          saveCustomOrder(dragTableKey, dataArray);
+        }
+      }
+      dragRow = null;
+      dragTableKey = null;
+    });
+    
+    row.addEventListener('dragover', (e) => {
+      if (lockStates[tableKey]) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      row.classList.add('drag-over');
+    });
+    
+    row.addEventListener('dragleave', () => { row.classList.remove('drag-over'); });
+    
+    row.addEventListener('drop', (e) => {
+      if (lockStates[tableKey]) return;
+      e.preventDefault();
+      row.classList.remove('drag-over');
+      if (dragRow && dragRow !== row) {
+        const allRows = [...tbody.querySelectorAll('tr.draggable-row')];
+        const dragIdx = allRows.indexOf(dragRow);
+        const dropIdx = allRows.indexOf(row);
+        if (dragIdx < dropIdx) row.after(dragRow);
+        else row.before(dragRow);
+      }
+    });
+  });
+}
+
+// ===== CHARTS =====
 function drawNetdataGrid(ctx, w, h, maxScale, isPct = true) {
   const levels = [0.25, 0.5, 0.75, 1.0];
   ctx.font = '10px JetBrains Mono, monospace';
@@ -1217,20 +1096,14 @@ function plotNetdataSingle(id, arr, maxScale, color) {
   gradient.addColorStop(1, color + '00');
   ctx.beginPath();
   const step = w / (arr.length - 1);
-  arr.forEach((val, i) => {
-    const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
-    i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y);
-  });
+  arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); });
   ctx.lineTo(35 + (arr.length - 1) * step, h);
   ctx.lineTo(35, h);
   ctx.closePath();
   ctx.fillStyle = gradient;
   ctx.fill();
   ctx.beginPath();
-  arr.forEach((val, i) => {
-    const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
-    i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y);
-  });
+  arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); });
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
   ctx.lineJoin = 'round';
@@ -1256,20 +1129,14 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
     gradient.addColorStop(0, color + '25');
     gradient.addColorStop(1, color + '00');
     ctx.beginPath();
-    arr.forEach((val, i) => {
-      const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
-      i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y);
-    });
+    arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); });
     ctx.lineTo(35 + (arr.length - 1) * step, h);
     ctx.lineTo(35, h);
     ctx.closePath();
     ctx.fillStyle = gradient;
     ctx.fill();
     ctx.beginPath();
-    arr.forEach((val, i) => {
-      const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
-      i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y);
-    });
+    arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); });
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
@@ -1277,19 +1144,12 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   });
 }
 
+// ===== DATA FETCHING =====
 async function fetchStatus() {
   if (!sessionToken) return;
   try {
     const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
-    if (res.status === 401) {
-      authFailedCount++;
-      if (authFailedCount >= 2) {
-        localStorage.removeItem('ward_token');
-        sessionToken = '';
-        showLogin();
-      }
-      return;
-    }
+    if (res.status === 401) { authFailedCount++; if (authFailedCount >= 2) { localStorage.removeItem('ward_token'); sessionToken = ''; showLogin(); } return; }
     const d = await res.json();
     document.getElementById('status-dot').style.background = 'var(--success)';
     globalData = d;
@@ -1328,17 +1188,27 @@ async function fetchStatus() {
     renderServices();
     renderPorts();
     renderDirs();
-  } catch(e) {
-    document.getElementById('status-dot').style.background = 'var(--danger)';
-  }
+  } catch(e) { document.getElementById('status-dot').style.background = 'var(--danger)'; }
 }
 
+// ===== RENDER BOOKMARKED TABLES WITH DRAG & DROP =====
 function renderApps() {
   if (!globalData) return;
+  let data = [...globalData.apps];
+  
+  // Apply custom order if lock is on and no sort is active
+  if (lockStates.apps && !sortConfig.apps.key && customOrders.apps) {
+    data = applyCustomOrder(data, 'apps');
+  } else if (sortConfig.apps.key) {
+    data = getSortedArray(data, 'apps');
+  }
+  
   let html = '';
-  globalData.apps.forEach(a => {
-    html += `<tr>
-      <td><b>${a.name}</b></td>
+  data.forEach((a, idx) => {
+    const dragHandle = lockStates.apps ? '' : '<span class="drag-handle">⋮⋮</span>';
+    html += `<tr class="draggable-row" data-index="${globalData.apps.indexOf(a)}">
+      <td class="row-number">${idx + 1}</td>
+      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${a.name}</b></td>
       <td style="font-family:'JetBrains Mono',monospace;">${a.cpu_pct}%</td>
       <td style="font-family:'JetBrains Mono',monospace;">${a.memory_mb} MB</td>
       <td style="font-family:'JetBrains Mono',monospace;">${a.threads}</td>
@@ -1346,49 +1216,91 @@ function renderApps() {
       <td><button class="btn btn-danger" onclick="remCfg('app', '${a.name}')">Remove</button></td>
     </tr>`;
   });
-  document.getElementById('app-tbody').innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--muted);">No watched apps</td></tr>';
+  const tbody = document.getElementById('app-tbody');
+  tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted);">No watched apps</td></tr>';
+  setupDragDrop(tbody, 'apps', globalData.apps);
 }
 
 function renderServices() {
   if (!globalData) return;
+  let dataArray = Object.entries(globalData.services).map(([name, state]) => ({ name, state }));
+  let data = [...dataArray];
+  
+  if (lockStates.services && !sortConfig.services.key && customOrders.services) {
+    data = applyCustomOrder(data, 'services');
+  } else if (sortConfig.services.key) {
+    data = getSortedArray(data, 'services');
+  }
+  
   let html = '';
-  Object.entries(globalData.services).forEach(([name, state]) => {
-    html += `<tr>
-      <td><b>${name}</b></td>
-      <td><span class="badge ${state==='Running'?'badge-success':'badge-danger'}">${state}</span></td>
-      <td><button class="btn btn-danger" onclick="remCfg('service', '${name}')">Remove</button></td>
+  data.forEach((item, idx) => {
+    const dragHandle = lockStates.services ? '' : '<span class="drag-handle">⋮</span>';
+    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
+      <td class="row-number">${idx + 1}</td>
+      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td>
+      <td><span class="badge ${item.state==='Running'?'badge-success':'badge-danger'}">${item.state}</span></td>
+      <td><button class="btn btn-danger" onclick="remCfg('service', '${item.name}')">Remove</button></td>
     </tr>`;
   });
-  document.getElementById('srv-tbody').innerHTML = html || '<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--muted);">No services monitored</td></tr>';
+  const tbody = document.getElementById('srv-tbody');
+  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No services monitored</td></tr>';
+  setupDragDrop(tbody, 'services', dataArray);
 }
 
 function renderPorts() {
   if (!globalData) return;
+  let dataArray = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status }));
+  let data = [...dataArray];
+  
+  if (lockStates.ports && !sortConfig.ports.key && customOrders.ports) {
+    data = applyCustomOrder(data, 'ports');
+  } else if (sortConfig.ports.key) {
+    data = getSortedArray(data, 'ports');
+  }
+  
   let html = '';
-  Object.entries(globalData.ports).forEach(([port, status]) => {
-    html += `<tr>
-      <td><b>Port ${port}</b></td>
-      <td><span class="badge ${status==='Listening'?'badge-success':'badge-danger'}">${status}</span></td>
-      <td><button class="btn btn-danger" onclick="remCfg('port', '${port}')">Remove</button></td>
+  data.forEach((item, idx) => {
+    const dragHandle = lockStates.ports ? '' : '<span class="drag-handle">⋮⋮</span>';
+    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
+      <td class="row-number">${idx + 1}</td>
+      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>Port ${item.port}</b></td>
+      <td><span class="badge ${item.status==='Listening'?'badge-success':'badge-danger'}">${item.status}</span></td>
+      <td><button class="btn btn-danger" onclick="remCfg('port', '${item.port}')">Remove</button></td>
     </tr>`;
   });
-  document.getElementById('port-tbody').innerHTML = html || '<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--muted);">No ports monitored</td></tr>';
+  const tbody = document.getElementById('port-tbody');
+  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No ports monitored</td></tr>';
+  setupDragDrop(tbody, 'ports', dataArray);
 }
 
 function renderDirs() {
   if (!globalData) return;
+  let dataArray = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb }));
+  let data = [...dataArray];
+  
+  if (lockStates.storage && !sortConfig.storage.key && customOrders.storage) {
+    data = applyCustomOrder(data, 'storage');
+  } else if (sortConfig.storage.key) {
+    data = getSortedArray(data, 'storage');
+  }
+  
   let html = '';
-  Object.entries(globalData.caches).forEach(([name, d]) => {
-    html += `<tr>
-      <td><b>${name}</b></td>
-      <td style="font-family:'JetBrains Mono',monospace; font-size:12px;">${d.path}</td>
-      <td style="font-family:'JetBrains Mono',monospace;"><b>${d.size_mb} MB</b></td>
-      <td><button class="btn btn-danger" onclick="remCfg('directory', '${name}')">Remove</button></td>
+  data.forEach((item, idx) => {
+    const dragHandle = lockStates.storage ? '' : '<span class="drag-handle">⋮⋮</span>';
+    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
+      <td class="row-number">${idx + 1}</td>
+      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td>
+      <td style="font-family:'JetBrains Mono',monospace; font-size:12px;">${item.path}</td>
+      <td style="font-family:'JetBrains Mono',monospace;"><b>${item.size_mb} MB</b></td>
+      <td><button class="btn btn-danger" onclick="remCfg('directory', '${item.name}')">Remove</button></td>
     </tr>`;
   });
-  document.getElementById('dir-tbody').innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
+  const tbody = document.getElementById('dir-tbody');
+  tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
+  setupDragDrop(tbody, 'storage', dataArray);
 }
 
+// ===== MODAL SCANNERS =====
 async function openTaskManager() {
   openModal('task-modal');
   document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Scanning processes...</span></td></tr>';
@@ -1397,9 +1309,7 @@ async function openTaskManager() {
     const d = await res.json();
     snapshotData = d.processes;
     renderSnapshotTable();
-  } catch(e) {
-    document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--danger);">Error loading processes</td></tr>';
-  }
+  } catch(e) { document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--danger);">Error loading processes</td></tr>'; }
 }
 
 function renderSnapshotTable() {
@@ -1421,17 +1331,11 @@ function renderSnapshotTable() {
 
 async function watchApp(appName) {
   try {
-    await fetch('/api/config/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ type: 'app', value: appName })
-    });
+    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'app', value: appName }) });
     showToast(`Added ${appName} to watched apps`, 'success');
     await fetchStatus();
     openTaskManager();
-  } catch(e) {
-    showToast('Failed to add app', 'error');
-  }
+  } catch(e) { showToast('Failed to add app', 'error'); }
 }
 
 async function openServicesScanner() {
@@ -1442,9 +1346,7 @@ async function openServicesScanner() {
     const d = await res.json();
     srvScanData = d.services;
     renderServicesScannerTable();
-  } catch(e) {
-    document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning services</td></tr>';
-  }
+  } catch(e) { document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning services</td></tr>'; }
 }
 
 function renderServicesScannerTable() {
@@ -1463,17 +1365,11 @@ function renderServicesScannerTable() {
 
 async function watchService(serviceName) {
   try {
-    await fetch('/api/config/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ type: 'service', value: serviceName })
-    });
+    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: serviceName }) });
     showToast(`Added ${serviceName} to tracked services`, 'success');
     await fetchStatus();
     openServicesScanner();
-  } catch(e) {
-    showToast('Failed to add service', 'error');
-  }
+  } catch(e) { showToast('Failed to add service', 'error'); }
 }
 
 async function openPortsScanner() {
@@ -1484,9 +1380,7 @@ async function openPortsScanner() {
     const d = await res.json();
     portScanData = d.ports.map(p => ({ port: p, status: 'Listening' }));
     renderPortsScannerTable();
-  } catch(e) {
-    document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning ports</td></tr>';
-  }
+  } catch(e) { document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning ports</td></tr>'; }
 }
 
 function renderPortsScannerTable() {
@@ -1505,22 +1399,16 @@ function renderPortsScannerTable() {
 
 async function watchPort(portNum) {
   try {
-    await fetch('/api/config/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ type: 'port', value: portNum })
-    });
+    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: portNum }) });
     showToast(`Added port ${portNum} to watched ports`, 'success');
     await fetchStatus();
     openPortsScanner();
-  } catch(e) {
-    showToast('Failed to add port', 'error');
-  }
+  } catch(e) { showToast('Failed to add port', 'error'); }
 }
 
 async function openTreeExplorer() {
   openModal('folder-modal');
-  document.getElementById('explore-path').value = '/home';
+  document.getElementById('explore-path').value = '/root';
   exploreFolder();
 }
 
@@ -1530,15 +1418,10 @@ async function exploreFolder() {
   try {
     const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(path)}`, { headers: { 'X-Session-Token': sessionToken } });
     const d = await res.json();
-    if (d.error) {
-      document.getElementById('folder-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">⚠️ ${d.error}</td></tr>`;
-      return;
-    }
+    if (d.error) { document.getElementById('folder-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">️ ${d.error}</td></tr>`; return; }
     folderData = d.items || [];
     renderFolderTable();
-  } catch(e) {
-    document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">Error loading folders</td></tr>';
-  }
+  } catch(e) { document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">Error loading folders</td></tr>'; }
 }
 
 function renderFolderTable() {
@@ -1562,148 +1445,43 @@ function renderFolderTable() {
 
 async function trackFolder(folderName, folderPath) {
   try {
-    await fetch('/api/config/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ type: 'directory', name: folderName, value: folderPath })
-    });
+    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name: folderName, value: folderPath }) });
     showToast(`Added ${folderName} to tracked folders`, 'success');
     await fetchStatus();
-    renderFolderTable(); // به جای exploreFolder()
-  } catch(e) {
-    showToast('Failed to track folder', 'error');
-  }
+    renderFolderTable();
+  } catch(e) { showToast('Failed to track folder', 'error'); }
 }
 
-async function addService() {
-  const val = document.getElementById('in-srv').value;
-  if (!val) return;
-  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: val }) });
-  document.getElementById('in-srv').value = '';
-  fetchStatus();
-  showToast('Service added', 'success');
-}
-
-async function addPort() {
-  const val = document.getElementById('in-port').value;
-  if (!val) return;
-  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: val }) });
-  document.getElementById('in-port').value = '';
-  fetchStatus();
-  showToast('Port added', 'success');
-}
-
-async function addFolder() {
-  const name = document.getElementById('dir-name').value;
-  const path = document.getElementById('dir-path').value;
-  if (!name || !path) return;
-  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name, value: path }) });
-  document.getElementById('dir-name').value = '';
-  document.getElementById('dir-path').value = '';
-  fetchStatus();
-  showToast('Folder tracked', 'success');
-}
+async function addService() { const val = document.getElementById('in-srv').value; if (!val) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: val }) }); document.getElementById('in-srv').value = ''; fetchStatus(); showToast('Service added', 'success'); }
+async function addPort() { const val = document.getElementById('in-port').value; if (!val) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: val }) }); document.getElementById('in-port').value = ''; fetchStatus(); showToast('Port added', 'success'); }
+async function addFolder() { const name = document.getElementById('dir-name').value; const path = document.getElementById('dir-path').value; if (!name || !path) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name, value: path }) }); document.getElementById('dir-name').value = ''; document.getElementById('dir-path').value = ''; fetchStatus(); showToast('Folder tracked', 'success'); }
 
 async function remCfg(type, value) {
   await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
+  // Clear custom order when removing items
+  if (type === 'app') { customOrders.apps = null; localStorage.removeItem('ward_order_apps'); }
+  else if (type === 'service') { customOrders.services = null; localStorage.removeItem('ward_order_services'); }
+  else if (type === 'port') { customOrders.ports = null; localStorage.removeItem('ward_order_ports'); }
+  else if (type === 'directory') { customOrders.storage = null; localStorage.removeItem('ward_order_storage'); }
   fetchStatus();
   showToast('Removed', 'success');
 }
 
-async function changePassword() {
-  const oldPass = document.getElementById('old-pass').value;
-  const newPass = document.getElementById('new-pass').value;
-  if (!oldPass || !newPass) { showToast('Fill both fields', 'error'); return; }
-  const res = await fetch('/api/settings/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ old_password: oldPass, new_password: newPass }) });
-  const d = await res.json();
-  if (d.status === 'ok') {
-    showToast('Password changed', 'success');
-    document.getElementById('old-pass').value = '';
-    document.getElementById('new-pass').value = '';
-  } else {
-    showToast(d.message || 'Failed', 'error');
-  }
-}
+async function changePassword() { const oldPass = document.getElementById('old-pass').value; const newPass = document.getElementById('new-pass').value; if (!oldPass || !newPass) { showToast('Fill both fields', 'error'); return; } const res = await fetch('/api/settings/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ old_password: oldPass, new_password: newPass }) }); const d = await res.json(); if (d.status === 'ok') { showToast('Password changed', 'success'); document.getElementById('old-pass').value = ''; document.getElementById('new-pass').value = ''; } else { showToast(d.message || 'Failed', 'error'); } }
 
-function updateTheme(key, value) {
-  currentTheme[key] = value;
-  document.documentElement.style.setProperty(`--${key}`, value);
-}
+function updateTheme(key, value) { currentTheme[key] = value; document.documentElement.style.setProperty(`--${key}`, value); }
+async function saveTheme() { await fetch('/api/settings/update-theme', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ theme: currentTheme }) }); showToast('Theme saved', 'success'); }
+function resetTheme() { currentTheme = { primary: '#00ab44', success: '#00d68f', danger: '#ff3366', bg: '#1a1d29', card: '#252836', text: '#e8e8e8' }; Object.entries(currentTheme).forEach(([k, v]) => { document.getElementById(`theme-${k}`).value = v; document.documentElement.style.setProperty(`--${k}`, v); }); showToast('Theme reset', 'info'); }
 
-async function saveTheme() {
-  await fetch('/api/settings/update-theme', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ theme: currentTheme }) });
-  showToast('Theme saved', 'success');
-}
+async function checkUpdate() { showToast('Checking...', 'info'); const res = await fetch('/api/system/check-update', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); document.getElementById('set-latest-ver').innerText = `v${d.latest}`; if (d.has_update) { showToast(`Update available: v${d.latest}`, 'success'); } else { showToast('Up to date', 'info'); } }
 
-function resetTheme() {
-  currentTheme = { primary: '#00ab44', success: '#00d68f', danger: '#ff3366', bg: '#1a1d29', card: '#252836', text: '#e8e8e8' };
-  Object.entries(currentTheme).forEach(([k, v]) => {
-    document.getElementById(`theme-${k}`).value = v;
-    document.documentElement.style.setProperty(`--${k}`, v);
-  });
-  showToast('Theme reset', 'info');
-}
+function downloadConfig() { fetch('/api/settings/config', { headers: { 'X-Session-Token': sessionToken } }).then(res => res.json()).then(d => { const blob = new Blob([JSON.stringify(d.config, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'ward-config.json'; a.click(); URL.revokeObjectURL(url); showToast('Config downloaded', 'success'); }).catch(() => showToast('Failed', 'error')); }
 
-async function checkUpdate() {
-  showToast('Checking...', 'info');
-  const res = await fetch('/api/system/check-update', { headers: { 'X-Session-Token': sessionToken } });
-  const d = await res.json();
-  document.getElementById('set-latest-ver').innerText = `v${d.latest}`;
-  if (d.has_update) {
-    showToast(`Update available: v${d.latest}`, 'success');
-  } else {
-    showToast('Up to date', 'info');
-  }
-}
+function uploadConfig(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (e) => { try { const config = JSON.parse(e.target.result); await fetch('/api/settings/restore-config', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ config }) }); showToast('Config restored!', 'success'); setTimeout(() => location.reload(), 2000); } catch(err) { showToast('Invalid JSON', 'error'); } }; reader.readAsText(file); }
 
-function downloadConfig() {
-  fetch('/api/settings/config', { headers: { 'X-Session-Token': sessionToken } })
-    .then(res => res.json())
-    .then(d => {
-      const blob = new Blob([JSON.stringify(d.config, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'ward-config.json'; a.click();
-      URL.revokeObjectURL(url);
-      showToast('Config downloaded', 'success');
-    })
-    .catch(() => showToast('Failed', 'error'));
-}
+function showToast(msg, type = 'success') { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = `toast toast-${type}`; toast.innerText = msg; container.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000); }
 
-function uploadConfig(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const config = JSON.parse(e.target.result);
-      await fetch('/api/settings/restore-config', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ config }) });
-      showToast('Config restored!', 'success');
-      setTimeout(() => location.reload(), 2000);
-    } catch(err) { showToast('Invalid JSON', 'error'); }
-  };
-  reader.readAsText(file);
-}
-
-function showToast(msg, type = 'success') {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.innerText = msg;
-  container.appendChild(toast);
-  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
-}
-
-if (sessionToken) {
-  fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } })
-    .then(res => res.json())
-    .then(d => {
-      if (d.authenticated) { hideLogin(); fetchStatus(); } else { showLogin(); }
-    })
-    .catch(() => showLogin());
-} else {
-  showLogin();
-}
+if (sessionToken) { fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } }).then(res => res.json()).then(d => { if (d.authenticated) { hideLogin(); fetchStatus(); } else { showLogin(); } }).catch(() => showLogin()); } else { showLogin(); }
 
 setInterval(() => { if (sessionToken) fetchStatus(); }, 2000);
 </script>
