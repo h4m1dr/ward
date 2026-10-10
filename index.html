@@ -988,41 +988,45 @@ function applyCustomOrder(dataArray, tableKey) {
   const order = customOrders[tableKey];
   if (!order || order.length === 0) return dataArray;
   
+  // Assign row numbers to new items that don't have one
+  dataArray.forEach(item => {
+    const id = getItemId(item, tableKey);
+    if (!(id in rowNumbers[tableKey])) {
+      rowNumbers[tableKey][id] = nextRowNumber[tableKey]++;
+      saveRowNumbers(tableKey);
+    }
+  });
+  
   // Reorder based on saved order
   const ordered = [];
   order.forEach(id => {
-    const item = dataArray.find(d => {
-      if (tableKey === 'apps') return d.name === id;
-      if (tableKey === 'services') return d.name === id;
-      if (tableKey === 'ports') return String(d.port) === id;
-      if (tableKey === 'storage') return d.name === id;
-      return false;
-    });
+    const item = dataArray.find(d => getItemId(d, tableKey) === id);
     if (item) ordered.push(item);
   });
   
   // Add any new items not in order
   dataArray.forEach(item => {
-    let id;
-    if (tableKey === 'apps') id = item.name;
-    else if (tableKey === 'services') id = item.name;
-    else if (tableKey === 'ports') id = String(item.port);
-    else if (tableKey === 'storage') id = item.name;
+    const id = getItemId(item, tableKey);
     if (!order.includes(id)) ordered.push(item);
   });
   
   return ordered;
 }
 
+function getItemId(item, tableKey) {
+  if (tableKey === 'apps') return item.name;
+  if (tableKey === 'services') return item.name;
+  if (tableKey === 'ports') return String(item.port);
+  if (tableKey === 'storage') return item.name;
+  return null;
+}
+
+function saveRowNumbers(tableKey) {
+  localStorage.setItem(`ward_rows_${tableKey}`, JSON.stringify(rowNumbers[tableKey]));
+}
+
 function saveCustomOrder(tableKey, dataArray) {
-  const ids = dataArray.map(item => {
-    if (tableKey === 'apps') return item.name;
-    if (tableKey === 'services') return item.name;
-    if (tableKey === 'ports') return String(item.port);
-    if (tableKey === 'storage') return item.name;
-    return null;
-  }).filter(id => id !== null);
-  
+  const ids = dataArray.map(item => getItemId(item, tableKey)).filter(id => id !== null);
   customOrders[tableKey] = ids;
   localStorage.setItem(`ward_order_${tableKey}`, JSON.stringify(ids));
 }
@@ -1222,6 +1226,14 @@ function renderApps() {
   if (!globalData) return;
   let data = [...globalData.apps];
   
+  // Assign row numbers to new items
+  data.forEach(a => {
+    if (!(a.name in rowNumbers.apps)) {
+      rowNumbers.apps[a.name] = nextRowNumber.apps++;
+      saveRowNumbers('apps');
+    }
+  });
+  
   // Apply custom order if lock is on and no sort is active
   if (lockStates.apps && !sortConfig.apps.key && customOrders.apps) {
     data = applyCustomOrder(data, 'apps');
@@ -1231,9 +1243,10 @@ function renderApps() {
   
   let html = '';
   data.forEach((a, idx) => {
+    const rowNum = rowNumbers.apps[a.name] || (idx + 1);
     const dragHandle = lockStates.apps ? '' : '<span class="drag-handle">⋮⋮</span>';
     html += `<tr class="draggable-row" data-index="${globalData.apps.indexOf(a)}">
-      <td class="row-number">${idx + 1}</td>
+      <td class="row-number">${rowNum}</td>
       <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${a.name}</b></td>
       <td style="font-family:'JetBrains Mono',monospace;">${a.cpu_pct}%</td>
       <td style="font-family:'JetBrains Mono',monospace;">${a.memory_mb} MB</td>
@@ -1245,6 +1258,114 @@ function renderApps() {
   const tbody = document.getElementById('app-tbody');
   tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted);">No watched apps</td></tr>';
   setupDragDrop(tbody, 'apps', globalData.apps);
+}
+
+function renderServices() {
+  if (!globalData) return;
+  let dataArray = Object.entries(globalData.services).map(([name, state]) => ({ name, state }));
+  let data = [...dataArray];
+  
+  // Assign row numbers to new items
+  data.forEach(s => {
+    if (!(s.name in rowNumbers.services)) {
+      rowNumbers.services[s.name] = nextRowNumber.services++;
+      saveRowNumbers('services');
+    }
+  });
+  
+  if (lockStates.services && !sortConfig.services.key && customOrders.services) {
+    data = applyCustomOrder(data, 'services');
+  } else if (sortConfig.services.key) {
+    data = getSortedArray(data, 'services');
+  }
+  
+  let html = '';
+  data.forEach((item, idx) => {
+    const rowNum = rowNumbers.services[item.name] || (idx + 1);
+    const dragHandle = lockStates.services ? '' : '<span class="drag-handle">⋮</span>';
+    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
+      <td class="row-number">${rowNum}</td>
+      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td>
+      <td><span class="badge ${item.state==='Running'?'badge-success':'badge-danger'}">${item.state}</span></td>
+      <td><button class="btn btn-danger" onclick="remCfg('service', '${item.name}')">Remove</button></td>
+    </tr>`;
+  });
+  const tbody = document.getElementById('srv-tbody');
+  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No services monitored</td></tr>';
+  setupDragDrop(tbody, 'services', dataArray);
+}
+
+function renderPorts() {
+  if (!globalData) return;
+  let dataArray = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status }));
+  let data = [...dataArray];
+  
+  // Assign row numbers to new items
+  data.forEach(p => {
+    const id = String(p.port);
+    if (!(id in rowNumbers.ports)) {
+      rowNumbers.ports[id] = nextRowNumber.ports++;
+      saveRowNumbers('ports');
+    }
+  });
+  
+  if (lockStates.ports && !sortConfig.ports.key && customOrders.ports) {
+    data = applyCustomOrder(data, 'ports');
+  } else if (sortConfig.ports.key) {
+    data = getSortedArray(data, 'ports');
+  }
+  
+  let html = '';
+  data.forEach((item, idx) => {
+    const id = String(item.port);
+    const rowNum = rowNumbers.ports[id] || (idx + 1);
+    const dragHandle = lockStates.ports ? '' : '<span class="drag-handle">⋮⋮</span>';
+    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
+      <td class="row-number">${rowNum}</td>
+      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>Port ${item.port}</b></td>
+      <td><span class="badge ${item.status==='Listening'?'badge-success':'badge-danger'}">${item.status}</span></td>
+      <td><button class="btn btn-danger" onclick="remCfg('port', '${item.port}')">Remove</button></td>
+    </tr>`;
+  });
+  const tbody = document.getElementById('port-tbody');
+  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No ports monitored</td></tr>';
+  setupDragDrop(tbody, 'ports', dataArray);
+}
+
+function renderDirs() {
+  if (!globalData) return;
+  let dataArray = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb }));
+  let data = [...dataArray];
+  
+  // Assign row numbers to new items
+  data.forEach(d => {
+    if (!(d.name in rowNumbers.storage)) {
+      rowNumbers.storage[d.name] = nextRowNumber.storage++;
+      saveRowNumbers('storage');
+    }
+  });
+  
+  if (lockStates.storage && !sortConfig.storage.key && customOrders.storage) {
+    data = applyCustomOrder(data, 'storage');
+  } else if (sortConfig.storage.key) {
+    data = getSortedArray(data, 'storage');
+  }
+  
+  let html = '';
+  data.forEach((item, idx) => {
+    const rowNum = rowNumbers.storage[item.name] || (idx + 1);
+    const dragHandle = lockStates.storage ? '' : '<span class="drag-handle">⋮⋮</span>';
+    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
+      <td class="row-number">${rowNum}</td>
+      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td>
+      <td style="font-family:'JetBrains Mono',monospace; font-size:12px;">${item.path}</td>
+      <td style="font-family:'JetBrains Mono',monospace;"><b>${item.size_mb} MB</b></td>
+      <td><button class="btn btn-danger" onclick="remCfg('directory', '${item.name}')">Remove</button></td>
+    </tr>`;
+  });
+  const tbody = document.getElementById('dir-tbody');
+  tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
+  setupDragDrop(tbody, 'storage', dataArray);
 }
 
 function renderServices() {
@@ -1484,11 +1605,30 @@ async function addFolder() { const name = document.getElementById('dir-name').va
 
 async function remCfg(type, value) {
   await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
-  // Clear custom order when removing items
-  if (type === 'app') { customOrders.apps = null; localStorage.removeItem('ward_order_apps'); }
-  else if (type === 'service') { customOrders.services = null; localStorage.removeItem('ward_order_services'); }
-  else if (type === 'port') { customOrders.ports = null; localStorage.removeItem('ward_order_ports'); }
-  else if (type === 'directory') { customOrders.storage = null; localStorage.removeItem('ward_order_storage'); }
+  
+  // Remove row number when item is deleted
+  if (type === 'app') {
+    delete rowNumbers.apps[value];
+    saveRowNumbers('apps');
+    customOrders.apps = null;
+    localStorage.removeItem('ward_order_apps');
+  } else if (type === 'service') {
+    delete rowNumbers.services[value];
+    saveRowNumbers('services');
+    customOrders.services = null;
+    localStorage.removeItem('ward_order_services');
+  } else if (type === 'port') {
+    delete rowNumbers.ports[String(value)];
+    saveRowNumbers('ports');
+    customOrders.ports = null;
+    localStorage.removeItem('ward_order_ports');
+  } else if (type === 'directory') {
+    delete rowNumbers.storage[value];
+    saveRowNumbers('storage');
+    customOrders.storage = null;
+    localStorage.removeItem('ward_order_storage');
+  }
+  
   fetchStatus();
   showToast('Removed', 'success');
 }
