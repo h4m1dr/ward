@@ -1,1 +1,3273 @@
+# 📄 WARD System Identity & Architecture Specification
+**Version:** 1.2.0-Blueprint  
+**Language:** English (for AI/Dev Context)  
+**Purpose:** Complete reconstruction guide for UI, Logic, and Data Flow.
+
+---
+
+## SECTION 1: SHELL & NAVIGATION (Global Layout)
+**Scope:** The persistent frame surrounding all tabs. Includes Sidebar, Top Header, Bottom Footer (Mobile), and Global State Managers.
+
+### 1.1. Visual Structure & CSS Variables
+**Theme Engine:** Cyber-OLED Dark Mode (Default).
+**Root Variables (`:root` in CSS):**
+```css
+:root {
+  /* Backgrounds */
+  --bg-base: #0B0E14;       /* Deepest background */
+  --bg-surface: #121721;    /* Card/Sidebar background */
+  --bg-surface-hover: #18202E; /* Hover state */
+  
+  /* Borders & Dividers */
+  --border-dim: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(0, 245, 160, 0.4);
+  
+  /* Accents (Status Colors) */
+  --accent-health: #00F5A0; /* Green: OK, Active, Up */
+  --accent-warn: #F59E0B;   /* Amber: High Load, Idle, Warning */
+  --accent-crit: #EF4444;   /* Red: Down, Error, Critical */
+  --accent-flow: #06B6D4;   /* Cyan: Network, Data Flow */
+  
+  /* Typography */
+  --text-main: #F9FAFB;
+  --text-muted: #94A3B8;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
+}
+```
+
+### 1.2. Component: Top Header (`#global-header`)
+**Position:** Fixed top, full width, height `60px`, z-index `100`.
+**Layout:** Flexbox (Space-between).
+
+*   **Left Zone (Brand & Status):**
+    *   `Logo`: SVG Icon (Ward Eye/Baton), size `32x32`.
+    *   `Title`: Text "WARD", font-weight `700`, size `18px`.
+    *   `Pulse Indicator`: `<span class="status-dot live">`. CSS animation `pulse 2s infinite`. Color `--accent-health`. Tooltip: "Live Telemetry (1s)".
+    *   `Version Badge`: Small text `v1.2.0`, color `--text-muted`.
+
+*   **Center Zone (Global Controls - Desktop Only):**
+    *   `Refresh Rate Switcher`: Segmented control `[1s] [3s] [Pause]`. Default `1s`. Updates global variable `POLLING_INTERVAL_MS`.
+    *   `Search Bar`: Global instant search (filters current tab table). Placeholder "Search processes, ports...".
+
+*   **Right Zone (Actions & Alerts):**
+    *   `Notification Bell`: Icon 🔔. 
+        *   **Badge:** Red circle with count of unread `severity: 'crit'` events from `EventEngine`. Hidden if 0.
+        *   **Action:** Click opens `#notification-drawer` (Slide-in panel from right).
+    *   `Theme Toggle`: Icon 🌙/☀️. Switches between `dark-oled` and `light-mode` (adds class `.theme-light` to body).
+    *   `User Menu`: Avatar/Icon. Dropdown: `Settings`, `Logout`, `Export Config`.
+
+### 1.3. Component: Sidebar Navigation (`#main-sidebar`)
+**Position:** Fixed left, width `240px` (Desktop), `0px` (Mobile/Collapsed).
+**Behavior:** 
+*   **Desktop:** Always visible unless toggled. Hover effect expands icons if collapsed.
+*   **Mobile/TMA (<768px):** Hidden by default. Replaced by **Bottom Navigation Bar**.
+
+**Navigation Items (Array `NAV_ITEMS`):**
+```javascript
+const NAV_ITEMS = [
+  { id: 'overview', label: 'Overview', icon: '📊', route: '#overview' },
+  { id: 'processes', label: 'Processes', icon: '⚡', route: '#processes' },
+  { id: 'services', label: 'Services', icon: '⚙️', route: '#services' },
+  { id: 'ports', label: 'Ports & Flow', icon: '🔌', route: '#ports' },
+  { id: 'storage', label: 'Storage', icon: '💾', route: '#storage' },
+  { id: 'settings', label: 'Settings', icon: '🔧', route: '#settings' }
+];
+```
+**Active State:** Class `.nav-item.active` applies `background: var(--bg-surface-hover)` and `border-left: 3px solid var(--accent-health)`.
+
+### 1.4. Component: Bottom Navigation (`#mobile-bottom-nav`)
+**Visibility:** `display: none` on Desktop. `display: flex` on Mobile/TMA.
+**Position:** Fixed bottom, height `60px`, safe-area-inset-bottom support.
+**Items:** Same as Sidebar but limited to 4 main items + "More" menu.
+**Style:** Icons centered, label below icon (size `10px`). Active item color `--accent-health`.
+
+### 1.5. Component: Notification Drawer (`#notification-drawer`)
+**Type:** Slide-over panel (Right side, width `350px`).
+**Data Source:** Fetches from `/api/events/recent?limit=50`.
+**Structure:**
+*   **Header:** "System Events" + Button "Mark All Read".
+*   **List:** Scrollable container.
+    *   **Item Template:**
+        ```html
+        <div class="event-item severity-{crit|warn|info}">
+          <div class="event-time">{timestamp_relative}</div>
+          <div class="event-title">{title}</div>
+          <div class="event-msg">{message}</div>
+        </div>
+        ```
+    *   **Color Coding:** Left border `4px`. Crit=`--accent-crit`, Warn=`--accent-warn`, Info=`--accent-flow`.
+
+### 1.6. Global State Management (JavaScript)
+**Object:** `window.WARD_STATE`
+```javascript
+window.WARD_STATE = {
+  pollingInterval: 1000, // ms
+  isPaused: false,
+  theme: 'dark-oled',
+  sidebarCollapsed: false,
+  notifications: {
+    unreadCount: 0,
+    lastChecked: null
+  },
+  activeTab: 'overview'
+};
+```
+**Event Listeners:**
+*   `resize`: Toggle between Sidebar and Bottom Nav based on `window.innerWidth`.
+*   `visibilitychange`: Pause polling if tab is hidden (save resources).
+*   `keydown`: `Ctrl+K` focuses global search.
+
+### 1.7. API Endpoints Required for Shell
+*   `GET /api/system/info`: Returns `{ version, uptime, hostname, os }`. Used for Header/Footer.
+*   `GET /api/events/recent`: Returns array of event objects. Used for Notification Bell badge.
+*   `POST /api/events/read`: Marks events as read. Payload `{ ids: [...] }`.
+
+### 1.8. Responsive Breakpoints & TMA Adaptation
+*   **Desktop (>1024px):** Sidebar Left + Header Top + Content Right.
+*   **Tablet (768px - 1024px):** Sidebar Collapsed (Icons only) + Header Top.
+*   **Mobile/TMA (<768px):** Sidebar Hidden + Bottom Nav + Header Simplified (No Search, compact controls).
+*   **Telegram WebApp Specifics:**
+    *   Use `Telegram.WebApp.expand()` to fill screen.
+    *   Use `Telegram.WebApp.themeParams` to sync colors if needed (optional override).
+    *   Disable pull-to-refresh browser default.
+
+---
+
+### ✅ Checkpoint for Section 1
+Does this level of detail match your expectation for the `Identity.md` file? 
+*   It defines exact CSS variables.
+*   It defines HTML structure IDs.
+*   It defines JS State objects.
+*   It defines API contracts.
+*   It handles Mobile/TMA specifically.
+
+
+## SECTION 2: OVERVIEW DASHBOARD (`#tab-overview`)
+**Scope:** The default landing view. Provides a high-level, real-time health summary of the entire system. Focus on "Glanceability" — user must understand system status in < 3 seconds.
+
+### 2.1. Layout Grid System
+**Container:** `#overview-grid`
+**CSS Grid Definition:**
+```css
+#overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns on Desktop */
+  gap: 16px;
+  padding: 20px;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); } /* Tablet */
+@media (max-width: 768px) { grid-template-columns: 1fr; } /* Mobile/TMA */
+```
+
+**Card Spanning Rules:**
+*   Standard Cards (CPU, RAM, Swap, Disk): `grid-column: span 1`.
+*   Wide Cards (Network, Connections): `grid-column: span 2` (Desktop), `span 1` (Mobile).
+*   Full Width Cards (Alerts/Summary): `grid-column: 1 / -1`.
+
+### 2.2. Component: Smart CPU Card (`#card-cpu`)
+**Data Source:** `/api/telemetry/overview` -> `cpu` object.
+**Visual Structure:**
+```html
+<div class="metric-card" id="card-cpu">
+  <div class="card-header">
+    <span class="card-title">CPU USAGE</span>
+    <span class="card-badge status-ok">Healthy</span> <!-- Dynamic: ok/warn/crit -->
+  </div>
+  <div class="card-value-main">
+    <span id="cpu-percent">45</span><span class="unit">%</span>
+  </div>
+  <div class="card-sub-metrics">
+    <div class="sub-metric">
+      <span class="label">User</span>
+      <span id="cpu-user" class="value mono">32%</span>
+    </div>
+    <div class="sub-metric">
+      <span class="label">System</span>
+      <span id="cpu-sys" class="value mono">10%</span>
+    </div>
+    <div class="sub-metric highlight-warn"> <!-- Highlights if > 20% -->
+      <span class="label">IO Wait</span>
+      <span id="cpu-iowait" class="value mono">3%</span>
+    </div>
+  </div>
+  <div class="card-chart-container">
+    <canvas id="chart-cpu-sparkline"></canvas> <!-- Multi-line: Total, User, Sys -->
+  </div>
+  <div class="card-footer">
+    <span id="cpu-cores-info">8 Cores @ 3.4GHz</span>
+    <button class="btn-icon" title="Per-Core View">📊</button> <!-- Opens Modal -->
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **Color Coding:** 
+    *   `< 70%`: Text `--text-main`, Badge `--accent-health`.
+    *   `70% - 90%`: Text `--accent-warn`, Badge `--accent-warn`.
+    *   `> 90%`: Text `--accent-crit`, Badge `--accent-crit`, Card Border pulses red.
+*   **IO Wait Alert:** If `iowait > 20%`, show tooltip "Disk Bottleneck Detected".
+*   **Chart:** Stacked area chart. Bottom layer `User` (Cyan), Middle `System` (Purple), Top `Idle` (Transparent). Line stroke `2px`.
+*   **Per-Core Modal:** Clicking icon opens modal with 8 individual sparklines (Grid 2x4).
+
+### 2.3. Component: Memory & Swap Card (`#card-memory`)
+**Data Source:** `/api/telemetry/overview` -> `memory`, `swap`.
+**Visual Structure:**
+```html
+<div class="metric-card" id="card-memory">
+  <div class="card-header">
+    <span class="card-title">MEMORY</span>
+    <span class="card-badge status-ok">Stable</span>
+  </div>
+  <div class="card-value-main">
+    <span id="mem-used">12.4</span><span class="unit">GB</span>
+    <span class="separator">/</span>
+    <span id="mem-total" class="text-muted">32.0 GB</span>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="mem-bar" style="width: 38%; background: var(--accent-health);"></div>
+  </div>
+  <div class="card-sub-metrics">
+    <div class="sub-metric">
+      <span class="label">Available</span>
+      <span id="mem-avail" class="value mono">19.6 GB</span>
+    </div>
+    <div class="sub-metric">
+      <span class="label">Cached</span>
+      <span id="mem-cached" class="value mono">8.2 GB</span>
+    </div>
+  </div>
+  
+  <!-- Swap Section (Collapsible if 0) -->
+  <div class="swap-section" id="swap-section">
+    <div class="section-divider"></div>
+    <div class="swap-header">
+      <span>SWAP</span>
+      <span id="swap-percent" class="mono">0%</span>
+    </div>
+    <div class="progress-bar-container small">
+      <div class="progress-bar-fill" id="swap-bar" style="width: 0%;"></div>
+    </div>
+  </div>
+  
+  <div class="card-chart-container">
+    <canvas id="chart-mem-history"></canvas> <!-- Line chart: Used vs Cached -->
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **Progress Bar Color:** Dynamic width based on `(used/total)*100`. Color shifts Green -> Amber -> Red at 80%/95%.
+*   **Swap Visibility:** If `swap_total == 0`, hide `#swap-section` entirely to save space.
+*   **Cache Insight:** Tooltip on "Cached": "Linux uses free RAM for disk cache. This is reclaimable."
+*   **Chart:** Single line for `Used`, shaded area for `Cached`. Y-Axis fixed 0-100%.
+
+### 2.4. Component: Disk Health & I/O Card (`#card-disk`)
+**Data Source:** `/api/telemetry/overview` -> `disk`.
+**Visual Structure:**
+```html
+<div class="metric-card" id="card-disk">
+  <div class="card-header">
+    <span class="card-title">STORAGE & I/O</span>
+    <span class="card-badge status-ok">OK</span>
+  </div>
+  
+  <!-- Circular Gauge for Space -->
+  <div class="gauge-container">
+    <canvas id="gauge-disk-space"></canvas>
+    <div class="gauge-center-text">
+      <span id="disk-percent" class="big">62%</span>
+      <span class="small">Used</span>
+    </div>
+  </div>
+  
+  <div class="io-metrics-grid">
+    <div class="io-box read">
+      <span class="icon">⬇️</span>
+      <div class="data">
+        <span id="disk-read-speed" class="value mono">120 MB/s</span>
+        <span class="label">Read</span>
+      </div>
+    </div>
+    <div class="io-box write">
+      <span class="icon">⬆️</span>
+      <div class="data">
+        <span id="disk-write-speed" class="value mono">45 MB/s</span>
+        <span class="label">Write</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card-footer">
+    <span id="disk-mount-info">/dev/sda1 mounted on /</span>
+    <button class="btn-text danger" id="btn-clean-cache" style="display:none;">Clean Cache</button>
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **Gauge Rendering:** Canvas arc from 135° to 405°. Fill color dynamic based on percentage.
+*   **I/O Speed Calculation:** Delta of `sectors_read/written` from `/proc/diskstats` over polling interval. Convert to MB/s.
+*   **Critical Alert:** If `disk_percent > 90%`, show `#btn-clean-cache` and trigger Global Notification.
+*   **Mount Info:** Parses `/proc/mounts` to show physical device name.
+
+### 2.5. Component: Network Traffic Splitter (`#card-network`)
+**Data Source:** `/api/telemetry/overview` -> `network`.
+**Visual Structure:**
+```html
+<div class="metric-card wide" id="card-network">
+  <div class="card-header">
+    <span class="card-title">NETWORK TRAFFIC</span>
+    <div class="interface-selector">
+      <select id="net-interface-select">
+        <option value="all">All Interfaces</option>
+        <option value="eth0">eth0</option>
+        <option value="tun0">tun0 (VPN)</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="net-speed-display">
+    <div class="speed-block upload">
+      <span class="arrow">▲</span>
+      <span id="net-tx-speed" class="value mono">12.5 MB/s</span>
+    </div>
+    <div class="speed-block download">
+      <span class="arrow">▼</span>
+      <span id="net-rx-speed" class="value mono">45.2 MB/s</span>
+    </div>
+  </div>
+  
+  <div class="card-chart-container large">
+    <canvas id="chart-net-flow"></canvas> <!-- Dual Axis: TX (Top), RX (Bottom) -->
+  </div>
+  
+  <div class="net-stats-row">
+    <div class="stat-item">
+      <span class="label">Total RX</span>
+      <span id="net-total-rx" class="value mono">1.2 TB</span>
+    </div>
+    <div class="stat-item">
+      <span class="label">Total TX</span>
+      <span id="net-total-tx" class="value mono">850 GB</span>
+    </div>
+    <div class="stat-item alert">
+      <span class="label">Errors/Drops</span>
+      <span id="net-errors" class="value mono">0</span>
+    </div>
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **Dual Chart:** TX plotted upwards (positive Y), RX plotted downwards (negative Y) or stacked. Color TX=`--accent-flow`, RX=`--accent-health`.
+*   **Interface Filtering:** Dropdown updates data source. If `tun0` selected, only show VPN traffic.
+*   **Error Detection:** If `errors > 0` or `drops > 0`, highlight stat item in Red and trigger Warning Event.
+*   **Auto-Scaling:** Y-Axis scales dynamically based on max speed in last 60 seconds (e.g., 10MB/s vs 1GB/s).
+
+### 2.6. Component: Connection & Socket Monitor (`#card-connections`)
+**Data Source:** `/api/telemetry/overview` -> `connections`.
+**Visual Structure:**
+```html
+<div class="metric-card wide" id="card-connections">
+  <div class="card-header">
+    <span class="card-title">ACTIVE CONNECTIONS</span>
+    <span class="card-badge status-ok">Normal</span>
+  </div>
+  
+  <div class="conn-summary">
+    <div class="conn-big-number">
+      <span id="conn-total" class="value huge">342</span>
+      <span class="label">Open Sockets</span>
+    </div>
+  </div>
+  
+  <div class="conn-breakdown">
+    <div class="breakdown-item">
+      <span class="dot tcp"></span>
+      <span>TCP ESTABLISHED</span>
+      <span id="conn-tcp-est" class="value mono">210</span>
+    </div>
+    <div class="breakdown-item">
+      <span class="dot udp"></span>
+      <span>UDP ACTIVE</span>
+      <span id="conn-udp" class="value mono">45</span>
+    </div>
+    <div class="breakdown-item warn">
+      <span class="dot time-wait"></span>
+      <span>TIME_WAIT</span>
+      <span id="conn-time-wait" class="value mono">87</span>
+    </div>
+  </div>
+  
+  <div class="card-chart-container">
+    <canvas id="chart-conn-history"></canvas> <!-- Stacked Bar: TCP, UDP, TimeWait -->
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **State Parsing:** Reads `/proc/net/tcp` and `/proc/net/udp`. Counts states: `01` (ESTABLISHED), `06` (TIME_WAIT), etc.
+*   **TIME_WAIT Alert:** If `TIME_WAIT > 500`, show warning "High connection churn detected".
+*   **Chart:** Stacked bar chart showing composition of connections over time.
+
+### 2.7. Component: Quick Alerts Summary (`#card-alerts-summary`)
+**Position:** Full width row below main grid.
+**Data Source:** `/api/events/recent?severity=crit,warn&limit=5`.
+**Visual Structure:**
+```html
+<div class="metric-card full-width" id="card-alerts-summary">
+  <div class="card-header">
+    <span class="card-title">RECENT SYSTEM ALERTS</span>
+    <a href="#settings" class="link">View All Logs →</a>
+  </div>
+  <div class="alerts-list" id="overview-alerts-list">
+    <!-- Populated by JS -->
+    <div class="alert-row empty">No critical alerts in the last hour.</div>
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **Dynamic Population:** Renders top 5 recent events.
+*   **Empty State:** If no events, show green checkmark "All Systems Operational".
+*   **Click Action:** Clicking an alert row opens the Notification Drawer with that event highlighted.
+
+### 2.8. Data Contract: `/api/telemetry/overview`
+**Response JSON Structure:**
+```json
+{
+  "timestamp": 1715623400,
+  "cpu": {
+    "total_percent": 45.2,
+    "user_percent": 32.1,
+    "system_percent": 10.5,
+    "iowait_percent": 2.6,
+    "cores": 8,
+    "model": "AMD EPYC 7542",
+    "per_core": [12, 45, 30, ...] // Array of floats
+  },
+  "memory": {
+    "total_bytes": 34359738368,
+    "used_bytes": 13314398208,
+    "available_bytes": 21045340160,
+    "cached_bytes": 8796093022,
+    "swap_total_bytes": 2147483648,
+    "swap_used_bytes": 0
+  },
+  "disk": {
+    "mount_point": "/",
+    "device": "/dev/sda1",
+    "total_bytes": 500107862016,
+    "used_bytes": 310066874450,
+    "read_bytes_sec": 125829120,
+    "write_bytes_sec": 47185920
+  },
+  "network": {
+    "interfaces": {
+      "eth0": { "rx_bytes_sec": 45200000, "tx_bytes_sec": 12500000, "errors": 0, "drops": 0 },
+      "tun0": { "rx_bytes_sec": 1200000, "tx_bytes_sec": 800000, "errors": 0, "drops": 0 }
+    },
+    "total_rx_bytes": 1288490188800,
+    "total_tx_bytes": 912680550400
+  },
+  "connections": {
+    "tcp_established": 210,
+    "tcp_time_wait": 87,
+    "udp_active": 45,
+    "total_sockets": 342
+  }
+}
+```
+
+### 2.9. JavaScript Logic: Overview Controller
+**File:** `js/controllers/overview.js`
+**Key Functions:**
+```javascript
+class OverviewController {
+  constructor() {
+    this.charts = {};
+    this.dataBuffer = { cpu: [], mem: [], net: [], conn: [] }; // Ring buffer for charts
+    this.maxBufferSize = 60; // Keep last 60 seconds
+  }
+
+  init() {
+    this.initCharts();
+    this.startPolling();
+    this.bindEvents();
+  }
+
+  async fetchData() {
+    if (WARD_STATE.isPaused) return;
+    try {
+      const res = await fetch('/api/telemetry/overview');
+      const data = await res.json();
+      this.updateDOM(data);
+      this.pushToBuffer(data);
+      this.renderCharts();
+      this.checkThresholds(data);
+    } catch (e) {
+      console.error("Overview fetch failed", e);
+      WARD_UI.showConnectionError();
+    }
+  }
+
+  updateDOM(data) {
+    // Update CPU
+    document.getElementById('cpu-percent').innerText = data.cpu.total_percent.toFixed(1);
+    document.getElementById('cpu-iowait').innerText = data.cpu.iowait_percent.toFixed(1) + '%';
+    this.updateStatusBadge('card-cpu', data.cpu.total_percent, [70, 90]);
+
+    // Update Memory
+    const memPct = (data.memory.used_bytes / data.memory.total_bytes) * 100;
+    document.getElementById('mem-bar').style.width = memPct + '%';
+    document.getElementById('mem-used').innerText = (data.memory.used_bytes / 1e9).toFixed(1);
+    
+    // Update Disk Gauge
+    const diskPct = (data.disk.used_bytes / data.disk.total_bytes) * 100;
+    this.drawGauge('gauge-disk-space', diskPct);
+    document.getElementById('disk-read-speed').innerText = (data.disk.read_bytes_sec / 1e6).toFixed(1) + ' MB/s';
+
+    // Update Network
+    document.getElementById('net-tx-speed').innerText = (data.network.interfaces.eth0.tx_bytes_sec / 1e6).toFixed(1);
+    document.getElementById('net-rx-speed').innerText = (data.network.interfaces.eth0.rx_bytes_sec / 1e6).toFixed(1);
+
+    // Update Connections
+    document.getElementById('conn-total').innerText = data.connections.total_sockets;
+    document.getElementById('conn-tcp-est').innerText = data.connections.tcp_established;
+  }
+
+  checkThresholds(data) {
+    if (data.cpu.iowait_percent > 20) {
+      WARD_EVENTS.log('warn', 'High IO Wait', 'Disk bottleneck detected (>20%)');
+    }
+    if (data.disk.used_bytes / data.disk.total_bytes > 0.9) {
+      WARD_EVENTS.log('crit', 'Disk Full', 'Storage usage exceeded 90%');
+      document.getElementById('btn-clean-cache').style.display = 'block';
+    }
+  }
+  
+  // ... Chart rendering methods using Chart.js or Canvas API ...
+}
+```
+
+---
+
+### ✅ Checkpoint for Section 2
+This section defines the **Overview Dashboard** completely.
+*   It specifies the Grid Layout.
+*   It details every Card (CPU, Mem, Disk, Net, Conn, Alerts).
+*   It provides the exact JSON API contract.
+*   It includes the JS Controller logic for thresholds and DOM updates.
+*   It handles the "IO Wait" and "Disk Speed" requirements you mentioned earlier.
+
+## SECTION 3: PROCESS INSPECTOR (`#tab-processes`)
+**Scope:** Deep-dive monitoring and control of running applications. Replaces the legacy "Watched Applications" tab with a full-featured Process Manager similar to `htop` or `Glances`, but optimized for web/mobile interaction.
+
+### 3.1. Layout & State Management
+**Container:** `#processes-container`
+**State Object:** `window.WARD_STATE.processes`
+```javascript
+window.WARD_STATE.processes = {
+  viewMode: 'watched', // 'watched' (default) | 'all' (full system list)
+  isLocked: true,      // Table sorting/drag state
+  searchQuery: '',     // Instant filter text
+  sortColumn: 'cpu_percent', // Default sort
+  sortDirection: 'desc',     // 'asc' | 'desc'
+  selectedPids: [],    // For bulk actions
+  autoRefresh: true    // Pause updates when user is interacting/scrolling
+};
+```
+
+### 3.2. Component: Control Toolbar (`#proc-toolbar`)
+**Position:** Sticky top within the tab content area.
+**Visual Structure:**
+```html
+<div class="toolbar" id="proc-toolbar">
+  <!-- Left: View Toggle -->
+  <div class="toggle-group">
+    <button class="btn-toggle active" data-view="watched">⭐ Watched Only</button>
+    <button class="btn-toggle" data-view="all">🌐 All Processes</button>
+  </div>
+
+  <!-- Center: Search & Filter -->
+  <div class="search-box">
+    <span class="icon">🔍</span>
+    <input type="text" id="proc-search" placeholder="Filter by Name, PID, User..." autocomplete="off">
+    <kbd class="shortcut">Ctrl+K</kbd>
+  </div>
+
+  <!-- Right: Actions & Lock -->
+  <div class="action-group">
+    <button class="btn-icon" id="btn-proc-lock" title="Lock Order (Disable Drag)">🔒</button>
+    <button class="btn-icon" id="btn-proc-refresh" title="Force Refresh">🔄</button>
+    <button class="btn-primary" id="btn-add-process" title="Add to Watchlist">+ Add Process</button>
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **View Toggle:** Switches data source between `/api/processes/watched` and `/api/processes/all`.
+*   **Search:** Debounced input (300ms). Filters table rows client-side instantly without API call.
+*   **Lock Button:** Toggles `WARD_STATE.processes.isLocked`. 
+    *   **Locked (🔒):** Drag handles hidden. Header clicks trigger Sort. Row order fixed by priority.
+    *   **Unlocked (🔓):** Drag handles visible. Header clicks disabled. Rows draggable.
+*   **Auto-Pause:** If user scrolls or clicks inside the table, `autoRefresh` pauses for 5 seconds to prevent UI jitter during interaction.
+
+### 3.3. Component: Process Data Table (`#proc-table`)
+**Structure:** Semantic HTML Table with sticky header.
+```html
+<div class="table-wrapper">
+  <table class="data-table" id="proc-table">
+    <thead>
+      <tr>
+        <th class="col-check"><input type="checkbox" id="check-all-proc"></th>
+        <th class="col-id" style="width: 40px;">#</th> <!-- Persistent Row ID -->
+        <th class="col-handle" style="width: 30px;"></th> <!-- Drag Handle (Visible only if Unlocked) -->
+        <th class="sortable" data-sort="pid">PID <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="name">Process Name <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="user">User <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="cpu_percent">CPU % <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="mem_percent">MEM % <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="mem_mb">RAM (MB) <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="threads">Threads <span class="sort-icon">↕</span></th>
+        <th class="col-status">Status</th>
+        <th class="col-actions" style="width: 80px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="proc-tbody">
+      <!-- Rows injected by JS -->
+    </tbody>
+  </table>
+</div>
+```
+
+**Row Template (`<tr class="proc-row">`):**
+```html
+<tr class="proc-row" data-pid="1234" data-row-id="5">
+  <td class="col-check"><input type="checkbox" class="row-check"></td>
+  <td class="col-id mono">5</td> <!-- Persistent ID, does not change on sort -->
+  <td class="col-handle drag-handle">⋮⋮</td>
+  <td class="mono">1234</td>
+  <td class="proc-name">
+    <span class="proc-icon"></span> <!-- Dynamic icon based on type -->
+    <strong>nginx</strong>
+    <span class="proc-cmd text-muted truncate" title="/usr/sbin/nginx -g daemon off;">master process</span>
+  </td>
+  <td class="mono">www-data</td>
+  <td class="mono cpu-val">12.4%</td>
+  <td class="mono mem-val">2.1%</td>
+  <td class="mono">450 MB</td>
+  <td class="mono">12</td>
+  <td><span class="badge status-running">Running</span></td>
+  <td class="col-actions">
+    <button class="btn-action-menu" data-pid="1234">⋯</button>
+  </td>
+</tr>
+```
+
+### 3.4. Component: Action Context Menu (`#proc-action-menu`)
+**Type:** Floating Dropdown (appears near click coordinates).
+**Trigger:** Click on `⋯` button in row.
+**Structure:**
+```html
+<div class="context-menu" id="proc-action-menu" style="display:none;">
+  <div class="menu-header">PID: <span id="menu-pid"></span> (<span id="menu-name"></span>)</div>
+  <div class="menu-divider"></div>
+  <button class="menu-item safe" data-action="inspect">🔍 Inspect Details</button>
+  <button class="menu-item safe" data-action="logs">📄 View Live Logs</button>
+  <div class="menu-divider"></div>
+  <button class="menu-item warn" data-action="sigterm">⚠️ Terminate (SIGTERM)</button>
+  <button class="menu-item danger" data-action="sigkill">☠️ Force Kill (SIGKILL)</button>
+  <div class="menu-divider"></div>
+  <button class="menu-item neutral" data-action="unwatch">👁️ Remove from Watchlist</button>
+</div>
+```
+**Logic & Safety:**
+*   **SIGTERM vs SIGKILL:** 
+    *   `SIGTERM`: Graceful shutdown. Shows confirmation modal: "Send SIGTERM to PID 1234?".
+    *   `SIGKILL`: Immediate force stop. Shows **Red Warning Modal**: "⚠️ FORCE KILL. This may cause data loss. Are you sure?". Requires typing "KILL" to confirm.
+*   **Inspect Details:** Opens Side Drawer with full command line, environment variables, open files count, and network connections owned by this PID.
+*   **Unwatch:** Only visible in "Watched Only" view. Removes PID from persistent config.
+
+### 3.5. Component: Add Process Modal (`#modal-add-process`)
+**Trigger:** Click "+ Add Process" in toolbar.
+**Purpose:** Allows user to pin a new process to the watchlist by name or PID pattern.
+**Structure:**
+```html
+<div class="modal-overlay" id="modal-add-process">
+  <div class="modal-card">
+    <h3>Add to Watchlist</h3>
+    <div class="form-group">
+      <label>Match Type</label>
+      <select id="add-match-type">
+        <option value="exact">Exact Name (e.g., nginx)</option>
+        <option value="contains">Contains (e.g., python3)</option>
+        <option value="pid">Specific PID (Temporary)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Value</label>
+      <input type="text" id="add-match-value" placeholder="Enter process name...">
+    </div>
+    <div class="form-group">
+      <label>Display Alias (Optional)</label>
+      <input type="text" id="add-alias" placeholder="My Web Server">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-confirm">Add to Watchlist</button>
+    </div>
+  </div>
+</div>
+```
+
+### 3.6. Data Contract: Process APIs
+**Endpoint 1:** `GET /api/processes/watched`
+*   **Description:** Returns only processes matching the user's watchlist configuration. Aggregates child threads if configured.
+*   **Response:**
+```json
+{
+  "processes": [
+    {
+      "pid": 1234,
+      "name": "nginx",
+      "user": "www-data",
+      "cpu_percent": 12.4,
+      "mem_percent": 2.1,
+      "mem_mb": 450.5,
+      "threads": 12,
+      "status": "running", // running, sleeping, zombie, stopped
+      "cmdline": "/usr/sbin/nginx -g daemon off;",
+      "uptime_seconds": 86400,
+      "row_id": 5, // Persistent ID for ordering
+      "priority": 1 // Sort priority when locked
+    }
+  ],
+  "total_system_cpu": 45.2,
+  "total_system_mem": 62.1
+}
+```
+
+**Endpoint 2:** `GET /api/processes/all?limit=100&sort=cpu`
+*   **Description:** Returns top N processes system-wide (like `top`). Used for "All Processes" view.
+*   **Response:** Same structure as above, but includes all PIDs.
+
+**Endpoint 3:** `POST /api/processes/action`
+*   **Payload:** `{ "pid": 1234, "action": "sigterm" | "sigkill" | "unwatch" }`
+*   **Response:** `{ "success": true, "message": "Signal sent" }`
+
+**Endpoint 4:** `POST /api/processes/watch`
+*   **Payload:** `{ "match_type": "exact", "value": "nginx", "alias": "Web Server" }`
+*   **Response:** `{ "success": true, "row_id": 6 }`
+
+### 3.7. JavaScript Logic: Process Controller
+**File:** `js/controllers/processes.js`
+**Key Algorithms:**
+
+**A. Delta CPU Calculation (Fixing the "0% CPU" Bug):**
+The backend must calculate CPU delta, not the frontend. However, the frontend must handle rapid updates smoothly.
+```javascript
+updateCpuDisplay(newData) {
+  newData.forEach(proc => {
+    const row = document.querySelector(`tr[data-pid="${proc.pid}"]`);
+    if (!row) return;
+    
+    const cpuCell = row.querySelector('.cpu-val');
+    const oldVal = parseFloat(cpuCell.dataset.lastVal || 0);
+    const newVal = proc.cpu_percent;
+    
+    // Smooth transition animation for numbers
+    this.animateValue(cpuCell, oldVal, newVal, 500);
+    cpuCell.dataset.lastVal = newVal;
+    
+    // Color coding
+    if (newVal > 80) cpuCell.style.color = 'var(--accent-crit)';
+    else if (newVal > 50) cpuCell.style.color = 'var(--accent-warn)';
+    else cpuCell.style.color = 'var(--text-main)';
+  });
+}
+```
+
+**B. Lock/Unlock & Drag-and-Drop Logic:**
+```javascript
+toggleLock() {
+  const state = WARD_STATE.processes;
+  state.isLocked = !state.isLocked;
+  
+  const lockBtn = document.getElementById('btn-proc-lock');
+  const handles = document.querySelectorAll('.drag-handle');
+  const rows = document.querySelectorAll('.proc-row');
+  
+  if (state.isLocked) {
+    // LOCKED: Enable Sorting, Disable Drag
+    lockBtn.innerText = '🔒';
+    lockBtn.title = 'Unlock to Reorder';
+    handles.forEach(h => h.style.display = 'none');
+    rows.forEach(r => r.draggable = false);
+    this.enableHeaderSorting();
+    this.saveOrderToBackend(); // Persist current visual order as priority
+  } else {
+    // UNLOCKED: Disable Sorting, Enable Drag
+    lockBtn.innerText = '🔓';
+    lockBtn.title = 'Lock to Sort';
+    handles.forEach(h => h.style.display = 'block');
+    rows.forEach(r => r.draggable = true);
+    this.disableHeaderSorting();
+    this.initDragAndDrop();
+  }
+}
+
+initDragAndDrop() {
+  const tbody = document.getElementById('proc-tbody');
+  let draggedRow = null;
+
+  tbody.addEventListener('dragstart', (e) => {
+    if (!e.target.closest('.proc-row')) return;
+    draggedRow = e.target.closest('.proc-row');
+    draggedRow.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  tbody.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const afterElement = this.getDragAfterElement(tbody, e.clientY);
+    if (afterElement == null) {
+      tbody.appendChild(draggedRow);
+    } else {
+      tbody.insertBefore(draggedRow, afterElement);
+    }
+  });
+
+  tbody.addEventListener('dragend', () => {
+    draggedRow.classList.remove('dragging');
+    draggedRow = null;
+    // Update internal state order based on DOM position
+    this.updateRowPrioritiesFromDOM();
+  });
+}
+
+getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.proc-row:not(.dragging)')];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+```
+
+**C. Persistent Row ID Logic:**
+*   When a process is first added to Watchlist, backend assigns a permanent `row_id` (incremental integer).
+*   This `row_id` is stored in `config.json` under `watched_processes`.
+*   Even if the process restarts (new PID), if the name matches, it retains the same `row_id` and thus the same position number in the UI.
+*   If the process disappears temporarily, the row remains in the table with status "Stopped" (greyed out) to preserve layout stability.
+
+### 3.8. Responsive & TMA Adaptations
+*   **Mobile Table:** On screens `< 768px`, hide columns: `User`, `Threads`, `CMD`. Show only `Name`, `CPU`, `MEM`, `Actions`.
+*   **Card View Alternative:** Optional toggle in Settings to render processes as Cards instead of Table on mobile (easier touch targets).
+*   **Swipe Actions:** On mobile, swipe left on a row to reveal "Kill" and "Logs" buttons (iOS style).
+
+---
+
+### ✅ Checkpoint for Section 3
+This section completely defines the **Process Inspector**.
+*   It solves the "Remove ambiguity" by splitting into Unwatch/SIGTERM/SIGKILL.
+*   It solves the "0% CPU" bug by specifying backend delta calculation + frontend smoothing.
+*   It implements the Lock/Unlock mechanism with exact JS logic for Drag-and-Drop vs Sorting.
+*   It defines Persistent Row IDs so order doesn't shuffle on restart.
+*   It includes Mobile adaptations (column hiding, swipe actions).
+
+
+## SECTION 4: SERVICE MANAGER (`#tab-services`)
+**Scope:** Lifecycle management of Systemd units. Transforms WARD from a passive monitor into an active control panel for server daemons (Nginx, Docker, Xray, etc.).
+
+### 4.1. Layout & State Management
+**Container:** `#services-container`
+**State Object:** `window.WARD_STATE.services`
+```javascript
+window.WARD_STATE.services = {
+  filterStatus: 'all', // 'all' | 'active' | 'failed' | 'inactive'
+  searchQuery: '',
+  autoRecoveryEnabled: {}, // Map: { "nginx.service": true, "docker.service": false }
+  expandedLogs: null,     // PID/Name of service currently showing logs
+  viewMode: 'list'        // 'list' | 'grid'
+};
+```
+
+### 4.2. Component: Control Toolbar (`#svc-toolbar`)
+**Position:** Sticky top within tab content.
+**Visual Structure:**
+```html
+<div class="toolbar" id="svc-toolbar">
+  <!-- Left: Status Filters -->
+  <div class="filter-group segmented-control">
+    <button class="seg-btn active" data-filter="all">All</button>
+    <button class="seg-btn" data-filter="active">Active <span class="badge-count" id="count-active">0</span></button>
+    <button class="seg-btn" data-filter="failed">Failed <span class="badge-count crit" id="count-failed">0</span></button>
+    <button class="seg-btn" data-filter="inactive">Inactive</button>
+  </div>
+
+  <!-- Center: Search -->
+  <div class="search-box compact">
+    <input type="text" id="svc-search" placeholder="Filter services...">
+  </div>
+
+  <!-- Right: Global Actions -->
+  <div class="action-group">
+    <button class="btn-icon" id="btn-svc-refresh" title="Reload Systemd Daemon">🔄 systemctl daemon-reload</button>
+    <button class="btn-primary" id="btn-add-service">+ Track Service</button>
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **Dynamic Counts:** Badges update in real-time based on `/api/services/list` response.
+*   **Daemon Reload:** Executes `systemctl daemon-reload` on backend. Shows toast "Systemd configuration reloaded".
+*   **Filtering:** Client-side filtering of the rendered list based on `sub_state` and `active_state`.
+
+### 4.3. Component: Service List Table (`#svc-table`)
+**Structure:** Semantic HTML Table with expandable rows for logs.
+```html
+<div class="table-wrapper">
+  <table class="data-table" id="svc-table">
+    <thead>
+      <tr>
+        <th style="width: 40px;">Status</th>
+        <th>Service Name</th>
+        <th>Description</th>
+        <th style="width: 100px;">Active State</th>
+        <th style="width: 100px;">Sub State</th>
+        <th style="width: 120px;">Auto-Recover</th>
+        <th style="width: 160px;">Controls</th>
+      </tr>
+    </thead>
+    <tbody id="svc-tbody">
+      <!-- Rows injected by JS -->
+    </tbody>
+  </table>
+</div>
+```
+
+**Row Template (`<tr class="svc-row">`):**
+```html
+<tr class="svc-row" data-unit="nginx.service">
+  <!-- Status Indicator Dot -->
+  <td class="col-status">
+    <span class="status-dot large status-active" title="Active (Running)"></span>
+  </td>
+  
+  <!-- Name & Description -->
+  <td class="col-name">
+    <strong class="unit-name">nginx.service</strong>
+    <div class="unit-desc text-muted truncate">A high performance web server...</div>
+  </td>
+  
+  <!-- States -->
+  <td class="mono state-active">active</td>
+  <td class="mono state-sub">running</td>
+  
+  <!-- Auto-Recovery Toggle -->
+  <td class="col-autorecover">
+    <label class="toggle-switch small">
+      <input type="checkbox" class="autorecover-toggle" data-unit="nginx.service">
+      <span class="slider"></span>
+    </label>
+  </td>
+  
+  <!-- Action Buttons -->
+  <td class="col-controls">
+    <div class="btn-group compact">
+      <button class="btn-ctrl start" title="Start" data-action="start">▶</button>
+      <button class="btn-ctrl restart" title="Restart" data-action="restart">🔄</button>
+      <button class="btn-ctrl stop" title="Stop" data-action="stop">⏹</button>
+      <button class="btn-ctrl logs" title="View Logs" data-action="logs">📄</button>
+    </div>
+  </td>
+</tr>
+
+<!-- Expandable Log Row (Hidden by default) -->
+<tr class="svc-log-row" id="logs-nginx.service" style="display:none;">
+  <td colspan="7" class="log-container">
+    <div class="log-header">
+      <span>Live Journal Logs (Last 50 lines)</span>
+      <button class="btn-close-logs">✕ Close</button>
+    </div>
+    <pre class="log-output mono" id="log-content-nginx.service">Loading logs...</pre>
+  </td>
+</tr>
+```
+
+### 4.4. Component: Live Log Viewer (Embedded)
+**Trigger:** Click "📄" button in Controls column.
+**Behavior:**
+*   Toggles visibility of the `.svc-log-row` immediately below the service row.
+*   Initiates WebSocket connection or SSE (Server-Sent Events) to `/api/services/logs/{unit}/stream`.
+*   **Auto-Scroll:** Automatically scrolls to bottom when new lines arrive, unless user manually scrolls up (pause auto-scroll).
+*   **Syntax Highlighting:** Simple regex coloring for keywords: `ERROR` (Red), `WARN` (Amber), `INFO` (Cyan), `DEBUG` (Grey).
+
+**Log Stream Logic (JS):**
+```javascript
+let logEventSource = null;
+
+function toggleLogs(unitName) {
+  const logRow = document.getElementById(`logs-${unitName}`);
+  const logContent = document.getElementById(`log-content-${unitName}`);
+  const isVisible = logRow.style.display !== 'none';
+
+  if (isVisible) {
+    // Close
+    logRow.style.display = 'none';
+    if (logEventSource) { logEventSource.close(); logEventSource = null; }
+    WARD_STATE.services.expandedLogs = null;
+  } else {
+    // Open
+    // Close any other open logs first (accordion behavior)
+    if (WARD_STATE.services.expandedLogs) {
+      toggleLogs(WARD_STATE.services.expandedLogs);
+    }
+    
+    logRow.style.display = 'table-row';
+    logContent.innerText = 'Connecting to journal stream...';
+    WARD_STATE.services.expandedLogs = unitName;
+
+    // Start SSE Stream
+    logEventSource = new EventSource(`/api/services/logs/${encodeURIComponent(unitName)}/stream?token=${sessionToken}`);
+    
+    logEventSource.onmessage = (event) => {
+      const line = event.data;
+      logContent.innerText += line + '\n';
+      
+      // Keep only last 100 lines in DOM to prevent memory leak
+      const lines = logContent.innerText.split('\n');
+      if (lines.length > 100) {
+        logContent.innerText = lines.slice(-100).join('\n');
+      }
+      
+      // Auto-scroll if near bottom
+      const container = logContent.parentElement;
+      if (container.scrollHeight - container.scrollTop <= container.clientHeight + 50) {
+        container.scrollTop = container.scrollHeight;
+      }
+    };
+
+    logEventSource.onerror = () => {
+      logContent.innerText += '\n[Connection Lost. Retrying...]';
+    };
+  }
+}
+```
+
+### 4.5. Component: Auto-Recovery Engine (Backend Logic)
+**Feature:** If enabled, WARD monitors specific services and restarts them if they die unexpectedly.
+**Configuration Storage:** `config.json` -> `auto_recovery_services: ["nginx.service", "xray.service"]`
+
+**Backend Worker Thread (`service_guardian.py`):**
+```python
+import subprocess
+import time
+from collections import deque
+
+class ServiceGuardian:
+    def __init__(self, check_interval=10):
+        self.check_interval = check_interval
+        self.failure_counts = {} # Track consecutive failures to prevent restart loops
+        self.max_failures_before_alert = 3
+        
+    def run_loop(self):
+        while True:
+            watched_services = load_config().get('auto_recovery_services', [])
+            
+            for unit in watched_services:
+                status = self.get_service_status(unit)
+                
+                if status['active_state'] == 'failed' or status['sub_state'] == 'dead':
+                    self.handle_failure(unit)
+                else:
+                    # Reset failure count if healthy
+                    self.failure_counts[unit] = 0
+                    
+            time.sleep(self.check_interval)
+            
+    def get_service_status(self, unit):
+        try:
+            res = subprocess.run(
+                ["systemctl", "show", unit, "--property=ActiveState,SubState", "--no-pager"],
+                capture_output=True, text=True, timeout=5
+            )
+            props = dict(line.split('=') for line in res.stdout.strip().split('\n') if '=' in line)
+            return {
+                'active_state': props.get('ActiveState', 'unknown'),
+                'sub_state': props.get('SubState', 'unknown')
+            }
+        except Exception:
+            return {'active_state': 'error', 'sub_state': 'check_failed'}
+
+    def handle_failure(self, unit):
+        count = self.failure_counts.get(unit, 0) + 1
+        self.failure_counts[unit] = count
+        
+        # Log Event
+        EVENT_ENGINE.log('warn', 'Service Down', f'{unit} is inactive/dead. Attempting auto-restart ({count}/{self.max_failures_before_alert})', source='guardian')
+        
+        if count <= self.max_failures_before_alert:
+            try:
+                subprocess.run(["systemctl", "restart", unit], timeout=10)
+                EVENT_ENGINE.log('info', 'Auto-Recovery', f'Successfully restarted {unit}', source='guardian')
+            except Exception as e:
+                EVENT_ENGINE.log('crit', 'Recovery Failed', f'Could not restart {unit}: {str(e)}', source='guardian')
+        else:
+            # Stop trying to prevent loop, alert admin
+            EVENT_ENGINE.log('crit', 'Recovery Aborted', f'{unit} failed {count} times. Manual intervention required.', source='guardian')
+            # Optionally disable auto-recovery for this unit in config
+```
+
+### 4.6. Data Contract: Service APIs
+**Endpoint 1:** `GET /api/services/list`
+*   **Description:** Returns all loaded systemd units (or filtered subset).
+*   **Response:**
+```json
+{
+  "units": [
+    {
+      "name": "nginx.service",
+      "description": "A high performance web server...",
+      "active_state": "active",   // active, inactive, failed
+      "sub_state": "running",     // running, dead, exited, waiting
+      "load_state": "loaded",
+      "is_watched": true,         // Is in WARD config watchlist?
+      "auto_recovery": true,      // Is auto-restart enabled?
+      "uptime_seconds": 86400,
+      "pid": 1234                 // Main PID if available
+    }
+  ],
+  "summary": {
+    "total": 120,
+    "active": 45,
+    "failed": 2,
+    "inactive": 73
+  }
+}
+```
+
+**Endpoint 2:** `POST /api/services/action`
+*   **Payload:** `{ "unit": "nginx.service", "action": "start" | "stop" | "restart" | "enable" | "disable" }`
+*   **Security:** Requires valid session token. Logs action to Event Engine.
+*   **Response:** `{ "success": true, "new_state": "active" }`
+
+**Endpoint 3:** `GET /api/services/logs/{unit}/stream` (SSE)
+*   **Description:** Server-Sent Events stream of `journalctl -u {unit} -f -n 50`.
+*   **Headers:** `Content-Type: text/event-stream`, `Cache-Control: no-cache`.
+*   **Data Format:** `data: <log_line>\n\n`
+
+**Endpoint 4:** `POST /api/services/configure`
+*   **Payload:** `{ "unit": "nginx.service", "auto_recovery": true, "watch": true }`
+*   **Description:** Updates `config.json` with watchlist and recovery settings.
+
+### 4.7. JavaScript Logic: Service Controller
+**File:** `js/controllers/services.js`
+**Key Functions:**
+
+**A. Render & Update Loop:**
+```javascript
+class ServiceController {
+  async fetchAndRender() {
+    const res = await fetch('/api/services/list');
+    const data = await res.json();
+    
+    // Update Summary Badges
+    document.getElementById('count-active').innerText = data.summary.active;
+    document.getElementById('count-failed').innerText = data.summary.failed;
+    
+    // Apply Filters
+    let filtered = data.units;
+    if (WARD_STATE.services.filterStatus !== 'all') {
+      filtered = filtered.filter(u => u.active_state === WARD_STATE.services.filterStatus);
+    }
+    if (WARD_STATE.services.searchQuery) {
+      const q = WARD_STATE.services.searchQuery.toLowerCase();
+      filtered = filtered.filter(u => 
+        u.name.toLowerCase().includes(q) || 
+        u.description.toLowerCase().includes(q)
+      );
+    }
+    
+    this.renderTable(filtered);
+  }
+
+  renderTable(units) {
+    const tbody = document.getElementById('svc-tbody');
+    // Diffing algorithm to update only changed rows (prevent flickering)
+    units.forEach(unit => {
+      let row = document.querySelector(`tr[data-unit="${unit.name}"]`);
+      if (!row) {
+        row = this.createRowElement(unit);
+        tbody.appendChild(row);
+      }
+      this.updateRowElement(row, unit);
+    });
+    
+    // Remove rows that no longer exist
+    const currentUnits = new Set(units.map(u => u.name));
+    Array.from(tbody.querySelectorAll('.svc-row')).forEach(row => {
+      if (!currentUnits.has(row.dataset.unit)) row.remove();
+    });
+  }
+
+  updateRowElement(row, unit) {
+    // Update Status Dot Color
+    const dot = row.querySelector('.status-dot');
+    dot.className = `status-dot large status-${unit.active_state}`;
+    
+    // Update State Text
+    row.querySelector('.state-active').innerText = unit.active_state;
+    row.querySelector('.state-sub').innerText = unit.sub_state;
+    
+    // Update Auto-Recover Checkbox (without triggering event if unchanged)
+    const toggle = row.querySelector('.autorecover-toggle');
+    if (toggle.checked !== unit.auto_recovery) {
+      toggle.checked = unit.auto_recovery;
+    }
+    
+    // Enable/Disable buttons based on state
+    const btnStart = row.querySelector('[data-action="start"]');
+    const btnStop = row.querySelector('[data-action="stop"]');
+    btnStart.disabled = (unit.active_state === 'active');
+    btnStop.disabled = (unit.active_state !== 'active');
+  }
+  
+  bindControlEvents() {
+    document.getElementById('svc-tbody').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-ctrl');
+      if (!btn) return;
+      
+      const unit = btn.closest('.svc-row').dataset.unit;
+      const action = btn.dataset.action;
+      
+      if (action === 'logs') {
+        toggleLogs(unit);
+      } else {
+        this.executeAction(unit, action);
+      }
+    });
+    
+    // Auto-Recover Toggle Change
+    document.getElementById('svc-tbody').addEventListener('change', (e) => {
+      if (e.target.classList.contains('autorecover-toggle')) {
+        const unit = e.target.closest('.svc-row').dataset.unit;
+        const enabled = e.target.checked;
+        this.updateConfig(unit, { auto_recovery: enabled });
+      }
+    });
+  }
+
+  async executeAction(unit, action) {
+    // Confirmation for destructive actions
+    if (action === 'stop' && !confirm(`Stop ${unit}? This may take services offline.`)) return;
+    
+    try {
+      const res = await fetch('/api/services/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+        body: JSON.stringify({ unit, action })
+      });
+      const result = await res.json();
+      if (result.success) {
+        showToast(`${action.toUpperCase()} command sent to ${unit}`, 'success');
+        this.fetchAndRender(); // Immediate refresh
+      } else {
+        showToast(`Failed: ${result.error}`, 'error');
+      }
+    } catch (e) {
+      showToast('Network error executing action', 'error');
+    }
+  }
+}
+```
+
+### 4.8. Responsive & TMA Adaptations
+*   **Mobile Card View:** On screens `< 768px`, switch from Table to Card List layout.
+    *   Each card shows: Name, Status Badge, Big Action Buttons (Start/Stop/Restart).
+    *   Logs open in a Full-Screen Modal instead of inline expansion.
+*   **Touch Targets:** All control buttons minimum `44x44px` for touch accuracy.
+*   **Swipe to Configure:** Swipe left on mobile card to reveal "Auto-Recover" toggle and "Unwatch" option.
+
+### 4.9. Security & Safety Constraints
+*   **Whitelist Approach:** By default, WARD can only control services explicitly added to the "Watched" list via UI. Prevents accidental manipulation of critical system services like `systemd-journald` or `sshd` unless explicitly enabled.
+*   **Action Logging:** Every Start/Stop/Restart action is logged to `EventEngine` with Timestamp, User IP, and Unit Name.
+*   **Rate Limiting:** Backend limits service actions to 1 per 2 seconds per unit to prevent rapid-fire restart loops.
+
+---
+
+### ✅ Checkpoint for Section 4
+This section completely defines the **Service Manager**.
+*   It includes the Auto-Recovery Guardian logic (running in backend thread).
+*   It implements Live Log Streaming via SSE (no polling lag).
+*   It defines the Lock/Filter/Search state management.
+*   It includes Mobile Card View adaptation.
+*   It enforces safety constraints (whitelist, logging, rate limiting).
+
+
+## SECTION 5: PORTS & FLOW GATEWAY (`#tab-ports`)
+**Scope:** Deep network inspection, proxy health monitoring, and security anomaly detection. Moves beyond simple "Open/Closed" status to active flow analysis and connection intelligence.
+
+### 5.1. Layout & State Management
+**Container:** `#ports-container`
+**State Object:** `window.WARD_STATE.ports`
+```javascript
+window.WARD_STATE.ports = {
+  viewMode: 'monitored', // 'monitored' (watchlist) | 'all_listening' (system-wide)
+  filterProtocol: 'all', // 'all' | 'tcp' | 'udp'
+  searchQuery: '',
+  idleThresholdMinutes: 15, // Configurable via Settings
+  selectedPort: null,       // For detail drawer
+  autoRefresh: true
+};
+```
+
+### 5.2. Component: Control Toolbar (`#port-toolbar`)
+**Position:** Sticky top within tab content.
+**Visual Structure:**
+```html
+<div class="toolbar" id="port-toolbar">
+  <!-- Left: View & Protocol Filters -->
+  <div class="filter-group segmented-control">
+    <button class="seg-btn active" data-view="monitored">⭐ Monitored</button>
+    <button class="seg-btn" data-view="all_listening">🌐 All Listening</button>
+  </div>
+  
+  <div class="filter-group compact">
+    <select id="proto-filter" class="input-select small">
+      <option value="all">All Protocols</option>
+      <option value="tcp">TCP Only</option>
+      <option value="udp">UDP Only</option>
+    </select>
+  </div>
+
+  <!-- Center: Search -->
+  <div class="search-box compact">
+    <input type="text" id="port-search" placeholder="Filter by Port, Process, IP...">
+  </div>
+
+  <!-- Right: Actions -->
+  <div class="action-group">
+    <button class="btn-icon" id="btn-port-scan" title="Force Full Scan">🔍 Scan Now</button>
+    <button class="btn-primary" id="btn-add-port">+ Monitor Port</button>
+  </div>
+</div>
+```
+
+### 5.3. Component: Port Intelligence Table (`#port-table`)
+**Structure:** Advanced table with embedded micro-charts and status indicators.
+```html
+<div class="table-wrapper">
+  <table class="data-table" id="port-table">
+    <thead>
+      <tr>
+        <th style="width: 40px;">Health</th>
+        <th class="sortable" data-sort="port">Port <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="protocol">Proto <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="owner">Owner Process <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="established">Active Conn <span class="sort-icon">↕</span></th>
+        <th style="width: 150px;">Traffic Flow (Last 60s)</th>
+        <th class="sortable" data-sort="status">Status <span class="sort-icon">↕</span></th>
+        <th style="width: 120px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="port-tbody">
+      <!-- Rows injected by JS -->
+    </tbody>
+  </table>
+</div>
+```
+
+**Row Template (`<tr class="port-row">`):**
+```html
+<tr class="port-row" data-port="443" data-proto="tcp">
+  <!-- Health Indicator -->
+  <td class="col-health">
+    <span class="health-dot status-active" title="Listening & Active"></span>
+  </td>
+  
+  <!-- Port & Proto -->
+  <td class="mono big">443</td>
+  <td><span class="badge proto tcp">TCP</span></td>
+  
+  <!-- Owner Process -->
+  <td class="col-owner">
+    <strong>nginx</strong>
+    <span class="pid text-muted">(PID 1234)</span>
+  </td>
+  
+  <!-- Active Connections -->
+  <td class="mono conn-count">
+    <span id="conn-443-tcp" class="value">142</span>
+    <span class="label text-muted">ESTAB</span>
+  </td>
+  
+  <!-- Micro Traffic Chart -->
+  <td class="col-sparkline">
+    <canvas class="sparkline" id="spark-port-443" width="120" height="30"></canvas>
+  </td>
+  
+  <!-- Smart Status -->
+  <td class="col-status">
+    <span class="badge status-active">Active</span>
+    <!-- OR -->
+    <span class="badge status-idle" title="No connections for 15m">Idle</span>
+    <!-- OR -->
+    <span class="badge status-crit" title="Port closed unexpectedly">Down</span>
+  </td>
+  
+  <!-- Actions -->
+  <td class="col-actions">
+    <button class="btn-ctrl test" title="Loopback Test" data-action="test">🏓</button>
+    <button class="btn-ctrl details" title="Connection Details" data-action="details">🔍</button>
+    <button class="btn-ctrl unwatch" title="Remove from Watchlist" data-action="unwatch">✕</button>
+  </td>
+</tr>
+```
+
+### 5.4. Component: Connection Detail Drawer (`#drawer-port-details`)
+**Trigger:** Click "🔍" in Actions column.
+**Type:** Slide-in panel from right (Width `450px`).
+**Content Sections:**
+
+**A. Header Summary:**
+```html
+<div class="drawer-header">
+  <h3>Port 443 (TCP) - nginx</h3>
+  <span class="badge status-active">Healthy</span>
+  <button class="btn-close-drawer">✕</button>
+</div>
+```
+
+**B. Real-time Metrics Grid:**
+```html
+<div class="metrics-grid-2x2">
+  <div class="metric-box">
+    <span class="label">Established</span>
+    <span class="value mono" id="detail-estab">142</span>
+  </div>
+  <div class="metric-box">
+    <span class="label">Time Wait</span>
+    <span class="value mono" id="detail-tw">12</span>
+  </div>
+  <div class="metric-box">
+    <span class="label">RX Rate</span>
+    <span class="value mono" id="detail-rx">2.4 MB/s</span>
+  </div>
+  <div class="metric-box">
+    <span class="label">TX Rate</span>
+    <span class="value mono" id="detail-tx">1.1 MB/s</span>
+  </div>
+</div>
+```
+
+**C. Live Connection List (Top 10):**
+```html
+<div class="conn-list-section">
+  <h4>Active Connections (Top 10 by Duration)</h4>
+  <table class="mini-table">
+    <thead><tr><th>Remote IP</th><th>State</th><th>Duration</th></tr></thead>
+    <tbody id="detail-conn-list">
+      <tr><td class="mono">192.168.1.50:54321</td><td>ESTABLISHED</td><td>2m 14s</td></tr>
+      <tr><td class="mono">10.0.0.5:12345</td><td>TIME_WAIT</td><td>45s</td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+**D. Historical Flow Chart:**
+```html
+<div class="chart-section">
+  <h4>Traffic History (Last Hour)</h4>
+  <canvas id="chart-port-history" height="150"></canvas>
+</div>
+```
+
+### 5.5. Component: Loopback Test Engine (`#modal-loopback-test`)
+**Trigger:** Click "🏓" button.
+**Purpose:** Actively probe the port from localhost to verify application responsiveness (not just socket listening).
+**Modal Structure:**
+```html
+<div class="modal-overlay" id="modal-loopback-test">
+  <div class="modal-card small">
+    <h3>Loopback Connectivity Test</h3>
+    <p>Testing connection to <strong>127.0.0.1:<span id="test-port"></span></strong>...</p>
+    
+    <div class="test-progress">
+      <div class="progress-bar indeterminate"></div>
+    </div>
+    
+    <div class="test-results" id="test-results" style="display:none;">
+      <div class="result-row success">
+        <span class="icon">✅</span>
+        <span>TCP Handshake: <strong>Success</strong></span>
+      </div>
+      <div class="result-row success">
+        <span class="icon">✅</span>
+        <span>Latency: <strong>0.4ms</strong></span>
+      </div>
+      <div class="result-row info">
+        <span class="icon">ℹ️</span>
+        <span>HTTP Response: <strong>200 OK</strong> (if applicable)</span>
+      </div>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn-confirm" id="btn-close-test">Close</button>
+    </div>
+  </div>
+</div>
+```
+**Backend Logic (`/api/ports/test`):**
+1.  Attempt TCP connect to `127.0.0.1:{port}` with 2s timeout.
+2.  If port is common HTTP (80, 443, 8080), send `HEAD / HTTP/1.0` and parse status code.
+3.  Return `{ tcp_ok: bool, latency_ms: float, http_status: int|null }`.
+
+### 5.6. Data Contract: Port APIs
+**Endpoint 1:** `GET /api/ports/list?view=monitored`
+*   **Description:** Returns watched ports or all listening ports.
+*   **Response:**
+```json
+{
+  "ports": [
+    {
+      "port": 443,
+      "protocol": "tcp",
+      "owner_pid": 1234,
+      "owner_name": "nginx",
+      "state": "LISTEN",
+      "established_count": 142,
+      "time_wait_count": 12,
+      "rx_bytes_sec": 2400000,
+      "tx_bytes_sec": 1100000,
+      "idle_minutes": 0,
+      "status": "active", // active, idle, down, unknown
+      "last_seen_active": 1715623400
+    }
+  ],
+  "summary": {
+    "total_monitored": 5,
+    "active": 4,
+    "idle": 1,
+    "down": 0
+  }
+}
+```
+
+**Endpoint 2:** `GET /api/ports/{port}/{proto}/connections`
+*   **Description:** Returns detailed list of active connections for a specific port.
+*   **Response:**
+```json
+{
+  "connections": [
+    {
+      "remote_ip": "192.168.1.50",
+      "remote_port": 54321,
+      "state": "ESTABLISHED",
+      "duration_seconds": 134,
+      "rx_bytes": 102400,
+      "tx_bytes": 51200
+    }
+  ],
+  "total_established": 142
+}
+```
+
+**Endpoint 3:** `POST /api/ports/test`
+*   **Payload:** `{ "port": 443, "protocol": "tcp" }`
+*   **Response:** `{ "tcp_ok": true, "latency_ms": 0.4, "http_status": 200 }`
+
+**Endpoint 4:** `POST /api/ports/configure`
+*   **Payload:** `{ "port": 443, "protocol": "tcp", "watch": true, "idle_threshold": 15 }`
+
+### 5.7. JavaScript Logic: Port Controller
+**File:** `js/controllers/ports.js`
+**Key Algorithms:**
+
+**A. Idle Detection Logic (Frontend + Backend Hybrid):**
+Backend calculates `idle_minutes` based on `established_count` history. Frontend visualizes it.
+```javascript
+updatePortStatus(row, data) {
+  const badge = row.querySelector('.col-status .badge');
+  
+  if (data.state !== 'LISTEN') {
+    badge.className = 'badge status-crit';
+    badge.innerText = 'Down';
+    WARD_EVENTS.log('crit', 'Port Down', `Port ${data.port}/${data.protocol} stopped listening`, 'ports');
+  } else if (data.idle_minutes >= WARD_STATE.ports.idleThresholdMinutes) {
+    badge.className = 'badge status-idle';
+    badge.innerText = `Idle (${data.idle_minutes}m)`;
+    // Optional: Warn only once per idle session
+    if (!row.dataset.idleWarned) {
+      WARD_EVENTS.log('warn', 'Proxy Idle', `Port ${data.port} has no active connections for ${data.idle_minutes}m`, 'ports');
+      row.dataset.idleWarned = 'true';
+    }
+  } else {
+    badge.className = 'badge status-active';
+    badge.innerText = 'Active';
+    row.dataset.idleWarned = ''; // Reset warning flag
+  }
+}
+```
+
+**B. Sparkline Rendering (Canvas):**
+Lightweight canvas drawing for traffic flow without heavy chart libraries.
+```javascript
+drawSparkline(canvasId, dataBuffer) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  
+  ctx.clearRect(0, 0, w, h);
+  
+  if (dataBuffer.length < 2) return;
+  
+  const maxVal = Math.max(...dataBuffer, 1); // Prevent div by zero
+  
+  ctx.beginPath();
+  ctx.strokeStyle = '#06B6D4'; // --accent-flow
+  ctx.lineWidth = 1.5;
+  
+  dataBuffer.forEach((val, i) => {
+    const x = (i / (dataBuffer.length - 1)) * w;
+    const y = h - ((val / maxVal) * (h - 4)) - 2; // 2px padding
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  
+  ctx.stroke();
+  
+  // Fill area under line
+  ctx.lineTo(w, h);
+  ctx.lineTo(0, h);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(6, 182, 212, 0.1)';
+  ctx.fill();
+}
+```
+
+**C. Owner Process Resolution:**
+Backend uses `ss -tulpn` or reads `/proc/net/tcp` + `/proc/{pid}/fd` symlinks to map inode -> PID -> Process Name.
+```python
+def resolve_port_owner(port, proto):
+    try:
+        # Fast method: ss command
+        cmd = f"ss -{proto[0]}lnp sport = :{port}"
+        res = subprocess.run(cmd.split(), capture_output=True, text=True, timeout=2)
+        for line in res.stdout.splitlines():
+            if 'users:' in line:
+                # Parse users:(("nginx",pid=1234,fd=6))
+                match = re.search(r'\("([^"]+)",pid=(\d+)', line)
+                if match:
+                    return match.group(1), int(match.group(2))
+    except Exception:
+        pass
+    
+    # Fallback: Scan /proc/net/tcp
+    # ... (inode lookup logic) ...
+    return "unknown", None
+```
+
+### 5.8. Responsive & TMA Adaptations
+*   **Mobile Card View:** On `< 768px`, switch to vertical cards.
+    *   Card Header: Port Number + Protocol Badge + Health Dot.
+    *   Card Body: Owner Name, Active Conn Count, Mini Sparkline.
+    *   Card Footer: Big buttons [Test] [Details] [Unwatch].
+*   **Drawer Fullscreen:** On mobile, Connection Detail Drawer becomes full-screen modal.
+*   **Touch Optimization:** Increase hit areas for sparkline interaction (tap to see exact value at point).
+
+### 5.9. Security & Performance Constraints
+*   **Scan Throttling:** Full system port scan (`/api/ports/list?view=all_listening`) limited to 1 request per 10 seconds to prevent CPU spike from `ss` command.
+*   **Connection List Limit:** API returns max 50 connections per port to prevent JSON payload bloat on high-traffic proxies.
+*   **Privacy Masking:** Option in Settings to mask Remote IPs in logs/UI (e.g., `192.168.x.x`) for GDPR/compliance if needed.
+
+---
+
+### ✅ Checkpoint for Section 5
+This section completely defines the **Ports & Flow Gateway**.
+*   It implements Idle Detection for proxies (critical for your Xray use case).
+*   It includes Loopback Testing (active health check).
+*   It resolves Owner Processes automatically.
+*   It provides lightweight Canvas sparklines for traffic flow.
+*   It handles Mobile/TMA layouts specifically.
+
+
+## SECTION 6: STORAGE & VOLUMES (`#tab-storage`)
+**Scope:** Filesystem health monitoring, directory size analysis, log bloat detection, and safe cleanup operations. Replaces the legacy "Storage Folders" tab with a professional volume manager inspired by `Ncdu` and `Cockpit Storage`.
+
+### 6.1. Layout & State Management
+**Container:** `#storage-container`
+**State Object:** `window.WARD_STATE.storage`
+```javascript
+window.WARD_STATE.storage = {
+  viewMode: 'partitions', // 'partitions' (default) | 'watched' (custom folders)
+  selectedMount: null,    // For detail drill-down
+  sortColumn: 'used_percent',
+  sortDirection: 'desc',
+  autoRefresh: true,
+  cleanupHistory: []      // Track recent clean actions for undo/log
+};
+```
+
+### 6.2. Component: Control Toolbar (`#stor-toolbar`)
+**Position:** Sticky top within tab content.
+**Visual Structure:**
+```html
+<div class="toolbar" id="stor-toolbar">
+  <!-- Left: View Toggle -->
+  <div class="toggle-group">
+    <button class="btn-toggle active" data-view="partitions">💾 Partitions</button>
+    <button class="btn-toggle" data-view="watched">📁 Watched Folders</button>
+  </div>
+
+  <!-- Center: Search (Only for Watched View) -->
+  <div class="search-box compact" id="stor-search-box" style="display:none;">
+    <input type="text" id="stor-search" placeholder="Filter folders...">
+  </div>
+
+  <!-- Right: Global Actions -->
+  <div class="action-group">
+    <button class="btn-icon" id="btn-stor-refresh" title="Rescan Disk Usage">🔄 Rescan</button>
+    <button class="btn-primary" id="btn-add-folder" title="Add Folder to Watchlist">+ Track Folder</button>
+  </div>
+</div>
+```
+**Logic & Behavior:**
+*   **View Toggle:** Switches between system-wide mount points (`/`, `/boot`, `/var`) and user-defined watched directories.
+*   **Rescan Button:** Triggers backend `du` scan with loading spinner. Disabled during scan to prevent queue buildup.
+*   **Dynamic Search:** Only visible in "Watched Folders" mode.
+
+### 6.3. Component: Partition Health Grid (`#partition-grid`)
+**Visibility:** Active when `viewMode === 'partitions'`.
+**Layout:** CSS Grid (2 columns on Desktop, 1 on Mobile).
+**Card Template (`<div class="partition-card">`):**
+```html
+<div class="partition-card" data-mount="/">
+  <div class="card-header">
+    <div class="mount-info">
+      <span class="mount-point big mono">/</span>
+      <span class="device-name text-muted">/dev/sda1</span>
+    </div>
+    <span class="badge status-ok">Healthy</span>
+  </div>
+  
+  <!-- Circular Gauge for Usage -->
+  <div class="gauge-container medium">
+    <canvas class="gauge-canvas" id="gauge-part-/"></canvas>
+    <div class="gauge-center">
+      <span class="percent big">62%</span>
+      <span class="label">Used</span>
+    </div>
+  </div>
+  
+  <!-- Capacity Details -->
+  <div class="capacity-details">
+    <div class="cap-row">
+      <span class="label">Total</span>
+      <span class="value mono">500 GB</span>
+    </div>
+    <div class="cap-row">
+      <span class="label">Used</span>
+      <span class="value mono text-warn">310 GB</span>
+    </div>
+    <div class="cap-row">
+      <span class="label">Free</span>
+      <span class="value mono text-health">190 GB</span>
+    </div>
+  </div>
+  
+  <!-- I/O Speed Indicators -->
+  <div class="io-indicators">
+    <div class="io-pill read">
+      <span class="icon">⬇️</span>
+      <span class="speed mono" id="io-read-/">12 MB/s</span>
+    </div>
+    <div class="io-pill write">
+      <span class="icon">⬆️</span>
+      <span class="speed mono" id="io-write-/">4 MB/s</span>
+    </div>
+  </div>
+  
+  <!-- Filesystem Type & Inodes -->
+  <div class="fs-meta text-muted small">
+    ext4 • Inodes: 45% used
+  </div>
+  
+  <!-- Alert Zone (Hidden unless critical) -->
+  <div class="alert-zone" id="alert-part-/" style="display:none;">
+    <span class="alert-text">⚠️ Low Space! Cleanup recommended.</span>
+    <button class="btn-tiny danger" data-action="analyze">Analyze</button>
+  </div>
+</div>
+```
+
+### 6.4. Component: Watched Folders Table (`#watched-folders-table`)
+**Visibility:** Active when `viewMode === 'watched'`.
+**Structure:** Sortable table with inline sparklines for growth trend.
+```html
+<div class="table-wrapper" id="watched-folders-wrapper">
+  <table class="data-table" id="watched-folders-table">
+    <thead>
+      <tr>
+        <th class="sortable" data-sort="name">Folder Name <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="path">Path <span class="sort-icon">↕</span></th>
+        <th class="sortable" data-sort="size_bytes">Size <span class="sort-icon">↕</span></th>
+        <th style="width: 120px;">Growth (24h)</th>
+        <th class="sortable" data-sort="file_count">Files <span class="sort-icon">↕</span></th>
+        <th class="col-status">Status</th>
+        <th style="width: 140px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="watched-folders-tbody">
+      <!-- Rows injected by JS -->
+    </tbody>
+  </table>
+</div>
+```
+
+**Row Template (`<tr class="folder-row">`):**
+```html
+<tr class="folder-row" data-path="/var/log">
+  <td class="col-name"><strong>System Logs</strong></td>
+  <td class="mono path-cell truncate" title="/var/log">/var/log</td>
+  <td class="mono size-cell">1.2 GB</td>
+  <td class="col-sparkline">
+    <canvas class="sparkline growth" id="spark-folder-varlog" width="100" height="24"></canvas>
+    <span class="trend-indicator up">+50MB/h</span>
+  </td>
+  <td class="mono">1,245</td>
+  <td><span class="badge status-warn">Growing Fast</span></td>
+  <td class="col-actions">
+    <button class="btn-ctrl analyze" title="Deep Scan" data-action="analyze">🔍</button>
+    <button class="btn-ctrl clean" title="Safe Clean" data-action="clean">🧹</button>
+    <button class="btn-ctrl unwatch" title="Remove" data-action="unwatch">✕</button>
+  </td>
+</tr>
+```
+
+### 6.5. Component: Deep Analysis Drawer (`#drawer-folder-analysis`)
+**Trigger:** Click "🔍 Analyze" on partition alert or folder row.
+**Type:** Full-screen overlay on mobile, Slide-in (600px) on desktop.
+**Content Sections:**
+
+**A. Header & Summary:**
+```html
+<div class="drawer-header">
+  <h3>Analysis: /var/log</h3>
+  <span class="scan-time text-muted">Scanned 2s ago</span>
+  <button class="btn-close-drawer">✕</button>
+</div>
+<div class="summary-bar">
+  <div class="stat"><span class="label">Total Size</span><span class="value big">1.2 GB</span></div>
+  <div class="stat"><span class="label">Files</span><span class="value">1,245</span></div>
+  <div class="stat"><span class="label">Oldest File</span><span class="value">45 days</span></div>
+</div>
+```
+
+**B. Treemap Visualization (Canvas):**
+Interactive block diagram showing largest subdirectories/files.
+```html
+<div class="treemap-container">
+  <canvas id="treemap-canvas" width="560" height="300"></canvas>
+  <div class="treemap-tooltip" id="treemap-tooltip" style="display:none;"></div>
+</div>
+<div class="treemap-legend">
+  <span class="legend-item"><span class="color-box c1"></span> nginx (450MB)</span>
+  <span class="legend-item"><span class="color-box c2"></span> syslog (320MB)</span>
+  <span class="legend-item"><span class="color-box c3"></span> auth.log (180MB)</span>
+</div>
+```
+
+**C. Top Consumers List:**
+```html
+<div class="top-consumers-list">
+  <h4>Largest Items</h4>
+  <table class="mini-table">
+    <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>nginx/access.log.1</td><td>File</td><td>250 MB</td><td><button class="btn-tiny delete">Delete</button></td></tr>
+      <tr><td>journal/</td><td>Dir</td><td>180 MB</td><td><button class="btn-tiny rotate">Rotate</button></td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+### 6.6. Component: Safe Cleanup Modal (`#modal-safe-clean`)
+**Trigger:** Click "🧹 Clean" on watched folder or partition alert.
+**Purpose:** Execute predefined safe cleanup rules without risking system stability.
+**Modal Structure:**
+```html
+<div class="modal-overlay" id="modal-safe-clean">
+  <div class="modal-card">
+    <h3>Safe Cleanup: /var/log</h3>
+    <p class="text-muted">Select items to remove. This action cannot be undone.</p>
+    
+    <div class="cleanup-options">
+      <label class="option-row">
+        <input type="checkbox" checked data-rule="old_logs">
+        <div class="option-info">
+          <strong>Compressed Logs (*.gz, *.old)</strong>
+          <span class="desc">Files older than 7 days. Estimated: 450 MB</span>
+        </div>
+      </label>
+      
+      <label class="option-row">
+        <input type="checkbox" data-rule="empty_files">
+        <div class="option-info">
+          <strong>Empty Log Files (0 bytes)</strong>
+          <span class="desc">Safe to remove. Estimated: 2 MB</span>
+        </div>
+      </label>
+      
+      <label class="option-row danger">
+        <input type="checkbox" data-rule="all_logs">
+        <div class="option-info">
+          <strong>⚠️ All Log Files (Aggressive)</strong>
+          <span class="desc">May break active logging. Requires service restart.</span>
+        </div>
+      </label>
+    </div>
+    
+    <div class="estimated-free">
+      Estimated Free Space: <strong id="est-free-space">+452 MB</strong>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-confirm danger" id="btn-exec-clean">Execute Cleanup</button>
+    </div>
+  </div>
+</div>
+```
+**Backend Safety Rules (`cleanup_rules.py`):**
+```python
+CLEANUP_RULES = {
+  'old_logs': {
+    'pattern': r'.*\.(gz|old|\d+)$',
+    'min_age_days': 7,
+    'safe': True
+  },
+  'empty_files': {
+    'pattern': r'.*',
+    'max_size_bytes': 0,
+    'safe': True
+  },
+  'all_logs': {
+    'pattern': r'.*\.log$',
+    'safe': False, # Requires double confirmation
+    'post_action': 'restart_rsyslog'
+  }
+}
+```
+
+### 6.7. Data Contract: Storage APIs
+**Endpoint 1:** `GET /api/storage/partitions`
+*   **Description:** Returns all mounted filesystems with usage stats.
+*   **Response:**
+```json
+{
+  "partitions": [
+    {
+      "mount_point": "/",
+      "device": "/dev/sda1",
+      "fs_type": "ext4",
+      "total_bytes": 500107862016,
+      "used_bytes": 310066874450,
+      "free_bytes": 190040987566,
+      "used_percent": 62.0,
+      "inode_total": 32768000,
+      "inode_used": 14745600,
+      "inode_percent": 45.0,
+      "read_bytes_sec": 125829120,
+      "write_bytes_sec": 47185920,
+      "status": "healthy" // healthy, warning (>80%), critical (>90%)
+    }
+  ]
+}
+```
+
+**Endpoint 2:** `GET /api/storage/watched`
+*   **Description:** Returns user-defined watched folders with historical trends.
+*   **Response:**
+```json
+{
+  "folders": [
+    {
+      "id": "uuid-123",
+      "name": "System Logs",
+      "path": "/var/log",
+      "size_bytes": 1288490188,
+      "file_count": 1245,
+      "growth_rate_bytes_per_hour": 52428800, // 50MB/h
+      "history_24h": [1200000000, 1210000000, ...], // Hourly snapshots
+      "status": "growing_fast", // stable, growing_fast, critical_size
+      "last_scanned": 1715623400
+    }
+  ]
+}
+```
+
+**Endpoint 3:** `POST /api/storage/analyze`
+*   **Payload:** `{ "path": "/var/log", "depth": 2 }`
+*   **Description:** Runs recursive scan up to N levels deep. Returns treemap data.
+*   **Response:**
+```json
+{
+  "root_path": "/var/log",
+  "total_size": 1288490188,
+  "children": [
+    { "name": "nginx", "type": "dir", "size": 471859200, "path": "/var/log/nginx" },
+    { "name": "syslog", "type": "file", "size": 335544320, "path": "/var/log/syslog" },
+    { "name": "auth.log", "type": "file", "size": 188743680, "path": "/var/log/auth.log" }
+  ]
+}
+```
+
+**Endpoint 4:** `POST /api/storage/clean`
+*   **Payload:** `{ "path": "/var/log", "rules": ["old_logs", "empty_files"] }`
+*   **Response:** `{ "success": true, "freed_bytes": 473956352, "deleted_count": 45 }`
+
+**Endpoint 5:** `POST /api/storage/watch`
+*   **Payload:** `{ "path": "/opt/ward/logs", "name": "WARD Logs", "alert_threshold_gb": 1.0 }`
+
+### 6.8. JavaScript Logic: Storage Controller
+**File:** `js/controllers/storage.js`
+**Key Algorithms:**
+
+**A. Treemap Rendering (Squarified Algorithm Simplified):**
+```javascript
+function drawTreemap(canvasId, data) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  
+  ctx.clearRect(0, 0, w, h);
+  
+  // Sort children by size descending
+  const sorted = [...data.children].sort((a, b) => b.size - a.size);
+  const total = data.total_size || 1;
+  
+  let x = 0, y = 0;
+  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+  
+  // Simple slice-and-dice layout for performance
+  sorted.forEach((item, i) => {
+    const ratio = item.size / total;
+    const rectW = w * ratio;
+    
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fillRect(x, y, rectW - 2, h - 2); // 2px gap
+    
+    // Label if big enough
+    if (rectW > 60 && h > 30) {
+      ctx.fillStyle = '#FFF';
+      ctx.font = '11px Inter';
+      ctx.fillText(item.name.substring(0, 10), x + 5, y + 15);
+      ctx.fillText((item.size / 1e6).toFixed(0) + 'MB', x + 5, y + 30);
+    }
+    
+    // Store rect for hover detection
+    item._rect = { x, y, w: rectW - 2, h: h - 2 };
+    x += rectW;
+  });
+  
+  // Hover interaction
+  canvas.onmousemove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    const hovered = sorted.find(item => 
+      mx >= item._rect.x && mx <= item._rect.x + item._rect.w &&
+      my >= item._rect.y && my <= item._rect.y + item._rect.h
+    );
+    
+    const tooltip = document.getElementById('treemap-tooltip');
+    if (hovered) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX + 10) + 'px';
+      tooltip.style.top = (e.clientY + 10) + 'px';
+      tooltip.innerHTML = `<strong>${hovered.name}</strong><br>${(hovered.size/1e6).toFixed(2)} MB`;
+    } else {
+      tooltip.style.display = 'none';
+    }
+  };
+}
+```
+
+**B. Growth Rate Calculation:**
+```javascript
+calculateGrowthTrend(historyArray) {
+  if (historyArray.length < 2) return { rate: 0, direction: 'stable' };
+  
+  const first = historyArray[0];
+  const last = historyArray[historyArray.length - 1];
+  const hours = historyArray.length;
+  
+  const ratePerHour = (last - first) / hours;
+  
+  let direction = 'stable';
+  if (ratePerHour > 10 * 1024 * 1024) direction = 'growing_fast'; // >10MB/h
+  else if (ratePerHour > 1 * 1024 * 1024) direction = 'growing';   // >1MB/h
+  else if (ratePerHour < -1 * 1024 * 1024) direction = 'shrinking';
+  
+  return { rate: ratePerHour, direction };
+}
+```
+
+**C. Smart Alert Thresholds:**
+```javascript
+checkStorageAlerts(partitions, folders) {
+  partitions.forEach(p => {
+    if (p.used_percent > 90) {
+      WARD_EVENTS.log('crit', 'Disk Critical', `${p.mount_point} is ${p.used_percent}% full`, 'storage');
+      document.getElementById(`alert-part-${p.mount_point}`).style.display = 'flex';
+    } else if (p.used_percent > 80) {
+      WARD_EVENTS.log('warn', 'Disk Warning', `${p.mount_point} is ${p.used_percent}% full`, 'storage');
+    }
+  });
+  
+  folders.forEach(f => {
+    if (f.status === 'growing_fast') {
+      WARD_EVENTS.log('warn', 'Log Bloat Detected', `${f.path} growing at ${(f.growth_rate_bytes_per_hour/1e6).toFixed(0)}MB/h`, 'storage');
+    }
+  });
+}
+```
+
+### 6.9. Responsive & TMA Adaptations
+*   **Partition Cards:** Stack vertically on mobile. Gauge becomes horizontal progress bar to save vertical space.
+*   **Treemap:** On mobile, replace Canvas Treemap with simple sorted list (Top 10 Largest Items) for better readability on small screens.
+*   **Cleanup Modal:** Full-screen on mobile. Checkboxes become large toggle switches for touch accuracy.
+*   **Swipe Actions:** Swipe left on folder row to reveal [Clean] and [Unwatch] buttons.
+
+### 6.10. Security & Safety Constraints
+*   **Path Whitelisting:** Cleanup operations restricted to paths explicitly added via UI or predefined safe zones (`/var/log`, `/tmp`, `/var/cache`). Prevents accidental deletion of `/bin` or `/etc`.
+*   **Dry Run Mode:** All cleanup actions support `?dry_run=true` query param to preview deletions without executing.
+*   **Confirmation Gate:** Aggressive rules (like `all_logs`) require typing "DELETE" in modal to confirm.
+*   **Audit Logging:** Every cleanup action logged to EventEngine with bytes freed, rule used, and timestamp.
+
+---
+
+### ✅ Checkpoint for Section 6
+This section completely defines the **Storage & Volumes** module.
+*   It fixes the `/proc` volume calculation bug by using partition-level stats + targeted `du`.
+*   It adds I/O speed monitoring per partition.
+*   It implements Interactive Treemap for deep analysis.
+*   It includes Safe Cleanup engine with rule-based deletion.
+*   It handles Growth Trend detection for log bloat alerts.
+
+
+## SECTION 7: PREFERENCES & ALERTS (`#tab-settings`)
+**Scope:** Central configuration hub for thresholds, notification channels, UI customization, security policies, and data management. This is the "Control Room" where users define how WARD behaves and when it speaks.
+
+### 7.1. Layout & Navigation Structure
+**Container:** `#settings-container`
+**Layout Pattern:** Vertical Tabbed Interface (Sidebar within Settings) or Accordion Sections for Mobile.
+**State Object:** `window.WARD_STATE.settings`
+```javascript
+window.WARD_STATE.settings = {
+  activeSection: 'general', // general, alerts, telegram, ui, security, data
+  hasUnsavedChanges: false,
+  originalConfig: null,     // Snapshot for "Discard Changes"
+  testInProgress: false     // Lock UI during Telegram test
+};
+```
+
+**Settings Sidebar (`#settings-nav`):**
+```html
+<div class="settings-sidebar">
+  <button class="settings-nav-btn active" data-section="general">️ General</button>
+  <button class="settings-nav-btn" data-section="alerts">🔔 Alert Thresholds</button>
+  <button class="settings-nav-btn" data-section="telegram">✈️ Telegram Bot</button>
+  <button class="settings-nav-btn" data-section="ui">🎨 Appearance</button>
+  <button class="settings-nav-btn" data-section="security">🔒 Security</button>
+  <button class="settings-nav-btn" data-section="data">💾 Data & Backup</button>
+  <button class="settings-nav-btn" data-section="about">ℹ️ About</button>
+</div>
+```
+
+### 7.2. Section: General Configuration (`#section-general`)
+**Purpose:** Core polling intervals, system identity, and global toggles.
+
+**Form Fields:**
+```html
+<div class="settings-card">
+  <h3>System Identity</h3>
+  <div class="form-group">
+    <label>Server Name</label>
+    <input type="text" id="cfg-server-name" value="Production-Web-01" placeholder="My Server">
+    <span class="help-text">Displayed in header and notifications.</span>
+  </div>
+  
+  <div class="form-group">
+    <label>Polling Interval</label>
+    <select id="cfg-poll-interval">
+      <option value="1000">1 Second (Real-time)</option>
+      <option value="3000" selected>3 Seconds (Balanced)</option>
+      <option value="5000">5 Seconds (Low CPU)</option>
+      <option value="10000">10 Seconds (Battery Saver)</option>
+    </select>
+    <span class="help-text">Lower values increase accuracy but use more CPU.</span>
+  </div>
+  
+  <div class="form-group toggle-row">
+    <div class="toggle-info">
+      <strong>Auto-Recovery Guardian</strong>
+      <span class="desc">Automatically restart watched services if they crash.</span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="cfg-auto-recovery" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <div class="form-group toggle-row">
+    <div class="toggle-info">
+      <strong>Idle Proxy Detection</strong>
+      <span class="desc">Warn when monitored ports have 0 connections for >15min.</span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="cfg-idle-detection" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+```
+
+### 7.3. Section: Alert Thresholds (`#section-alerts`)
+**Purpose:** Define numeric limits that trigger Warning/Critical events.
+**Visual Structure:** Dynamic table with inline inputs.
+
+```html
+<div class="settings-card">
+  <h3>Resource Thresholds</h3>
+  <p class="card-desc">Set limits for automatic alerts. Leave blank to disable.</p>
+  
+  <table class="threshold-table">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th style="width: 120px;">Warning (%)</th>
+        <th style="width: 120px;">Critical (%)</th>
+        <th style="width: 140px;">Duration (sec)</th>
+        <th>Enabled</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-metric="cpu_total">
+        <td><strong>CPU Usage (Total)</strong></td>
+        <td><input type="number" class="input-num" value="80" min="0" max="100"></td>
+        <td><input type="number" class="input-num" value="95" min="0" max="100"></td>
+        <td><input type="number" class="input-num" value="60" placeholder="Sustained for..."></td>
+        <td><input type="checkbox" class="toggle-enable" checked></td>
+      </tr>
+      <tr data-metric="cpu_iowait">
+        <td><strong>CPU IO Wait</strong></td>
+        <td><input type="number" class="input-num" value="20" min="0" max="100"></td>
+        <td><input type="number" class="input-num" value="50" min="0" max="100"></td>
+        <td><input type="number" class="input-num" value="30"></td>
+        <td><input type="checkbox" class="toggle-enable" checked></td>
+      </tr>
+      <tr data-metric="mem_used">
+        <td><strong>Memory Usage</strong></td>
+        <td><input type="number" class="input-num" value="85" min="0" max="100"></td>
+        <td><input type="number" class="input-num" value="95" min="0" max="100"></td>
+        <td><input type="number" class="input-num" value="60"></td>
+        <td><input type="checkbox" class="toggle-enable" checked></td>
+      </tr>
+      <tr data-metric="disk_used">
+        <td><strong>Disk Space (Any Partition)</strong></td>
+        <td><input type="number" class="input-num" value="80" min="0" max="100"></td>
+        <td><input type="number" class="input-num" value="90" min="0" max="100"></td>
+        <td><input type="number" class="input-num" value="0" disabled title="Immediate"></td>
+        <td><input type="checkbox" class="toggle-enable" checked></td>
+      </tr>
+      <tr data-metric="net_rx_spike">
+        <td><strong>Network RX Spike (MB/s)</strong></td>
+        <td><input type="number" class="input-num" value="50" placeholder="Abs Value"></td>
+        <td><input type="number" class="input-num" value="100" placeholder="Abs Value"></td>
+        <td><input type="number" class="input-num" value="10"></td>
+        <td><input type="checkbox" class="toggle-enable"></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div class="action-row">
+    <button class="btn-secondary" id="btn-reset-thresholds">Reset to Defaults</button>
+  </div>
+</div>
+```
+**Logic:** Backend stores these in `config.json` under `alert_thresholds`. EventEngine checks metrics against these values every poll cycle. "Duration" prevents flapping alerts (e.g., CPU must be >90% for 60s straight before alerting).
+
+### 7.4. Section: Telegram Integration (`#section-telegram`)
+**Purpose:** Configure bot credentials and test connectivity. Critical for receiving alerts when dashboard is closed.
+
+**Form Fields:**
+```html
+<div class="settings-card">
+  <h3>Telegram Bot Configuration</h3>
+  <div class="status-banner" id="tg-status-banner">
+    <!-- Dynamic: Success/Error/Disconnected -->
+    <span class="icon">❌</span>
+    <span class="text">Not Connected</span>
+  </div>
+  
+  <div class="form-group">
+    <label>Bot Token</label>
+    <div class="input-with-action">
+      <input type="password" id="cfg-tg-token" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
+      <button class="btn-icon toggle-vis" title="Show/Hide">👁️</button>
+    </div>
+    <span class="help-text">Get from <a href="https://t.me/BotFather" target="_blank">@BotFather</a>. Never share publicly.</span>
+  </div>
+  
+  <div class="form-group">
+    <label>Chat ID (Destination)</label>
+    <div class="input-with-action">
+      <input type="text" id="cfg-tg-chatid" placeholder="-1001234567890 or @mychannel">
+      <button class="btn-small" id="btn-get-chatid">🔍 Detect My ID</button>
+    </div>
+    <span class="help-text">Send /start to your bot first, then click Detect.</span>
+  </div>
+  
+  <div class="form-group toggle-row">
+    <div class="toggle-info">
+      <strong>Send Critical Alerts Only</strong>
+      <span class="desc">Disable to receive Warnings too (may be noisy).</span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="cfg-tg-crit-only" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <div class="form-group">
+    <label>Alert Prefix</label>
+    <input type="text" id="cfg-tg-prefix" value="🚨 WARD" placeholder="Optional prefix for messages">
+  </div>
+  
+  <div class="action-row split">
+    <button class="btn-secondary" id="btn-test-telegram">🧪 Send Test Message</button>
+    <button class="btn-primary" id="btn-save-telegram">💾 Save & Connect</button>
+  </div>
+  
+  <!-- Test Result Log -->
+  <div class="test-log" id="tg-test-log" style="display:none;">
+    <pre class="mono small"></pre>
+  </div>
+</div>
+```
+
+**Backend Logic (`telegram_notifier.py`):**
+```python
+import requests
+
+class TelegramNotifier:
+    def __init__(self, token, chat_id):
+        self.token = token
+        self.chat_id = chat_id
+        self.api_url = f"https://api.telegram.org/bot{token}/sendMessage"
+        
+    def send(self, message, severity='info'):
+        if not self.token or not self.chat_id:
+            return False
+            
+        # Format message with HTML
+        icons = {'crit': '', 'warn': '', 'info': '🔵'}
+        icon = icons.get(severity, 'ℹ️')
+        formatted_msg = f"<b>{icon} WARD Alert</b>\n\n{message}"
+        
+        payload = {
+            'chat_id': self.chat_id,
+            'text': formatted_msg,
+            'parse_mode': 'HTML',
+            'disable_web_page_preview': True
+        }
+        
+        try:
+            res = requests.post(self.api_url, json=payload, timeout=5)
+            return res.status_code == 200
+        except Exception as e:
+            print(f"TG Send Failed: {e}")
+            return False
+
+    def get_updates(self, timeout=5):
+        """Used for 'Detect My ID' feature"""
+        url = f"https://api.telegram.org/bot{self.token}/getUpdates"
+        try:
+            res = requests.get(url, timeout=timeout)
+            data = res.json()
+            if data.get('ok') and data.get('result'):
+                # Return last chat_id found
+                last_msg = data['result'][-1]
+                return last_msg['message']['chat']['id']
+        except:
+            pass
+        return None
+```
+
+**Endpoint:** `POST /api/settings/telegram/test`
+*   Payload: `{ "token": "...", "chat_id": "..." }`
+*   Action: Instantiates `TelegramNotifier`, sends "✅ WARD Connection Test Successful", returns result.
+
+### 7.5. Section: Appearance & UI (`#section-ui`)
+**Purpose:** Theme selection, density control, and accessibility options.
+
+**Form Fields:**
+```html
+<div class="settings-card">
+  <h3>Theme Engine</h3>
+  <div class="theme-selector-grid">
+    <div class="theme-option active" data-theme="cyber-oled">
+      <div class="theme-preview cyber-oled"></div>
+      <span>Cyber OLED</span>
+      <span class="badge default">Default</span>
+    </div>
+    <div class="theme-option" data-theme="light-pro">
+      <div class="theme-preview light-pro"></div>
+      <span>Light Pro</span>
+    </div>
+    <div class="theme-option" data-theme="high-contrast">
+      <div class="theme-preview high-contrast"></div>
+      <span>High Contrast</span>
+    </div>
+  </div>
+  
+  <div class="form-group" style="margin-top: 20px;">
+    <label>Interface Density</label>
+    <select id="cfg-ui-density">
+      <option value="comfortable">Comfortable (More spacing)</option>
+      <option value="compact" selected>Compact (More data)</option>
+      <option value="dense">Dense (Maximum info)</option>
+    </select>
+  </div>
+  
+  <div class="form-group toggle-row">
+    <div class="toggle-info">
+      <strong>Reduce Animations</strong>
+      <span class="desc">Disable transitions for slower devices.</span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="cfg-reduce-motion">
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <div class="form-group toggle-row">
+    <div class="toggle-info">
+      <strong>Show Row Numbers</strong>
+      <span class="desc">Display persistent IDs in tables.</span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="cfg-show-row-nums" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+```
+**CSS Variable Mapping:**
+JS updates `document.documentElement.style.setProperty('--bg-base', ...)` based on selection. Saved to `localStorage` key `ward_theme_pref`.
+
+### 7.6. Section: Security & Access (`#section-security`)
+**Purpose:** Authentication, IP whitelisting, and session management.
+
+**Form Fields:**
+```html
+<div class="settings-card">
+  <h3>Authentication</h3>
+  <div class="form-group">
+    <label>Admin Password</label>
+    <div class="input-with-action">
+      <input type="password" id="cfg-admin-pass" placeholder="••••••••">
+      <button class="btn-small" id="btn-change-pass">Change</button>
+    </div>
+    <span class="help-text">Required for login and sensitive actions (Kill/Stop).</span>
+  </div>
+  
+  <div class="form-group toggle-row">
+    <div class="toggle-info">
+      <strong>Enable Login Screen</strong>
+      <span class="desc">If disabled, dashboard is public (Not recommended).</span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="cfg-auth-enabled" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <div class="form-group">
+    <label>IP Whitelist (CIDR)</label>
+    <textarea id="cfg-ip-whitelist" rows="3" placeholder="0.0.0.0/0 (Allow All)&#10;192.168.1.0/24&#10;203.0.113.5/32"></textarea>
+    <span class="help-text">One per line. Empty = Allow All. Changes require restart.</span>
+  </div>
+  
+  <div class="form-group">
+    <label>Session Timeout (Minutes)</label>
+    <input type="number" id="cfg-session-timeout" value="60" min="5" max="1440">
+  </div>
+</div>
+
+<div class="settings-card">
+  <h3>Active Sessions</h3>
+  <table class="mini-table" id="active-sessions-table">
+    <thead><tr><th>IP Address</th><th>User Agent</th><th>Last Active</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">192.168.1.50</td><td>Chrome/Win</td><td>Just now</td><td><button class="btn-tiny danger">Revoke</button></td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+### 7.7. Section: Data & Backup (`#section-data`)
+**Purpose:** Export/Import configuration, clear history, and factory reset.
+
+**Form Fields:**
+```html
+<div class="settings-card">
+  <h3>Configuration Management</h3>
+  <div class="action-grid-2">
+    <button class="btn-large secondary" id="btn-export-config">
+      <span class="icon">📥</span>
+      <div class="text">
+        <strong>Export Config</strong>
+        <span class="desc">Download ward_config.json</span>
+      </div>
+    </button>
+    
+    <label class="btn-large secondary file-upload">
+      <input type="file" id="input-import-config" accept=".json" hidden>
+      <span class="icon">📤</span>
+      <div class="text">
+        <strong>Import Config</strong>
+        <span class="desc">Restore from backup file</span>
+      </div>
+    </label>
+  </div>
+  
+  <div class="divider"></div>
+  
+  <h3>Danger Zone</h3>
+  <div class="danger-zone">
+    <div class="danger-item">
+      <div class="info">
+        <strong>Clear Event History</strong>
+        <span class="desc">Delete all logged alerts and notifications.</span>
+      </div>
+      <button class="btn-danger-outline" id="btn-clear-events">Clear Logs</button>
+    </div>
+    
+    <div class="danger-item">
+      <div class="info">
+        <strong>Reset Watchlists</strong>
+        <span class="desc">Remove all monitored processes, ports, and folders.</span>
+      </div>
+      <button class="btn-danger-outline" id="btn-reset-watchlists">Reset Lists</button>
+    </div>
+    
+    <div class="danger-item critical">
+      <div class="info">
+        <strong>Factory Reset</strong>
+        <span class="desc">Restore all settings to default. Irreversible.</span>
+      </div>
+      <button class="btn-danger-solid" id="btn-factory-reset">Factory Reset</button>
+    </div>
+  </div>
+</div>
+```
+
+### 7.8. Data Contract: Settings APIs
+**Endpoint 1:** `GET /api/settings/config`
+*   **Description:** Returns full current configuration object.
+*   **Response:**
+```json
+{
+  "server_name": "Production-Web-01",
+  "polling_interval_ms": 3000,
+  "auto_recovery_enabled": true,
+  "idle_detection_enabled": true,
+  "idle_threshold_minutes": 15,
+  "alert_thresholds": {
+    "cpu_total": { "warn": 80, "crit": 95, "duration_sec": 60, "enabled": true },
+    "mem_used": { "warn": 85, "crit": 95, "duration_sec": 60, "enabled": true },
+    "disk_used": { "warn": 80, "crit": 90, "duration_sec": 0, "enabled": true }
+  },
+  "telegram": {
+    "token_masked": "123456:****",
+    "chat_id": "-1001234567890",
+    "crit_only": true,
+    "prefix": "🚨 WARD",
+    "connected": true
+  },
+  "ui": {
+    "theme": "cyber-oled",
+    "density": "compact",
+    "reduce_motion": false,
+    "show_row_nums": true
+  },
+  "security": {
+    "auth_enabled": true,
+    "ip_whitelist": ["0.0.0.0/0"],
+    "session_timeout_min": 60
+  }
+}
+```
+
+**Endpoint 2:** `POST /api/settings/update`
+*   **Payload:** Partial or full config object. Merges with existing.
+*   **Validation:** Backend validates types and ranges before saving.
+*   **Side Effects:** If `polling_interval` changed, notify frontend to adjust timer. If `telegram` changed, re-initialize notifier.
+
+**Endpoint 3:** `POST /api/settings/telegram/detect_id`
+*   **Payload:** `{ "token": "..." }`
+*   **Action:** Calls `getUpdates` on Telegram API, extracts latest `chat_id`.
+*   **Response:** `{ "success": true, "chat_id": "-100..." }` or `{ "success": false, "error": "No messages found. Send /start first." }`
+
+**Endpoint 4:** `POST /api/settings/security/password`
+*   **Payload:** `{ "old_password": "...", "new_password": "..." }`
+*   **Action:** Verifies old hash, generates new salt+hash, updates config. Invalidates all existing sessions.
+
+**Endpoint 5:** `POST /api/settings/data/reset`
+*   **Payload:** `{ "scope": "events" | "watchlists" | "full" }`
+*   **Action:** Clears specific sections of `config.json` and memory buffers. Requires confirmation token in header.
+
+### 7.9. JavaScript Logic: Settings Controller
+**File:** `js/controllers/settings.js`
+**Key Functions:**
+
+**A. Dirty State Tracking:**
+```javascript
+let initialConfigSnapshot = null;
+
+async function loadSettings() {
+  const res = await fetch('/api/settings/config');
+  const config = await res.json();
+  initialConfigSnapshot = JSON.stringify(config);
+  populateForm(config);
+  WARD_STATE.settings.hasUnsavedChanges = false;
+  updateSaveButtonState();
+}
+
+function checkDirtyState() {
+  const currentFormState = collectFormData();
+  const isDirty = JSON.stringify(currentFormState) !== initialConfigSnapshot;
+  
+  if (isDirty !== WARD_STATE.settings.hasUnsavedChanges) {
+    WARD_STATE.settings.hasUnsavedChanges = isDirty;
+    updateSaveButtonState();
+    
+    // Warn before leaving tab
+    if (isDirty) {
+      window.onbeforeunload = () => "You have unsaved settings changes.";
+    } else {
+      window.onbeforeunload = null;
+    }
+  }
+}
+
+function updateSaveButtonState() {
+  const btnSave = document.getElementById('btn-save-all-settings');
+  if (WARD_STATE.settings.hasUnsavedChanges) {
+    btnSave.classList.add('pulse-highlight');
+    btnSave.innerText = '💾 Save Changes';
+  } else {
+    btnSave.classList.remove('pulse-highlight');
+    btnSave.innerText = 'Saved';
+    btnSave.disabled = true;
+  }
+}
+```
+
+**B. Telegram Test Flow:**
+```javascript
+async function testTelegramConnection() {
+  const token = document.getElementById('cfg-tg-token').value;
+  const chatId = document.getElementById('cfg-tg-chatid').value;
+  const logBox = document.getElementById('tg-test-log');
+  const banner = document.getElementById('tg-status-banner');
+  
+  if (!token || !chatId) {
+    showToast('Token and Chat ID required', 'error');
+    return;
+  }
+  
+  logBox.style.display = 'block';
+  logBox.querySelector('pre').innerText = 'Connecting to Telegram API...\n';
+  banner.className = 'status-banner loading';
+  banner.innerHTML = '<span class="spinner"></span> Testing...';
+  
+  try {
+    const res = await fetch('/api/settings/telegram/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ token, chat_id: chatId })
+    });
+    const result = await res.json();
+    
+    if (result.success) {
+      logBox.querySelector('pre').innerText += '✅ Success! Message sent.\nCheck your Telegram app.';
+      banner.className = 'status-banner success';
+      banner.innerHTML = '<span class="icon">✅</span> Connected & Verified';
+      showToast('Test message sent successfully', 'success');
+    } else {
+      throw new Error(result.error || 'Unknown error');
+    }
+  } catch (e) {
+    logBox.querySelector('pre').innerText += `❌ Failed: ${e.message}\n`;
+    banner.className = 'status-banner error';
+    banner.innerHTML = `<span class="icon">❌</span> ${e.message}`;
+    showToast('Telegram test failed', 'error');
+  }
+}
+```
+
+**C. Threshold Validation:**
+```javascript
+function validateThresholds() {
+  const rows = document.querySelectorAll('.threshold-table tbody tr');
+  let isValid = true;
+  
+  rows.forEach(row => {
+    const warnInput = row.querySelector('input:nth-of-type(1)');
+    const critInput = row.querySelector('input:nth-of-type(2)');
+    
+    const warn = parseFloat(warnInput.value);
+    const crit = parseFloat(critInput.value);
+    
+    if (warn >= crit) {
+      warnInput.classList.add('input-error');
+      critInput.classList.add('input-error');
+      isValid = false;
+    } else {
+      warnInput.classList.remove('input-error');
+      critInput.classList.remove('input-error');
+    }
+  });
+  
+  if (!isValid) {
+    showToast('Warning threshold must be lower than Critical', 'error');
+  }
+  return isValid;
+}
+```
+
+### 7.10. Responsive & TMA Adaptations
+*   **Settings Navigation:** On mobile, vertical sidebar becomes horizontal scrollable tabs at top of content area.
+*   **Threshold Table:** Converts to stacked cards on mobile. Each metric becomes a card with inputs arranged vertically.
+*   **Telegram Section:** "Detect My ID" button becomes prominent primary action on mobile since typing long IDs is painful.
+*   **Danger Zone:** Buttons require double-tap or hold-to-confirm on touch devices to prevent accidental resets.
+
+### 7.11. Security & Persistence Constraints
+*   **Token Masking:** API never returns full Telegram token in GET responses. Only masked version (`123456:****`). Full token only accepted in POST updates.
+*   **Config Atomicity:** Backend writes to `config.json.tmp` first, then renames to `config.json` to prevent corruption on power loss.
+*   **Session Invalidation:** Changing password or IP whitelist immediately invalidates all active session tokens, forcing re-login.
+*   **Backup Encryption Option:** Future hook for encrypting exported JSON with user password (AES-256) before download.
+
+---
+
+### ✅ Checkpoint for Section 7
+This section completely defines the **Preferences & Alerts** module.
+*   It implements granular threshold configuration with duration-based debouncing.
+*   It includes full Telegram Bot integration with live testing and ID detection.
+*   It provides theme engine and density controls for UI customization.
+*   It handles security policies (IP whitelist, session management).
+*   It includes safe data management (export/import/factory reset).
+
+
+## SECTION 8: MISCELLANEOUS & FUTURE MODULES (`#tab-misc`)
+**Scope:** Cross-cutting concerns, placeholder architectures for future versions, global utilities, and the "glue" logic that binds all sections together. This section ensures extensibility without breaking the core identity.
+
+### 8.1. Module: Scheduled Tasks Engine (Placeholder v2.0+)
+**Status:** 🚧 Stub Implementation (UI Visible, Logic Disabled)
+**Purpose:** Allow users to define cron-like jobs directly from WARD UI instead of editing `/etc/crontab`. Deferred to v2.0 to keep v1.x lightweight.
+
+**UI Stub (`#tab-scheduled-tasks`):**
+```html
+<div class="feature-preview-card">
+  <div class="preview-icon"></div>
+  <h3>Scheduled Tasks & Automation</h3>
+  <p class="text-muted">
+    Define custom cleanup scripts, backup routines, and periodic health checks.
+    Coming in <strong>WARD v2.0</strong>.
+  </p>
+  <div class="preview-features-list">
+    <span class="feature-tag"> Cron Syntax Support</span>
+    <span class="feature-tag">📜 Script Runner</span>
+    <span class="feature-tag">📧 Email/Telegram Reports</span>
+    <span class="feature-tag"> History & Logs</span>
+  </div>
+  <button class="btn-secondary disabled" disabled>Notify Me on Release</button>
+</div>
+```
+
+**Backend Stub (`scheduler_stub.py`):**
+```python
+class TaskSchedulerStub:
+    """
+    Placeholder for v2.0 APScheduler integration.
+    Currently does nothing but logs intent if called.
+    """
+    def __init__(self):
+        self.is_enabled = False
+        self.jobs = []
+        
+    def add_job(self, trigger, func, args=None, job_id=None):
+        # Log only, do not execute
+        EVENT_ENGINE.log('info', 'Scheduler Stub', 
+            f'Job registration attempted: {job_id} (Disabled in v1.x)', 
+            source='scheduler')
+        return None
+        
+    def get_jobs(self):
+        return [] # Return empty list for API compatibility
+```
+
+**API Contract (Reserved):**
+*   `GET /api/tasks/list` → Returns `[]` in v1.x
+*   `POST /api/tasks/create` → Returns `{ "error": "Feature available in v2.0" }`
+*   `DELETE /api/tasks/{id}` → Returns 404
+
+---
+
+### 8.2. Module: Global Event Bus & State Sync
+**Purpose:** Decouple components so Process Tab can trigger Notification Bell update without direct DOM manipulation. Central nervous system of WARD.
+
+**Implementation:** `js/core/event-bus.js`
+```javascript
+class WARDEventBus {
+  constructor() {
+    this.listeners = {};
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) this.listeners[event] = [];
+    this.listeners[event].push(callback);
+    return () => this.off(event, callback); // Unsubscribe function
+  }
+
+  off(event, callback) {
+    if (!this.listeners[event]) return;
+    this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+  }
+
+  emit(event, data) {
+    if (!this.listeners[event]) return;
+    this.listeners[event].forEach(cb => {
+      try { cb(data); } catch (e) { console.error(`EventBus error in ${event}`, e); }
+    });
+  }
+}
+
+// Global Instance
+window.WARD_EVENTS = new WARDEventBus();
+
+// Standard Event Types
+const EVENTS = {
+  // System
+  'system:config_updated': null,
+  'system:connection_lost': null,
+  'system:connection_restored': null,
+  
+  // Alerts
+  'alert:new': { severity: 'crit|warn|info', title: '', message: '' },
+  'alert:read': { id: 'uuid' },
+  'alert:cleared': null,
+  
+  // Data
+  'data:overview_updated': { cpu: {}, mem: {}, ... },
+  'data:processes_updated': { processes: [] },
+  'data:services_updated': { units: [] },
+  'data:ports_updated': { ports: [] },
+  
+  // UI
+  'ui:tab_changed': { tabId: 'overview' },
+  'ui:theme_changed': { theme: 'cyber-oled' },
+  'ui:settings_saved': null
+};
+```
+
+**Usage Pattern:**
+```javascript
+// In Process Controller
+WARD_EVENTS.emit('alert:new', { 
+  severity: 'crit', 
+  title: 'High CPU', 
+  message: 'nginx using 98% CPU' 
+});
+
+// In Notification Bell Component (Shell)
+WARD_EVENTS.on('alert:new', (data) => {
+  this.incrementBadge();
+  this.prependToDrawer(data);
+  if (data.severity === 'crit') this.playSound();
+});
+```
+
+### 8.3. Module: Error Boundary & Graceful Degradation
+**Purpose:** Prevent white-screen-of-death when one component fails. Isolate errors per tab.
+
+**React-like Error Boundary (Vanilla JS):**
+```javascript
+class ComponentErrorBoundary {
+  constructor(containerId, componentName) {
+    this.container = document.getElementById(containerId);
+    this.componentName = componentName;
+    this.originalContent = this.container.innerHTML;
+  }
+
+  wrap(asyncFn) {
+    return async (...args) => {
+      try {
+        return await asyncFn(...args);
+      } catch (error) {
+        this.handleError(error);
+        throw error; // Re-throw for global logging
+      }
+    };
+  }
+
+  handleError(error) {
+    console.error(`[${this.componentName}] Critical Failure`, error);
+    
+    // Replace container with friendly error message
+    this.container.innerHTML = `
+      <div class="error-boundary-card">
+        <div class="error-icon">⚠️</div>
+        <h3>${this.componentName} Unavailable</h3>
+        <p class="text-muted">${error.message || 'An unexpected error occurred.'}</p>
+        <div class="error-actions">
+          <button class="btn-secondary" onclick="location.reload()">Reload Page</button>
+          <button class="btn-ghost" onclick="this.closest('.error-boundary-card').remove()">Dismiss</button>
+        </div>
+        <details class="error-details">
+          <summary>Technical Details</summary>
+          <pre class="mono small">${error.stack || 'No stack trace'}</pre>
+        </details>
+      </div>
+    `;
+    
+    // Send to Event Engine
+    WARD_EVENTS.emit('alert:new', {
+      severity: 'crit',
+      title: `${this.componentName} Crash`,
+      message: error.message
+    });
+  }
+}
+
+// Usage in init
+const overviewBoundary = new ComponentErrorBoundary('overview-grid', 'Overview Dashboard');
+const safeFetchOverview = overviewBoundary.wrap(OverviewController.fetchData.bind(OverviewController));
+```
+
+### 8.4. Module: Telegram Mini App (TMA) Bridge
+**Purpose:** Native integration with Telegram WebApp SDK for haptics, theming, and back-button handling.
+
+**Implementation:** `js/core/tma-bridge.js`
+```javascript
+class TMABridge {
+  constructor() {
+    this.isTMA = window.Telegram && window.Telegram.WebApp;
+    this.webApp = this.isTMA ? window.Telegram.WebApp : null;
+    
+    if (this.isTMA) {
+      this.init();
+    }
+  }
+
+  init() {
+    // Expand to full screen
+    this.webApp.expand();
+    
+    // Sync Theme Colors
+    this.syncTheme();
+    
+    // Handle Back Button
+    this.webApp.BackButton.onClick(() => {
+      WARD_EVENTS.emit('ui:navigate_back');
+    });
+    
+    // Ready Signal
+    this.webApp.ready();
+    
+    console.log('[TMA] Initialized', this.webApp.initDataUnsafe);
+  }
+
+  syncTheme() {
+    const tgParams = this.webApp.themeParams;
+    if (tgParams.bg_color) {
+      document.documentElement.style.setProperty('--bg-base', tgParams.bg_color);
+    }
+    if (tgParams.text_color) {
+      document.documentElement.style.setProperty('--text-main', tgParams.text_color);
+    }
+    // Map TG colors to WARD palette where applicable
+  }
+
+  // Haptic Feedback Helpers
+  haptic(type = 'light') {
+    if (!this.isTMA) return;
+    const HapticFeedback = this.webApp.HapticFeedback;
+    
+    switch(type) {
+      case 'success': HapticFeedback.notificationOccurred('success'); break;
+      case 'error': HapticFeedback.notificationOccurred('error'); break;
+      case 'warning': HapticFeedback.notificationOccurred('warning'); break;
+      case 'heavy': HapticFeedback.impactOccurred('heavy'); break;
+      case 'medium': HapticFeedback.impactOccurred('medium'); break;
+      case 'light': 
+      default: HapticFeedback.impactOccurred('light'); break;
+    }
+  }
+
+  showAlert(message) {
+    if (this.isTMA) {
+      this.webApp.showAlert(message);
+    } else {
+      alert(message);
+    }
+  }
+
+  showConfirm(message, callback) {
+    if (this.isTMA) {
+      this.webApp.showConfirm(message, callback);
+    } else {
+      callback(confirm(message));
+    }
+  }
+}
+
+window.WARD_TMA = new TMABridge();
+
+// Usage in controllers
+WARD_TMA.haptic('success'); // After saving settings
+WARD_TMA.haptic('error');   // After failed action
+```
+
+### 8.5. Module: Data Export & Reporting Engine
+**Purpose:** Generate downloadable reports for auditing and offline analysis.
+
+**Features:**
+1.  **JSON Snapshot:** Full state dump (config + last 1h metrics).
+2.  **CSV Export:** Table data (Processes, Ports) for Excel analysis.
+3.  **PDF Summary:** (Future) Server-side generated PDF via headless browser or client-side jsPDF.
+
+**API Endpoints:**
+*   `GET /api/export/snapshot` → Returns `.json` file attachment.
+*   `GET /api/export/csv/{type}` → Returns `.csv` stream (`type` = processes, ports, services).
+
+**JS Helper:**
+```javascript
+function downloadCSV(filename, rows) {
+  const csvContent = rows.map(row => row.join(',')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.click();
+  URL.revokeObjectURL(url);
+}
+```
+
+### 8.6. Module: Multi-Node Architecture Prep (v3.0 Vision)
+**Purpose:** Structure code so adding remote agents later requires minimal refactoring.
+
+**Design Pattern:** Agent-Ready Data Fetching
+```javascript
+// Instead of direct fetch:
+// fetch('/api/telemetry/overview')
+
+// Use Node-Aware Fetcher:
+class NodeFetcher {
+  constructor(nodeId = 'local') {
+    this.nodeId = nodeId;
+    this.baseUrl = nodeId === 'local' ? '' : `/api/nodes/${nodeId}`;
+  }
+
+  async get(endpoint) {
+    const res = await fetch(`${this.baseUrl}${endpoint}`);
+    return res.json();
+  }
+}
+
+// Current usage
+const localFetcher = new NodeFetcher('local');
+const data = await localFetcher.get('/telemetry/overview');
+
+// Future usage (v3.0)
+const remoteFetcher = new NodeFetcher('uuid-web-02');
+const remoteData = await remoteFetcher.get('/telemetry/overview');
+```
+
+**Config Schema Prep:**
+```json
+{
+  "nodes": [
+    { "id": "local", "name": "Local Host", "type": "master" }
+  ],
+  "active_node": "local"
+}
+```
+
+### 8.7. Module: AI Assistant Hooks (v2.5+ Vision)
+**Purpose:** Prepare endpoints for LLM integration to answer "Why is CPU high?" questions.
+
+**Reserved Endpoint:** `POST /api/ai/analyze`
+*   **Payload:** `{ "question": "Why is disk I/O high?", "context_window_min": 10 }`
+*   **Backend Action:** Gathers last 10min metrics + recent events + top processes → Sends to configured LLM API (OpenAI/Local Ollama) → Returns natural language explanation.
+*   **v1.x Behavior:** Returns `{ "error": "AI Assistant available in v2.5+" }`
+
+**UI Hook:** Floating "?" button in bottom-right corner (disabled in v1.x, shows tooltip "Coming Soon").
+
+### 8.8. Global Constants & Configuration Schema
+**File:** `js/core/constants.js`
+```javascript
+const WARD_CONSTANTS = {
+  VERSION: '1.2.0',
+  BUILD_DATE: '2026-01-15',
+  
+  // Polling
+  MIN_POLL_MS: 1000,
+  MAX_POLL_MS: 60000,
+  DEFAULT_POLL_MS: 3000,
+  
+  // Thresholds Defaults
+  DEFAULT_THRESHOLDS: {
+    cpu_total: { warn: 80, crit: 95, duration: 60 },
+    mem_used: { warn: 85, crit: 95, duration: 60 },
+    disk_used: { warn: 80, crit: 90, duration: 0 },
+    net_spike_mb: { warn: 50, crit: 100, duration: 10 }
+  },
+  
+  // Status Codes
+  STATUS: {
+    OK: 'ok',
+    WARN: 'warn',
+    CRIT: 'crit',
+    UNKNOWN: 'unknown',
+    IDLE: 'idle',
+    DOWN: 'down'
+  },
+  
+  // Storage Keys
+  LS_KEYS: {
+    THEME: 'ward_theme_pref',
+    SIDEBAR: 'ward_sidebar_state',
+    LOCKS: 'ward_table_locks',
+    ROW_ORDERS: 'ward_row_orders',
+    SESSION: 'ward_session_token'
+  }
+};
+```
+
+### 8.9. Build & Deployment Metadata
+**File:** `package.json` (for frontend tooling)
+```json
+{
+  "name": "ward-dashboard",
+  "version": "1.2.0",
+  "scripts": {
+    "build": "node build.js --minify --hash",
+    "watch": "node build.js --watch",
+    "lint": "eslint js/"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0"
+  }
+}
+```
+
+**File:** `Dockerfile` (Containerization Ready)
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8080
+CMD ["python", "server.py"]
+```
+
+**File:** `ward.service` (Systemd Unit Template)
+```ini
+[Unit]
+Description=WARD System Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/ward
+ExecStart=/usr/bin/python3 server.py
+Restart=always
+RestartSec=5
+Environment=WARD_PORT=8080
+
+[Install]
+WantedBy=multi-user.target
+```
+
+---
+
+### ✅ FINAL CHECKPOINT: COMPLETE IDENTITY DOCUMENT
+
+You now have the complete **8-Section Identity Specification** for WARD v1.2.0.
+
+**Summary of Deliverables:**
+1.  **Section 1 (Shell):** Global layout, responsive nav, notification system, theme engine.
+2.  **Section 2 (Overview):** Real-time gauges, smart cards, I/O monitoring, alert summary.
+3.  **Section 3 (Processes):** Lock/Sort/Drag logic, persistent Row IDs, Kill/Term controls, mobile adaptation.
+4.  **Section 4 (Services):** Systemd lifecycle control, live log streaming (SSE), auto-recovery guardian.
+5.  **Section 5 (Ports):** Idle detection, loopback testing, owner resolution, traffic sparklines.
+6.  **Section 6 (Storage):** Partition health, treemap analysis, safe cleanup rules, growth tracking.
+7.  **Section 7 (Settings):** Threshold config, Telegram bot integration, security policies, data management.
+8.  **Section 8 (Misc/Future):** Event bus architecture, TMA bridge, error boundaries, multi-node prep, AI hooks.
+
+**How to Use This Document:**
+1.  Save this entire conversation as `WARD_IDENTITY_v1.2.0.md`.
+2.  Upload to your GitHub repository root.
+3.  When prompting an AI to code a specific feature, paste the relevant Section from this document as context.
+    *   *Example Prompt:* "Act as a Senior Frontend Dev. Implement Section 3.2 and 3.7 from the attached WARD Identity doc. Use Vanilla JS and CSS variables defined in Section 1.1."
+4.  The AI will now know exactly which variable names, API endpoints, CSS classes, and behavioral logic to use, ensuring 90%+ consistency with your vision.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
