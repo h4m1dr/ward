@@ -405,6 +405,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "panel_name": cfg.get("panel_name", "WARD"),
                 "theme": cfg.get("theme", {})
             }).encode("utf-8"))
+        elif self.path in ["/favicon.svg", "/favicon.ico"]:
+    self.send_response(200)
+    self.send_header("Content-Type", "image/svg+xml")
+    self.send_header("Access-Control-Allow-Origin", "*")
+    self.send_header("Cache-Control", "public, max-age=86400")
+    self.end_headers()
+    with open("/opt/ward/favicon.svg", "rb") as f:
+        self.wfile.write(f.read())
             return
 
         if not self.is_authenticated() and self.path not in ["/", "/index.html"]:
