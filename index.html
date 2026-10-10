@@ -38,6 +38,87 @@ body {
   font-size: 14px;
 }
 
+/* ===== LOGIN OVERLAY ===== */
+#login-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 12, 18, 0.95);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+#login-overlay.hidden { display: none; }
+
+.login-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px;
+  width: 340px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.login-logo {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+}
+
+.login-box h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.login-box .subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.login-box input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s;
+}
+
+.login-box input:focus { outline: none; border-color: var(--primary); }
+
+.login-box button {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.15s;
+}
+
+.login-box button:hover { background: #009a3d; }
+
+.login-err {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 12px;
+  display: none;
+}
+
 /* ===== SIDEBAR ===== */
 .sidebar {
   width: 240px;
@@ -95,10 +176,7 @@ body {
   font-weight: 500;
 }
 
-.nav-item:hover {
-  background: var(--sidebar-hover);
-  color: var(--text);
-}
+.nav-item:hover { background: var(--sidebar-hover); color: var(--text); }
 
 .nav-item.active {
   background: var(--primary-dim);
@@ -107,12 +185,7 @@ body {
   font-weight: 600;
 }
 
-.nav-icon {
-  font-size: 16px;
-  width: 22px;
-  text-align: center;
-  flex-shrink: 0;
-}
+.nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
 
 .sidebar-footer {
   padding: 16px 20px;
@@ -137,11 +210,7 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+.header-left { display: flex; align-items: center; gap: 14px; }
 
 .status-dot {
   width: 8px;
@@ -157,11 +226,7 @@ body {
   50% { opacity: 0.6; }
 }
 
-.header-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
+.header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
 
 .header-right {
   display: flex;
@@ -177,6 +242,20 @@ body {
   font-size: 12px;
 }
 
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+}
+
+.logout-btn:hover { color: var(--danger); border-color: var(--danger); }
+
 /* ===== CONTENT SECTIONS ===== */
 .content-section { display: none; }
 .content-section.active { display: block; animation: fadeIn 0.25s; }
@@ -186,7 +265,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== NETDATA-STYLE CHARTS GRID ===== */
+/* ===== CHARTS GRID ===== */
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -205,10 +284,7 @@ body {
   transition: all 0.2s;
 }
 
-.chart-card:hover {
-  border-color: var(--border);
-  background: var(--card-hover);
-}
+.chart-card:hover { background: var(--card-hover); }
 
 .chart-header {
   display: flex;
@@ -253,30 +329,15 @@ body {
   width: 100%;
   height: 100px;
   margin-top: 14px;
-  position: relative;
 }
 
-.chart-container canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
+.chart-container canvas { width: 100%; height: 100%; display: block; }
 
-.chart-card.full-width {
-  grid-column: span 2;
-}
+.chart-card.full-width { grid-column: span 2; }
+.chart-card.full-width .chart-container { height: 180px; }
 
-.chart-card.full-width .chart-container {
-  height: 180px;
-}
-
-@media (max-width: 1400px) {
-  .chart-card.full-width { grid-column: span 2; }
-}
-
-@media (max-width: 700px) {
-  .chart-card.full-width { grid-column: span 1; }
-}
+@media (max-width: 1400px) { .chart-card.full-width { grid-column: span 2; } }
+@media (max-width: 700px) { .chart-card.full-width { grid-column: span 1; } }
 
 /* ===== TABLES ===== */
 .data-table {
@@ -288,8 +349,7 @@ body {
   overflow: hidden;
 }
 
-.data-table th,
-.data-table td {
+.data-table th, .data-table td {
   padding: 11px 14px;
   text-align: left;
   border-bottom: 1px solid var(--border);
@@ -323,7 +383,6 @@ body {
 }
 
 .btn:hover { background: #009a3d; transform: translateY(-1px); }
-
 .btn-success { background: var(--success); color: #1a1d29; }
 .btn-success:hover { background: #00c482; }
 
@@ -355,7 +414,6 @@ body {
 
 .badge-success { background: rgba(0, 214, 143, 0.15); color: var(--success); }
 .badge-danger { background: rgba(255, 51, 102, 0.15); color: var(--danger); }
-.badge-warning { background: rgba(255, 204, 0, 0.15); color: var(--warning); }
 
 /* ===== INPUTS ===== */
 .input-field {
@@ -415,11 +473,7 @@ body {
   margin-top: 14px;
 }
 
-.theme-color-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.theme-color-item { display: flex; flex-direction: column; gap: 6px; }
 
 .theme-color-item label {
   font-size: 10.5px;
@@ -479,10 +533,10 @@ body {
 </head>
 <body>
 
-<!-- Sidebar -->
-<div class="sidebar">
-  <div class="sidebar-header">
-    <svg class="sidebar-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+<!-- ===== LOGIN OVERLAY ===== -->
+<div id="login-overlay">
+  <div class="login-box">
+    <svg class="login-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#00ab44"/>
@@ -492,40 +546,54 @@ body {
       <path d="M32 4L8 16v16c0 14 10 24 24 28 14-4 24-14 24-28V16L32 4z" fill="url(#logoGrad)"/>
       <path d="M20 32l6 6 10-12 8 10" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
+    <h3>WARD Monitor</h3>
+    <div class="subtitle">v1.1.0 - Enter admin password</div>
+    <input type="password" id="login-pass" placeholder="Admin Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Authorize</button>
+    <div id="login-err" class="login-err">Invalid password. Try again.</div>
+  </div>
+</div>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <svg class="sidebar-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="logoGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#00ab44"/>
+          <stop offset="100%" stop-color="#00d68f"/>
+        </linearGradient>
+      </defs>
+      <path d="M32 4L8 16v16c0 14 10 24 24 28 14-4 24-14 24-28V16L32 4z" fill="url(#logoGrad2)"/>
+      <path d="M20 32l6 6 10-12 8 10" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
     <div>
       <div class="sidebar-title" id="sidebar-title">WARD</div>
-      <div class="sidebar-version" id="sidebar-version">v1.1.0</div>
+      <div class="sidebar-version">v1.1.0</div>
     </div>
   </div>
   
   <div class="sidebar-nav">
     <div class="nav-item active" onclick="switchSection('overview', this)">
-      <span class="nav-icon">📊</span>
-      <span>Overview</span>
+      <span class="nav-icon">📊</span><span>Overview</span>
     </div>
     <div class="nav-item" onclick="switchSection('apps', this)">
-      <span class="nav-icon">📱</span>
-      <span>Watched Apps</span>
+      <span class="nav-icon">📱</span><span>Watched Apps</span>
     </div>
     <div class="nav-item" onclick="switchSection('services', this)">
-      <span class="nav-icon">⚙️</span>
-      <span>Services</span>
+      <span class="nav-icon">️</span><span>Services</span>
     </div>
     <div class="nav-item" onclick="switchSection('ports', this)">
-      <span class="nav-icon">🔌</span>
-      <span>Ports</span>
+      <span class="nav-icon">🔌</span><span>Ports</span>
     </div>
     <div class="nav-item" onclick="switchSection('storage', this)">
-      <span class="nav-icon">📁</span>
-      <span>Storage</span>
+      <span class="nav-icon">📁</span><span>Storage</span>
     </div>
     <div class="nav-item" onclick="switchSection('tasks', this)">
-      <span class="nav-icon">⏰</span>
-      <span>Scheduled Tasks</span>
+      <span class="nav-icon">⏰</span><span>Scheduled Tasks</span>
     </div>
     <div class="nav-item" onclick="switchSection('settings', this)">
-      <span class="nav-icon">🔧</span>
-      <span>Settings</span>
+      <span class="nav-icon">🔧</span><span>Settings</span>
     </div>
   </div>
 
@@ -534,7 +602,7 @@ body {
   </div>
 </div>
 
-<!-- Main Content -->
+<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content">
   <div class="header">
     <div class="header-left">
@@ -544,6 +612,7 @@ body {
     <div class="header-right">
       <div>Net: <b id="h-net">0 GiB</b></div>
       <div>Load: <b id="h-load">0.0</b></div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
@@ -551,9 +620,7 @@ body {
   <div id="overview" class="content-section active">
     <div class="charts-grid">
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">CPU Usage</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">CPU Usage</div></div>
         <div class="chart-value" id="cpu-val">0<span class="unit">%</span></div>
         <div class="chart-sub">
           <span id="cpu-sub">1 Core</span>
@@ -563,9 +630,7 @@ body {
       </div>
 
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">RAM Usage</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">RAM Usage</div></div>
         <div class="chart-value" id="ram-val">0<span class="unit">%</span></div>
         <div class="chart-sub">
           <span id="ram-sub">0/0 MB</span>
@@ -575,9 +640,7 @@ body {
       </div>
 
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">SWAP</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">SWAP</div></div>
         <div class="chart-value" id="swap-val">0<span class="unit">%</span></div>
         <div class="chart-sub">
           <span id="swap-sub">0/0 MB</span>
@@ -587,9 +650,7 @@ body {
       </div>
 
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Storage</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">Storage</div></div>
         <div class="chart-value" id="disk-val">0<span class="unit">%</span></div>
         <div class="chart-sub">
           <span id="disk-sub">0/0 GB</span>
@@ -622,16 +683,7 @@ body {
   <!-- Apps -->
   <div id="apps" class="content-section">
     <table class="data-table">
-      <thead>
-        <tr>
-          <th>Application</th>
-          <th>CPU %</th>
-          <th>RAM (MB)</th>
-          <th>Threads</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Application</th><th>CPU %</th><th>RAM (MB)</th><th>Threads</th><th>Status</th><th>Action</th></tr></thead>
       <tbody id="app-tbody"></tbody>
     </table>
   </div>
@@ -643,13 +695,7 @@ body {
       <button class="btn" onclick="addService()">Add Service</button>
     </div>
     <table class="data-table">
-      <thead>
-        <tr>
-          <th>Service</th>
-          <th>State</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Service</th><th>State</th><th>Action</th></tr></thead>
       <tbody id="srv-tbody"></tbody>
     </table>
   </div>
@@ -661,13 +707,7 @@ body {
       <button class="btn" onclick="addPort()">Watch Port</button>
     </div>
     <table class="data-table">
-      <thead>
-        <tr>
-          <th>Port</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Port</th><th>Status</th><th>Action</th></tr></thead>
       <tbody id="port-tbody"></tbody>
     </table>
   </div>
@@ -680,14 +720,7 @@ body {
       <button class="btn" onclick="addFolder()">Track Folder</button>
     </div>
     <table class="data-table">
-      <thead>
-        <tr>
-          <th>Label</th>
-          <th>Path</th>
-          <th>Size</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Label</th><th>Path</th><th>Size</th><th>Action</th></tr></thead>
       <tbody id="dir-tbody"></tbody>
     </table>
   </div>
@@ -705,7 +738,7 @@ body {
   <div id="settings" class="content-section">
     <div class="settings-container">
       <div class="settings-group">
-        <h3> Security</h3>
+        <h3>🔐 Security</h3>
         <div class="setting-row">
           <span class="setting-label">Change Admin Password</span>
           <div style="display:flex; gap:8px;">
@@ -717,7 +750,7 @@ body {
       </div>
 
       <div class="settings-group">
-        <h3>🎨 Theme Colors</h3>
+        <h3> Theme Colors</h3>
         <div class="theme-grid">
           <div class="theme-color-item">
             <label>Primary</label>
@@ -774,7 +807,7 @@ body {
         <div class="setting-row">
           <span class="setting-label">Import Configuration</span>
           <input type="file" id="config-file-input" accept=".json" style="display:none;" onchange="uploadConfig(event)">
-          <button class="btn btn-ghost" onclick="document.getElementById('config-file-input').click()"> Upload & Restore</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('config-file-input').click()">📤 Upload & Restore</button>
         </div>
       </div>
     </div>
@@ -787,11 +820,62 @@ body {
 let sessionToken = localStorage.getItem('ward_token') || '';
 let globalData = null;
 let currentTheme = {};
+let authFailedCount = 0; // Track consecutive auth failures
 
 const pLen = 40;
 const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
 
+// ===== AUTH FUNCTIONS =====
+function showLogin() {
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-err').style.display = 'none';
+  setTimeout(() => document.getElementById('login-pass').focus(), 100);
+}
+
+function hideLogin() {
+  document.getElementById('login-overlay').classList.add('hidden');
+  authFailedCount = 0;
+}
+
+async function doLogin() {
+  const pw = document.getElementById('login-pass').value;
+  if (!pw) return;
+  
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    const d = await res.json();
+    
+    if (d.status === 'ok') {
+      sessionToken = d.token;
+      localStorage.setItem('ward_token', d.token);
+      hideLogin();
+      fetchStatus();
+      showToast('Authorized successfully', 'success');
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+      document.getElementById('login-pass').value = '';
+    }
+  } catch(e) {
+    document.getElementById('login-err').innerText = 'Connection error';
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Session-Token': sessionToken } }).finally(() => {
+    localStorage.removeItem('ward_token');
+    sessionToken = '';
+    showLogin();
+  });
+}
+
+// ===== NAVIGATION =====
 function switchSection(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -810,17 +894,14 @@ function switchSection(id, el) {
   document.getElementById('page-title').innerText = titles[id] || 'WARD';
 }
 
-// ===== NETDATA-STYLE CHART DRAWING =====
+// ===== NETDATA-STYLE CHARTS =====
 function drawNetdataGrid(ctx, w, h, maxScale, isPct = true) {
-  // Dotted grid lines like Netdata
   const levels = [0.25, 0.5, 0.75, 1.0];
   ctx.font = '10px JetBrains Mono, monospace';
   ctx.textAlign = 'left';
   
   levels.forEach(lvl => {
     const y = h - (lvl * (h - 16)) - 8;
-    
-    // Dotted line
     ctx.beginPath();
     ctx.strokeStyle = 'rgba(139, 143, 163, 0.15)';
     ctx.lineWidth = 1;
@@ -829,11 +910,8 @@ function drawNetdataGrid(ctx, w, h, maxScale, isPct = true) {
     ctx.lineTo(w, y);
     ctx.stroke();
     
-    // Label on left
     ctx.fillStyle = 'rgba(139, 143, 163, 0.6)';
-    if (isPct) {
-      ctx.fillText(`${Math.round(lvl * maxScale)}%`, 4, y + 3);
-    }
+    if (isPct) ctx.fillText(`${Math.round(lvl * maxScale)}%`, 4, y + 3);
   });
   ctx.setLineDash([]);
 }
@@ -842,14 +920,12 @@ function plotNetdataSingle(id, arr, maxScale, color) {
   const cvs = document.getElementById(id);
   if (!cvs) return;
   const ctx = cvs.getContext('2d');
-  const w = cvs.width = cvs.clientWidth * 2; // 2x for retina
+  const w = cvs.width = cvs.clientWidth * 2;
   const h = cvs.height = cvs.clientHeight * 2;
-  ctx.scale(1, 1);
   ctx.clearRect(0, 0, w, h);
   
   drawNetdataGrid(ctx, w, h, maxScale, true);
 
-  // Draw fill gradient
   const gradient = ctx.createLinearGradient(0, 0, 0, h);
   gradient.addColorStop(0, color + '30');
   gradient.addColorStop(1, color + '00');
@@ -860,15 +936,12 @@ function plotNetdataSingle(id, arr, maxScale, color) {
     const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
     i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y);
   });
-  
-  // Fill
   ctx.lineTo(35 + (arr.length - 1) * step, h);
   ctx.lineTo(35, h);
   ctx.closePath();
   ctx.fillStyle = gradient;
   ctx.fill();
 
-  // Draw line
   ctx.beginPath();
   arr.forEach((val, i) => {
     const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8;
@@ -890,7 +963,6 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   
   drawNetdataGrid(ctx, w, h, maxScale, false);
 
-  // Labels for double chart
   ctx.fillStyle = 'rgba(139, 143, 163, 0.7)';
   ctx.font = '10px JetBrains Mono, monospace';
   ctx.fillText(`${Math.round(maxScale)}${unit}`, 4, 12);
@@ -898,7 +970,6 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
 
   const step = w / (arr1.length - 1);
   
-  // Draw both lines with fills
   [arr1, arr2].forEach((arr, idx) => {
     const color = idx === 0 ? c1 : c2;
     const gradient = ctx.createLinearGradient(0, 0, 0, h);
@@ -928,10 +999,25 @@ function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
   });
 }
 
+// ===== DATA FETCHING =====
 async function fetchStatus() {
+  if (!sessionToken) return; // Don't fetch if not logged in
+  
   try {
     const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
-    if (res.status === 401) { location.reload(); return; }
+    
+    // ✅ FIX: Instead of reload, show login overlay
+    if (res.status === 401) {
+      authFailedCount++;
+      if (authFailedCount >= 2) {
+        // After 2 consecutive failures, show login
+        localStorage.removeItem('ward_token');
+        sessionToken = '';
+        showLogin();
+      }
+      return;
+    }
+    
     const d = await res.json();
     
     document.getElementById('status-dot').style.background = 'var(--success)';
@@ -941,40 +1027,34 @@ async function fetchStatus() {
     document.getElementById('h-net').innerText = `${d.network.total_tx_gib} GiB | ${d.network.total_rx_gib} GiB`;
     document.getElementById('footer-uptime').innerText = `Uptime: ${d.uptime}`;
 
-    // CPU
     document.getElementById('cpu-val').innerHTML = `${d.cpu.usage_pct}<span class="unit">%</span>`;
     document.getElementById('cpu-sub').innerText = `${d.cpu.cores} Core`;
     d_cpu.shift(); d_cpu.push(d.cpu.usage_pct);
     document.getElementById('cpu-stat').innerText = `Avg: ${Math.round(d_cpu.reduce((a,b)=>a+b)/pLen)}%`;
     plotNetdataSingle('cv-cpu', d_cpu, 100, getComputedStyle(document.documentElement).getPropertyValue('--primary').trim());
 
-    // RAM
     document.getElementById('ram-val').innerHTML = `${d.ram.pct}<span class="unit">%</span>`;
     document.getElementById('ram-sub').innerText = `${d.ram.used_mb} / ${d.ram.total_mb} MB`;
     document.getElementById('ram-free').innerText = `Free: ${d.ram.total_mb - d.ram.used_mb} MB`;
     d_ram.shift(); d_ram.push(d.ram.pct);
     plotNetdataSingle('cv-ram', d_ram, 100, '#339af0');
 
-    // SWAP
     document.getElementById('swap-val').innerHTML = `${d.swap.pct}<span class="unit">%</span>`;
     document.getElementById('swap-sub').innerText = `${d.swap.used_mb} / ${d.swap.total_mb} MB`;
     d_swap.shift(); d_swap.push(d.swap.pct);
     plotNetdataSingle('cv-swap', d_swap, 100, '#cc5de8');
 
-    // Disk
     document.getElementById('disk-val').innerHTML = `${d.disk.pct}<span class="unit">%</span>`;
     document.getElementById('disk-sub').innerText = `${d.disk.used_gb} / ${d.disk.total_gb} GB`;
     document.getElementById('disk-free').innerText = `Free: ${d.disk.free_gb} GB`;
     d_disk.shift(); d_disk.push(d.disk.pct);
     plotNetdataSingle('cv-disk', d_disk, 100, '#ff922b');
 
-    // Network
     document.getElementById('net-speeds').innerText = `▲ ${d.network.speed_tx_mb} MB/s  ▼ ${d.network.speed_rx_mb} MB/s`;
     d_tx.shift(); d_tx.push(d.network.speed_tx_mb);
     d_rx.shift(); d_rx.push(d.network.speed_rx_mb);
     plotNetdataDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#339af0', '#00d68f', 'M');
 
-    // Connections
     document.getElementById('conn-totals').innerText = `${d.connections.tcp + d.connections.udp} Open`;
     document.getElementById('conn-sub').innerText = `TCP: ${d.connections.tcp} | UDP: ${d.connections.udp}`;
     d_tcp.shift(); d_tcp.push(d.connections.tcp);
@@ -990,6 +1070,7 @@ async function fetchStatus() {
   }
 }
 
+// ===== RENDER TABLES =====
 function renderApps() {
   if (!globalData) return;
   let html = '';
@@ -1046,6 +1127,7 @@ function renderDirs() {
   document.getElementById('dir-tbody').innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
 }
 
+// ===== ACTIONS =====
 async function addService() {
   const val = document.getElementById('in-srv').value;
   if (!val) return;
@@ -1165,9 +1247,26 @@ function showToast(msg, type = 'success') {
   setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// Init
-fetchStatus();
-setInterval(fetchStatus, 2000);
+// ===== INIT =====
+// Check if we have a valid session
+if (sessionToken) {
+  // Try to verify the token
+  fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } })
+    .then(res => res.json())
+    .then(d => {
+      if (d.authenticated) {
+        hideLogin();
+        fetchStatus();
+      } else {
+        showLogin();
+      }
+    })
+    .catch(() => showLogin());
+} else {
+  showLogin();
+}
+
+setInterval(() => { if (sessionToken) fetchStatus(); }, 2000);
 </script>
 </body>
 </html>
