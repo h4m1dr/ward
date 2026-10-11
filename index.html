@@ -8,7 +8,6 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* === SECTION 1.1 & 2.1: CYBER-OLED THEME & GRID SYSTEM === */
 :root {
   --bg-base: #0B0E14;
   --bg-surface: #121721;
@@ -26,947 +25,549 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); background: var(--bg-base); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
 
-body {
-  font-family: var(--font-sans); background: var(--bg-base); color: var(--text-main);
-  display: flex; height: 100vh; overflow: hidden; font-size: 14px; transition: padding-bottom 0.3s ease;
-}
-
-/* === LOGIN OVERLAY === */
-#login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 10000; }
+#login-overlay { position: fixed; inset: 0; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 10000; }
 #login-overlay.hidden { display: none; }
-.login-box { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 12px; padding: 36px; width: 340px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-.login-logo { width: 64px; height: 64px; margin: 0 auto 16px; }
-.login-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-.login-box .subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
-.login-box input { width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 11px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 14px; font-family: var(--font-sans); }
-.login-box input:focus { outline: none; border-color: var(--accent-health); }
-.login-box button { width: 100%; background: var(--accent-health); color: #000; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; font-family: var(--font-sans); }
-.login-err { color: var(--accent-crit); font-size: 12px; margin-top: 12px; display: none; }
+.login-box { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 12px; padding: 36px; width: 340px; text-align: center; }
+.login-box input { width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 11px 14px; border-radius: 8px; margin-bottom: 14px; }
+.login-box button { width: 100%; background: var(--accent-health); color: #000; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
-/* === SIDEBAR NAVIGATION === */
-.sidebar { width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border-dim); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s ease; position: relative; overflow: hidden; z-index: 100; }
-.sidebar.collapsed { width: 60px; }
-.sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-dim); display: flex; align-items: center; gap: 12px; white-space: nowrap; overflow: hidden; }
-.sidebar.collapsed .sidebar-header { padding: 20px 12px; justify-content: center; gap: 0; }
-.sidebar-logo { width: 36px; height: 36px; flex-shrink: 0; }
-.sidebar-title { font-size: 18px; font-weight: 700; transition: opacity 0.2s; }
-.sidebar.collapsed .sidebar-title { opacity: 0; width: 0; }
-.sidebar-version { font-size: 11px; color: var(--accent-health); font-weight: 600; margin-top: 2px; transition: opacity 0.2s; }
-.sidebar.collapsed .sidebar-version { opacity: 0; width: 0; }
-.sidebar-toggle { position: absolute; right: -11px; top: 65px; transform: translateY(-50%); background: var(--bg-surface); border: 1px solid var(--border-dim); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; color: var(--text-muted); z-index: 10; }
-.sidebar-toggle:hover { background: var(--accent-health); color: #000; border-color: var(--accent-health); }
-.sidebar.collapsed .sidebar-toggle { transform: translateY(-50%) rotate(180deg); }
+.sidebar { width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border-dim); display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-dim); display: flex; align-items: center; gap: 12px; }
+.sidebar-title { font-size: 18px; font-weight: 700; color: var(--accent-health); }
 .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
-.nav-item { padding: 11px 20px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 12px; font-size: 13.5px; color: var(--text-muted); border-left: 3px solid transparent; font-weight: 500; white-space: nowrap; overflow: hidden; }
-.sidebar.collapsed .nav-item { padding: 11px 12px; justify-content: center; gap: 0; }
+.nav-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: var(--text-muted); border-left: 3px solid transparent; font-weight: 500; }
 .nav-item:hover { background: var(--bg-surface-hover); color: var(--text-main); }
 .nav-item.active { background: rgba(0, 245, 160, 0.1); color: var(--accent-health); border-left-color: var(--accent-health); font-weight: 600; }
-.nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
-.sidebar.collapsed .nav-icon { width: 100%; }
-.nav-text { transition: opacity 0.2s; }
-.sidebar.collapsed .nav-text { opacity: 0; width: 0; display: none; }
-.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-dim); font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; }
-.sidebar.collapsed .sidebar-footer { opacity: 0; padding: 16px 12px; text-align: center; }
 
-/* === BOTTOM NAVIGATION (MOBILE/TMA) === */
-#mobile-bottom-nav { display: none !important; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--bg-surface); border-top: 1px solid var(--border-dim); z-index: 1000; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); }
-.bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 8px; }
-.bottom-nav-item.active { color: var(--accent-health); }
-.bottom-nav-icon { font-size: 20px; }
-@media (max-width: 768px) { body { padding-bottom: 65px; } .sidebar { display: none !important; } #mobile-bottom-nav { display: flex !important; } }
+#mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--bg-surface); border-top: 1px solid var(--border-dim); z-index: 1000; justify-content: space-around; align-items: center; }
+@media (max-width: 768px) {
+  body { padding-bottom: 65px; }
+  .sidebar { display: none; }
+  #mobile-bottom-nav { display: flex; }
+}
 
-/* === TOP HEADER === */
 .main-content { flex: 1; overflow-y: auto; padding: 24px 28px; }
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-dim); }
 .header-left { display: flex; align-items: center; gap: 14px; }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-health); box-shadow: 0 0 8px var(--accent-health); animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-.header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-.header-right { display: flex; gap: 20px; font-size: 13px; color: var(--text-muted); align-items: center; }
-.header-right b { color: var(--text-main); font-weight: 600; font-family: var(--font-mono); font-size: 12px; }
-.notification-bell { position: relative; cursor: pointer; font-size: 18px; color: var(--text-muted); }
-.notification-bell .badge-count { position: absolute; top: -4px; right: -6px; background: var(--accent-crit); color: #fff; font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 8px; min-width: 14px; text-align: center; display: none; }
-.logout-btn { background: transparent; border: 1px solid var(--border-dim); color: var(--text-muted); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: var(--font-sans); }
-.logout-btn:hover { color: var(--accent-crit); border-color: var(--accent-crit); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-health); box-shadow: 0 0 8px var(--accent-health); }
+.header-title { font-size: 20px; font-weight: 700; }
+.header-right { display: flex; gap: 16px; align-items: center; font-size: 13px; color: var(--text-muted); }
 
-/* === NOTIFICATION DRAWER === */
-#notification-drawer { position: fixed; top: 0; right: -350px; width: 350px; height: 100%; background: var(--bg-surface); border-left: 1px solid var(--border-dim); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
-#notification-drawer.open { right: 0; }
-.drawer-header { padding: 16px 20px; border-bottom: 1px solid var(--border-dim); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
-.drawer-body { flex: 1; overflow-y: auto; padding: 12px; }
-.event-item { padding: 12px; margin-bottom: 8px; border-radius: 6px; border-left: 4px solid var(--border-dim); background: var(--bg-base); }
-.event-item.severity-crit { border-left-color: var(--accent-crit); }
-.event-item.severity-warn { border-left-color: var(--accent-warn); }
-.event-item.severity-info { border-left-color: var(--accent-flow); }
-.event-time { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-family: var(--font-mono); }
-.event-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-.event-msg { font-size: 12px; color: var(--text-muted); }
-
-/* === TOAST SYSTEM === */
-#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-.toast { padding: 11px 18px; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.25s; font-family: var(--font-sans); }
-.toast-success { background: var(--accent-health); color: #000; }
-.toast-error { background: var(--accent-crit); }
-.toast-info { background: var(--accent-flow); }
-@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-/* === CONTENT SECTIONS & OVERVIEW GRID (SECTION 2.1) === */
 .content-section { display: none; }
-.content-section.active { display: block; animation: fadeIn 0.25s; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.content-section.active { display: block; animation: fadeIn 0.2s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-#overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+/* Overview Grid */
+#overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 @media (max-width: 1200px) { #overview-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px) { #overview-grid { grid-template-columns: 1fr; } }
-
-.metric-card { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; padding: 18px; transition: all 0.2s; }
-.metric-card:hover { background: var(--bg-surface-hover); }
+.metric-card { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; padding: 18px; }
 .metric-card.wide { grid-column: span 2; }
-.metric-card.full-width { grid-column: 1 / -1; }
-@media (max-width: 1200px) { .metric-card.wide { grid-column: span 2; } }
-@media (max-width: 768px) { .metric-card.wide, .metric-card.full-width { grid-column: span 1; } }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.card-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+.card-val { font-size: 26px; font-weight: 700; font-family: var(--font-mono); margin: 6px 0; }
+.card-sub { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); display: flex; justify-content: space-between; }
+.chart-box { width: 100%; height: 80px; margin-top: 10px; }
+.chart-box canvas { width: 100%; height: 100%; }
 
-.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.card-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
-.card-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-family: var(--font-mono); }
-.badge-ok { background: rgba(0, 245, 160, 0.15); color: var(--accent-health); }
-.badge-warn { background: rgba(245, 158, 11, 0.15); color: var(--accent-warn); }
-.badge-crit { background: rgba(239, 68, 68, 0.15); color: var(--accent-crit); }
-
-.card-value-main { font-size: 26px; font-weight: 700; font-family: var(--font-mono); margin: 6px 0 8px 0; letter-spacing: -0.5px; }
-.card-value-main .unit { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
-
-.card-sub-metrics { display: flex; gap: 16px; margin-bottom: 12px; }
-.sub-metric { display: flex; flex-direction: column; }
-.sub-metric .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
-.sub-metric .value { font-size: 13px; font-family: var(--font-mono); }
-.highlight-warn .value { color: var(--accent-warn); }
-
-.chart-container { width: 100%; height: 80px; margin-top: 10px; }
-.chart-container canvas { width: 100%; height: 100%; display: block; }
-
-.card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-dim); font-size: 11px; color: var(--text-muted); }
-.btn-icon { background: transparent; border: 1px solid var(--border-dim); color: var(--text-muted); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-.btn-icon:hover { color: var(--text-main); border-color: var(--text-muted); }
-
-/* Specific Card Styles */
-.gauge-container { position: relative; width: 120px; height: 120px; margin: 0 auto 16px; }
-.gauge-container canvas { width: 100%; height: 100%; }
-.gauge-center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-.gauge-center-text .big { font-size: 24px; font-weight: 700; font-family: var(--font-mono); display: block; }
-.gauge-center-text .small { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
-
-.io-metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-.io-box { background: var(--bg-base); border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; }
-.io-box .icon { font-size: 18px; }
-.io-box .data { display: flex; flex-direction: column; }
-.io-box .value { font-size: 14px; font-weight: 600; font-family: var(--font-mono); }
-.io-box .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
-
-.progress-bar-container { width: 100%; height: 6px; background: var(--bg-base); border-radius: 3px; overflow: hidden; margin: 8px 0; }
-.progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease, background 0.3s ease; }
-
-.swap-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-dim); }
-.swap-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
-
-.net-speed-display { display: flex; justify-content: space-around; margin-bottom: 12px; }
-.speed-block { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 14px; font-weight: 600; }
-.speed-block .arrow { font-size: 12px; }
-
-.interface-selector select { background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-family: var(--font-sans); }
-
-.conn-breakdown { display: flex; gap: 16px; margin-bottom: 12px; }
-.breakdown-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
-.breakdown-item .dot { width: 8px; height: 8px; border-radius: 50%; }
-.dot.tcp { background: var(--accent-flow); }
-.dot.udp { background: var(--accent-health); }
-.dot.time-wait { background: var(--accent-warn); }
-.breakdown-item .value { font-family: var(--font-mono); color: var(--text-main); margin-left: 4px; }
-
-.alerts-list { display: flex; flex-direction: column; gap: 8px; }
-.alert-row { padding: 10px 12px; background: var(--bg-base); border-radius: 6px; border-left: 3px solid var(--border-dim); font-size: 12px; cursor: pointer; transition: background 0.15s; }
-.alert-row:hover { background: var(--bg-surface-hover); }
-.alert-row.empty { text-align: center; color: var(--text-muted); border-left-color: var(--accent-health); cursor: default; }
-.alert-row .time { font-family: var(--font-mono); color: var(--text-muted); font-size: 10px; margin-bottom: 2px; }
-.alert-row .title { font-weight: 600; margin-bottom: 2px; }
-.alert-row .msg { color: var(--text-muted); }
-
-/* Legacy styles preserved for other tabs */
-.data-table { width: 100%; border-collapse: collapse; background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; overflow: hidden; margin-top: 16px; }
-.data-table th, .data-table td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border-dim); font-size: 13px; }
-.data-table th { background: rgba(0,0,0,0.2); color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-.data-table tr:last-child td { border-bottom: none; }
-.data-table tr:hover td { background: var(--bg-surface-hover); }
-.th-sort { cursor: pointer; user-select: none; }
-.th-sort:hover { color: var(--accent-health); }
-.draggable-row { cursor: grab; }
-.draggable-row.dragging { opacity: 0.5; background: rgba(0, 245, 160, 0.1); }
-.drag-handle { cursor: grab; color: var(--text-muted); padding: 0 8px; user-select: none; }
-.row-number { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); font-weight: 600; width: 30px; text-align: center; }
-.btn { background: var(--accent-health); color: #000; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: var(--font-sans); }
-.btn:hover { filter: brightness(0.9); }
-.btn-success { background: var(--accent-health); color: #000; }
-.btn-danger { background: transparent; color: var(--accent-crit); border: 1px solid var(--accent-crit); padding: 5px 10px; font-size: 11px; }
+/* Process Inspector Toolbar & Table */
+.toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.search-box { flex: 1; min-width: 200px; position: relative; }
+.search-box input { width: 100%; background: var(--bg-surface); border: 1px solid var(--border-dim); color: var(--text-main); padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+.data-table { width: 100%; border-collapse: collapse; background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; overflow: hidden; }
+.data-table th, .data-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-dim); font-size: 13px; }
+.data-table th { background: rgba(0,0,0,0.2); color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; cursor: pointer; user-select: none; }
+.data-table th:hover { color: var(--accent-health); }
+.data-table tr.draggable-row { cursor: grab; }
+.data-table tr.dragging { opacity: 0.4; background: rgba(0,245,160,0.1); }
+.drag-handle { cursor: grab; color: var(--text-muted); margin-right: 6px; user-select: none; }
+.mono { font-family: var(--font-mono); }
+.badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: var(--font-mono); }
+.badge-active { background: rgba(0,245,160,0.15); color: var(--accent-health); }
+.badge-stopped { background: rgba(148,163,184,0.15); color: var(--text-muted); }
+.btn { background: var(--accent-health); color: #000; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
+.btn-danger { background: transparent; color: var(--accent-crit); border: 1px solid var(--accent-crit); }
 .btn-danger:hover { background: var(--accent-crit); color: #fff; }
-.btn-warning { background: transparent; color: var(--accent-warn); border: 1px solid var(--accent-warn); padding: 5px 10px; font-size: 11px; }
-.btn-warning:hover { background: var(--accent-warn); color: #000; }
+.btn-warn { background: transparent; color: var(--accent-warn); border: 1px solid var(--accent-warn); }
+.btn-warn:hover { background: var(--accent-warn); color: #000; }
 .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-dim); }
-.lock-toggle { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-dim); background: var(--bg-surface); color: var(--text-muted); cursor: pointer; font-size: 12px; }
-.lock-toggle.unlocked { color: var(--accent-warn); border-color: var(--accent-warn); background: rgba(245, 158, 11, 0.1); }
-.badge { padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-weight: 600; font-family: var(--font-mono); }
-.badge-success { background: rgba(0, 245, 160, 0.15); color: var(--accent-health); }
-.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--accent-crit); }
-.badge-stopped { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); }
-.input-field { background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 7px 11px; border-radius: 6px; font-size: 13px; font-family: var(--font-sans); }
-.settings-container { width: 100%; max-width: 100%; }
-.settings-group { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
-.settings-group h3 { font-size: 15px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-dim); }
-.setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-.setting-row:last-child { border-bottom: none; }
-.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
-.theme-color-item { display: flex; flex-direction: column; gap: 6px; }
-.theme-color-item label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-.theme-color-item input[type="color"] { width: 100%; height: 38px; border: 1px solid var(--border-dim); border-radius: 6px; cursor: pointer; background: var(--bg-base); padding: 3px; }
-.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(4px); animation: fadeIn 0.2s; }
-.modal.active { display: flex; align-items: center; justify-content: center; }
-.modal-body { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 12px; max-width: 900px; width: 90%; max-height: 85vh; display: flex; flex-direction: column; }
-.modal-head { padding: 16px 20px; border-bottom: 1px solid var(--border-dim); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
-.modal-content { padding: 20px; overflow-y: auto; flex: 1; }
-::-webkit-scrollbar { width: 7px; height: 7px; }
-::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb { background: var(--border-dim); border-radius: 4px; }
 
-/* NEW STYLES FOR SECTION 3 PROCESSES */
-.proc-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
-.proc-search { flex: 1; min-width: 200px; }
-.proc-actions-cell { display: flex; gap: 6px; justify-content: flex-end; }
-.protected-indicator { color: var(--accent-crit); font-size: 10px; margin-left: 5px; vertical-align: middle; }
-.cmdline-truncate { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
-.status-running { color: var(--accent-health); }
-.status-stopped { color: var(--text-muted); }
-.status-zombie { color: var(--accent-crit); }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+.modal.active { display: flex; }
+.modal-card { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 10px; width: 440px; padding: 24px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+.form-group input { width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 8px 12px; border-radius: 6px; }
+
+#toast-box { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 10px 16px; border-radius: 6px; background: var(--accent-health); color: #000; font-weight: 600; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 </style>
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
 <div id="login-overlay">
   <div class="login-box">
-    <svg class="login-logo" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
-      <rect width="128" height="128" rx="26" fill="#141824"/>
-      <path d="M58 122L56 86Q54 64 45 48Q37 34 45 20Q53 8 64 8Q75 8 83 20Q91 34 83 48Q74 64 72 86L70 122Z" fill="#4d3727" stroke="#110c07" stroke-width="2"/>
-      <circle cx="64" cy="36" r="19" fill="#ffea00" stroke="#92400e" stroke-width="1.2"/>
-      <circle cx="64" cy="36" r="8" fill="#000"/>
-    </svg>
-    <h3>WARD Monitor</h3>
-    <div class="subtitle">v1.2.0 - Enter admin password</div>
+    <h3 style="margin-bottom:12px;">WARD Monitor</h3>
     <input type="password" id="login-pass" placeholder="Admin Password" onkeydown="if(event.key==='Enter')doLogin()">
-    <button onclick="doLogin()">Authorize</button>
-    <div id="login-err" class="login-err">Invalid password. Try again.</div>
+    <button onclick="doLogin()">Unlock Dashboard</button>
   </div>
 </div>
 
-<!-- SIDEBAR NAVIGATION -->
-<div class="sidebar" id="sidebar">
-  <div class="sidebar-toggle" onclick="toggleSidebar()"></div>
-  <div class="sidebar-header">
-    <svg class="sidebar-logo" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
-      <rect width="128" height="128" rx="26" fill="#141824"/>
-      <path d="M58 122L56 86Q54 64 45 48Q37 34 45 20Q53 8 64 8Q75 8 83 20Q91 34 83 48Q74 64 72 86L70 122Z" fill="#4d3727" stroke="#110c07" stroke-width="2"/>
-      <circle cx="64" cy="36" r="19" fill="#ffea00" stroke="#92400e" stroke-width="1.2"/>
-      <circle cx="64" cy="36" r="8" fill="#000"/>
-    </svg>
-    <div><div class="sidebar-title">WARD</div><div class="sidebar-version">v1.2.0</div></div>
-  </div>
+<div class="sidebar">
+  <div class="sidebar-header"><span class="sidebar-title">WARD v1.2.0</span></div>
   <div class="sidebar-nav">
-    <div class="nav-item active" onclick="switchSection('overview', this)"><span class="nav-icon">📊</span><span class="nav-text">Overview</span></div>
-    <div class="nav-item" onclick="switchSection('apps', this)"><span class="nav-icon">⚡</span><span class="nav-text">Processes</span></div>
-    <div class="nav-item" onclick="switchSection('services', this)"><span class="nav-icon">️</span><span class="nav-text">Services</span></div>
-    <div class="nav-item" onclick="switchSection('ports', this)"><span class="nav-icon">🔌</span><span class="nav-text">Ports & Flow</span></div>
-    <div class="nav-item" onclick="switchSection('storage', this)"><span class="nav-icon">💾</span><span class="nav-text">Storage</span></div>
-    <div class="nav-item" onclick="switchSection('settings', this)"><span class="nav-icon">🔧</span><span class="nav-text">Settings</span></div>
+    <div class="nav-item active" onclick="switchTab('overview', this)"><span>📊</span> Overview</div>
+    <div class="nav-item" onclick="switchTab('processes', this)"><span>⚡</span> Processes</div>
+    <div class="nav-item" onclick="switchTab('services', this)"><span>⚙️</span> Services</div>
+    <div class="nav-item" onclick="switchTab('ports', this)"><span>🔌</span> Ports & Flow</div>
+    <div class="nav-item" onclick="switchTab('storage', this)"><span>💾</span> Storage</div>
+    <div class="nav-item" onclick="switchTab('settings', this)"><span>🔧</span> Settings</div>
   </div>
-  <div class="sidebar-footer"><div id="footer-uptime" style="font-family: var(--font-mono); font-size: 11px;">Uptime: -</div></div>
 </div>
 
-<!-- BOTTOM NAVIGATION (MOBILE/TMA) -->
 <div id="mobile-bottom-nav">
-  <div class="bottom-nav-item active" onclick="switchSection('overview', this)"><span class="bottom-nav-icon">📊</span><span>Overview</span></div>
-  <div class="bottom-nav-item" onclick="switchSection('apps', this)"><span class="bottom-nav-icon">⚡</span><span>Procs</span></div>
-  <div class="bottom-nav-item" onclick="switchSection('services', this)"><span class="bottom-nav-icon">️</span><span>Svcs</span></div>
-  <div class="bottom-nav-item" onclick="switchSection('ports', this)"><span class="bottom-nav-icon">🔌</span><span>Ports</span></div>
-  <div class="bottom-nav-item" onclick="switchSection('more-menu', this)"><span class="bottom-nav-icon">☰</span><span>More</span></div>
+  <div class="nav-item active" onclick="switchTab('overview', this)">📊</div>
+  <div class="nav-item" onclick="switchTab('processes', this)">⚡</div>
+  <div class="nav-item" onclick="switchTab('services', this)">⚙️</div>
+  <div class="nav-item" onclick="switchTab('ports', this)">🔌</div>
+  <div class="nav-item" onclick="switchTab('settings', this)">🔧</div>
 </div>
 
-<!-- MAIN CONTENT AREA -->
 <div class="main-content">
   <div class="header">
     <div class="header-left">
-      <div class="status-dot" id="status-dot"></div>
-      <div class="header-title" id="page-title">System Overview</div>
+      <div class="status-dot"></div>
+      <div class="header-title" id="tab-heading">System Overview</div>
     </div>
     <div class="header-right">
-      <div class="notification-bell" onclick="toggleNotificationDrawer()">🔔 <span class="badge-count" id="notif-badge">0</span></div>
-      <div>Net: <b id="h-net">0 GiB</b></div>
-      <div>Load: <b id="h-load">0.0</b></div>
-      <button class="logout-btn" onclick="doLogout()">Logout</button>
+      <span id="header-uptime">Uptime: -</span>
+      <span id="header-load">Load: -</span>
+      <button class="btn btn-ghost" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
-  <!-- === SECTION 2: OVERVIEW DASHBOARD === -->
-  <div id="overview" class="content-section active">
+  <!-- TAB: OVERVIEW -->
+  <div id="tab-overview" class="content-section active">
     <div id="overview-grid">
-      
-      <!-- 2.2 Smart CPU Card -->
-      <div class="metric-card" id="card-cpu">
-        <div class="card-header">
-          <span class="card-title">CPU USAGE</span>
-          <span class="card-badge badge-ok" id="cpu-badge">Healthy</span>
-        </div>
-        <div class="card-value-main"><span id="cpu-percent">0</span><span class="unit">%</span></div>
-        <div class="card-sub-metrics">
-          <div class="sub-metric"><span class="label">User</span><span id="cpu-user" class="value">0%</span></div>
-          <div class="sub-metric"><span class="label">System</span><span id="cpu-sys" class="value">0%</span></div>
-          <div class="sub-metric highlight-warn"><span class="label">IO Wait</span><span id="cpu-iowait" class="value">0%</span></div>
-        </div>
-        <div class="chart-container"><canvas id="chart-cpu-sparkline"></canvas></div>
-        <div class="card-footer">
-          <span id="cpu-cores-info">Loading...</span>
-          <button class="btn-icon" title="Per-Core View">📊</button>
-        </div>
+      <div class="metric-card">
+        <div class="card-header"><span class="card-title">CPU Usage</span></div>
+        <div class="card-val" id="ov-cpu-val">0%</div>
+        <div class="card-sub"><span id="ov-cpu-user">User: 0%</span><span id="ov-cpu-io">I/O Wait: 0%</span></div>
+        <div class="chart-box"><canvas id="cv-cpu"></canvas></div>
       </div>
-
-      <!-- 2.3 Memory & Swap Card -->
-      <div class="metric-card" id="card-memory">
-        <div class="card-header">
-          <span class="card-title">MEMORY</span>
-          <span class="card-badge badge-ok" id="mem-badge">Stable</span>
-        </div>
-        <div class="card-value-main"><span id="mem-used">0</span><span class="unit">GB</span><span class="separator" style="color:var(--text-muted)">/</span><span id="mem-total" class="text-muted" style="font-size:14px; font-weight:500;">0 GB</span></div>
-        <div class="progress-bar-container"><div class="progress-bar-fill" id="mem-bar" style="width: 0%; background: var(--accent-health);"></div></div>
-        <div class="card-sub-metrics">
-          <div class="sub-metric"><span class="label">Available</span><span id="mem-avail" class="value">0 GB</span></div>
-          <div class="sub-metric"><span class="label">Cached</span><span id="mem-cached" class="value">0 GB</span></div>
-        </div>
-        <div class="swap-section" id="swap-section">
-          <div class="swap-header"><span>SWAP</span><span id="swap-percent" class="mono">0%</span></div>
-          <div class="progress-bar-container" style="height:4px;"><div class="progress-bar-fill" id="swap-bar" style="width: 0%; background: var(--accent-warn);"></div></div>
-        </div>
-        <div class="chart-container"><canvas id="chart-mem-history"></canvas></div>
+      <div class="metric-card">
+        <div class="card-header"><span class="card-title">Memory</span></div>
+        <div class="card-val" id="ov-mem-val">0 GB</div>
+        <div class="card-sub"><span id="ov-mem-total">Total: 0 GB</span><span id="ov-mem-avail">Avail: 0 GB</span></div>
+        <div class="chart-box"><canvas id="cv-mem"></canvas></div>
       </div>
-
-      <!-- 2.4 Disk Health & I/O Card -->
-      <div class="metric-card" id="card-disk">
-        <div class="card-header">
-          <span class="card-title">STORAGE & I/O</span>
-          <span class="card-badge badge-ok" id="disk-badge">OK</span>
-        </div>
-        <div class="gauge-container">
-          <canvas id="gauge-disk-space"></canvas>
-          <div class="gauge-center-text"><span id="disk-percent" class="big">0%</span><span class="small">Used</span></div>
-        </div>
-        <div class="io-metrics-grid">
-          <div class="io-box read"><span class="icon">⬇️</span><div class="data"><span id="disk-read-speed" class="value">0 MB/s</span><span class="label">Read</span></div></div>
-          <div class="io-box write"><span class="icon">⬆️</span><div class="data"><span id="disk-write-speed" class="value">0 MB/s</span><span class="label">Write</span></div></div>
-        </div>
-        <div class="card-footer">
-          <span id="disk-mount-info">Loading...</span>
-          <button class="btn-text danger" id="btn-clean-cache" style="display:none; background:transparent; border:none; color:var(--accent-crit); cursor:pointer; font-size:11px; font-weight:600;">Clean Cache</button>
-        </div>
+      <div class="metric-card">
+        <div class="card-header"><span class="card-title">Storage I/O</span></div>
+        <div class="card-val" id="ov-disk-pct">0%</div>
+        <div class="card-sub"><span id="ov-disk-r">R: 0 MB/s</span><span id="ov-disk-w">W: 0 MB/s</span></div>
+        <div class="chart-box"><canvas id="cv-disk"></canvas></div>
       </div>
-
-      <!-- Placeholder for 4th card to maintain grid balance if needed, or Alerts Summary -->
-      <div class="metric-card full-width" id="card-alerts-summary" style="margin-top:0;">
-        <div class="card-header"><span class="card-title">RECENT SYSTEM ALERTS</span><a href="#settings" class="link" style="color:var(--accent-health); text-decoration:none; font-size:11px;">View All Logs →</a></div>
-        <div class="alerts-list" id="overview-alerts-list"><div class="alert-row empty">No critical alerts in the last hour.</div></div>
+      <div class="metric-card">
+        <div class="card-header"><span class="card-title">Sockets</span></div>
+        <div class="card-val" id="ov-sock-total">0</div>
+        <div class="card-sub"><span id="ov-sock-tcp">TCP: 0</span><span id="ov-sock-udp">UDP: 0</span></div>
+        <div class="chart-box"><canvas id="cv-conn"></canvas></div>
       </div>
-
-      <!-- 2.5 Network Traffic Splitter -->
-      <div class="metric-card wide" id="card-network">
-        <div class="card-header">
-          <span class="card-title">NETWORK TRAFFIC</span>
-          <div class="interface-selector">
-            <select id="net-interface-select">
-              <option value="all">All Interfaces</option>
-              <!-- Populated dynamically -->
-            </select>
-          </div>
-        </div>
-        <div class="net-speed-display">
-          <div class="speed-block upload"><span class="arrow" style="color:var(--accent-flow)">▲</span><span id="net-tx-speed" class="value">0 MB/s</span></div>
-          <div class="speed-block download"><span class="arrow" style="color:var(--accent-health)">▼</span><span id="net-rx-speed" class="value">0 MB/s</span></div>
-        </div>
-        <div class="chart-container" style="height:120px;"><canvas id="chart-net-flow"></canvas></div>
-        <div class="card-sub-metrics" style="margin-top:12px; border-top:1px solid var(--border-dim); padding-top:10px;">
-          <div class="sub-metric"><span class="label">Total RX</span><span id="net-total-rx" class="value">0 GB</span></div>
-          <div class="sub-metric"><span class="label">Total TX</span><span id="net-total-tx" class="value">0 GB</span></div>
-          <div class="sub-metric"><span class="label">Errors/Drops</span><span id="net-errors" class="value" style="color:var(--accent-crit)">0</span></div>
-        </div>
+      <div class="metric-card wide">
+        <div class="card-header"><span class="card-title">Network Traffic</span></div>
+        <div class="card-sub"><span id="ov-net-rx">RX: 0 MB/s</span><span id="ov-net-tx">TX: 0 MB/s</span></div>
+        <div class="chart-box"><canvas id="cv-net"></canvas></div>
       </div>
-
-      <!-- 2.6 Connection & Socket Monitor -->
-      <div class="metric-card wide" id="card-connections">
-        <div class="card-header">
-          <span class="card-title">ACTIVE CONNECTIONS</span>
-          <span class="card-badge badge-ok" id="conn-badge">Normal</span>
-        </div>
-        <div style="text-align:center; margin-bottom:16px;">
-          <span id="conn-total" class="value" style="font-size:32px; font-weight:700; font-family:var(--font-mono);">0</span>
-          <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Open Sockets</div>
-        </div>
-        <div class="conn-breakdown">
-          <div class="breakdown-item"><span class="dot tcp"></span><span>TCP ESTABLISHED</span><span id="conn-tcp-est" class="value">0</span></div>
-          <div class="breakdown-item"><span class="dot udp"></span><span>UDP ACTIVE</span><span id="conn-udp" class="value">0</span></div>
-          <div class="breakdown-item warn"><span class="dot time-wait"></span><span>TIME_WAIT</span><span id="conn-time-wait" class="value">0</span></div>
-        </div>
-        <div class="chart-container"><canvas id="chart-conn-history"></canvas></div>
-      </div>
-
     </div>
   </div>
 
-  <!-- === SECTION 3: PROCESS INSPECTOR TAB === -->
-  <div id="apps" class="content-section">
-    <div class="proc-controls">
-      <h2 style="font-size:18px; font-weight:600; margin-right:auto;">Process Inspector</h2>
-      <input type="text" id="proc-search-input" class="input-field proc-search" placeholder="Search process by name..." onkeyup="filterProcesses()">
-      <button class="btn btn-success" onclick="openAddProcessModal()">+ Watch Process</button>
-      <button class="btn btn-ghost" onclick="refreshProcesses()">↻ Refresh</button>
+  <!-- TAB: PROCESSES (SECTION 3 SPEC COMPLIANT) -->
+  <div id="tab-processes" class="content-section">
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="proc-search" placeholder="Search processes by Name, User, PID..." onkeyup="filterProcessList()">
+      </div>
+      <button class="btn btn-ghost" id="btn-lock-proc" onclick="toggleProcessLock()">🔒 Locked</button>
+      <button class="btn" onclick="openModal('modal-add-proc')">+ Watch Process</button>
+      <button class="btn btn-ghost" onclick="fetchProcesses()">🔄 Refresh</button>
     </div>
-    
+
     <table class="data-table">
       <thead>
         <tr>
-          <th style="width:50px;">PID</th>
-          <th>Name / Alias</th>
-          <th>User</th>
-          <th>CPU %</th>
-          <th>MEM (MB)</th>
+          <th style="width: 40px;">#</th>
+          <th onclick="sortProcessView('pid')">PID ⬍</th>
+          <th onclick="sortProcessView('name')">Name / Alias ⬍</th>
+          <th onclick="sortProcessView('user')">User ⬍</th>
+          <th onclick="sortProcessView('cpu_percent')">CPU % ⬍</th>
+          <th onclick="sortProcessView('mem_mb')">RAM (MB) ⬍</th>
           <th>Status</th>
           <th style="text-align:right;">Actions</th>
         </tr>
       </thead>
-      <tbody id="process-tbody">
-        <tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">Loading processes...</td></tr>
+      <tbody id="proc-tbody">
+        <tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Loading processes...</td></tr>
       </tbody>
     </table>
   </div>
 
-  <!-- OTHER TABS PRESERVED FOR CONTINUITY -->
-  <div id="services" class="content-section">
-    <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <h2 style="font-size:18px; font-weight:600;">Service Manager</h2>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button class="lock-toggle" id="lock-services" onclick="toggleLock('services')">🔒 Locked</button>
-        <button class="btn btn-success" onclick="openServicesScanner()">Scan Services</button>
-        <input type="text" id="in-srv" class="input-field" placeholder="Service name" style="width:150px;">
-        <button class="btn" onclick="addService()">Add</button>
-      </div>
-    </div>
-    <table class="data-table">
-      <thead><tr><th style="width:30px;">#</th><th class="th-sort" onclick="toggleSort('services', 'name')">Service ⬍</th><th class="th-sort" onclick="toggleSort('services', 'state')">State ⬍</th><th>Action</th></tr></thead>
-      <tbody id="srv-tbody"></tbody>
-    </table>
-  </div>
+  <!-- PLACEHOLDER TABS -->
+  <div id="tab-services" class="content-section"><p style="color:var(--text-muted); padding:20px;">Services Manager is scheduled for Section 4 implementation.</p></div>
+  <div id="tab-ports" class="content-section"><p style="color:var(--text-muted); padding:20px;">Ports & Flow Gateway is scheduled for Section 5 implementation.</p></div>
+  <div id="tab-storage" class="content-section"><p style="color:var(--text-muted); padding:20px;">Storage & Volumes is scheduled for Section 6 implementation.</p></div>
+  <div id="tab-settings" class="content-section"><p style="color:var(--text-muted); padding:20px;">Preferences & Settings is scheduled for Section 7 implementation.</p></div>
+</div>
 
-  <div id="ports" class="content-section">
-    <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <h2 style="font-size:18px; font-weight:600;">Ports & Flow Gateway</h2>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button class="lock-toggle" id="lock-ports" onclick="toggleLock('ports')">🔒 Locked</button>
-        <button class="btn btn-success" onclick="openPortsScanner()">🔍 Scan Ports</button>
-        <input type="number" id="in-port" class="input-field" placeholder="Port" style="width:100px;">
-        <button class="btn" onclick="addPort()">Watch</button>
-      </div>
+<!-- MODAL: ADD PROCESS -->
+<div id="modal-add-proc" class="modal">
+  <div class="modal-card">
+    <h3 style="margin-bottom:16px;">Watch New Process</h3>
+    <div class="form-group">
+      <label>Process Name (comm)</label>
+      <input type="text" id="new-proc-name" placeholder="e.g., nginx, xray, python3">
     </div>
-    <table class="data-table">
-      <thead><tr><th style="width:30px;">#</th><th class="th-sort" onclick="toggleSort('ports', 'port')">Port ⬍</th><th class="th-sort" onclick="toggleSort('ports', 'status')">Status </th><th>Action</th></tr></thead>
-      <tbody id="port-tbody"></tbody>
-    </table>
-  </div>
-
-  <div id="storage" class="content-section">
-    <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <h2 style="font-size:18px; font-weight:600;">Storage & Volumes</h2>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button class="lock-toggle" id="lock-storage" onclick="toggleLock('storage')">🔒 Locked</button>
-        <button class="btn btn-success" onclick="openTreeExplorer()">🌳 Explore</button>
-        <input type="text" id="dir-name" class="input-field" placeholder="Label" style="width:100px;">
-        <input type="text" id="dir-path" class="input-field" placeholder="/path" style="width:200px;">
-        <button class="btn" onclick="addFolder()">Track</button>
-      </div>
+    <div class="form-group">
+      <label>Display Alias (Optional)</label>
+      <input type="text" id="new-proc-alias" placeholder="e.g., Primary Web Proxy">
     </div>
-    <table class="data-table">
-      <thead><tr><th style="width:30px;">#</th><th class="th-sort" onclick="toggleSort('storage', 'name')">Label </th><th class="th-sort" onclick="toggleSort('storage', 'path')">Path ⬍</th><th class="th-sort" onclick="toggleSort('storage', 'size_mb')">Size ⬍</th><th>Action</th></tr></thead>
-      <tbody id="dir-tbody"></tbody>
-    </table>
-  </div>
-
-  <div id="settings" class="content-section">
-    <div class="settings-container">
-      <div class="settings-group"><h3> Security</h3><div class="setting-row"><span class="setting-label">Change Admin Password</span><div style="display:flex; gap:8px;"><input type="password" id="old-pass" class="input-field" placeholder="Current" style="width:130px;"><input type="password" id="new-pass" class="input-field" placeholder="New" style="width:130px;"><button class="btn" onclick="changePassword()">Update</button></div></div></div>
-      <div class="settings-group"><h3> Appearance</h3><div class="theme-grid"><div class="theme-color-item"><label>Primary</label><input type="color" id="theme-primary" value="#00F5A0" onchange="updateTheme('primary', this.value)"></div><div class="theme-color-item"><label>Success</label><input type="color" id="theme-success" value="#00F5A0" onchange="updateTheme('success', this.value)"></div><div class="theme-color-item"><label>Danger</label><input type="color" id="theme-danger" value="#EF4444" onchange="updateTheme('danger', this.value)"></div><div class="theme-color-item"><label>Background</label><input type="color" id="theme-bg" value="#0B0E14" onchange="updateTheme('bg-base', this.value)"></div><div class="theme-color-item"><label>Surface</label><input type="color" id="theme-card" value="#121721" onchange="updateTheme('bg-surface', this.value)"></div><div class="theme-color-item"><label>Text</label><input type="color" id="theme-text" value="#F9FAFB" onchange="updateTheme('text-main', this.value)"></div></div><div style="margin-top:16px; display:flex; gap:8px;"><button class="btn btn-ghost" onclick="resetTheme()">Reset Default</button><button class="btn" onclick="saveTheme()">Save Theme</button></div></div>
-      <div class="settings-group"><h3> Update Manager</h3><div class="setting-row"><span class="setting-label">Current Version</span><span class="setting-value" id="set-current-ver">v1.2.0</span></div><div class="setting-row"><span class="setting-label">Latest Version</span><span class="setting-value" id="set-latest-ver">Checking...</span></div><div style="margin-top:12px;"><button class="btn" onclick="checkUpdate()">🔄 Check Updates</button></div></div>
-      <div class="settings-group"><h3>💾 Backup & Restore</h3><div class="setting-row"><span class="setting-label">Export Config</span><button class="btn btn-ghost" onclick="downloadConfig()">📥 Download JSON</button></div><div class="setting-row"><span class="setting-label">Import Config</span><input type="file" id="config-file-input" accept=".json" style="display:none;" onchange="uploadConfig(event)"><button class="btn btn-ghost" onclick="document.getElementById('config-file-input').click()">📤 Upload</button></div></div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-proc')">Cancel</button>
+      <button class="btn" onclick="submitWatchProcess()">Save to Watchlist</button>
     </div>
   </div>
 </div>
 
-<!-- NOTIFICATION DRAWER -->
-<div id="notification-drawer">
-  <div class="drawer-header"><span>System Events</span><button class="btn-ghost" onclick="markAllRead()" style="font-size:11px; padding:4px 8px;">Mark All Read</button></div>
-  <div class="drawer-body" id="notif-list"><div style="text-align:center; padding:40px; color:var(--text-muted);">No recent events</div></div>
-</div>
-
-<!-- MODALS -->
-<!-- Task Manager Modal (Legacy/Full List) -->
-<div id="task-modal" class="modal"><div class="modal-body"><div class="modal-head"><span>⚡ Live Process Snapshot</span><button class="btn-ghost" onclick="closeModal('task-modal')">✕</button></div><div class="modal-content"><table class="data-table"><thead><tr><th class="th-sort" onclick="toggleSort('snapshot', 'pid')">PID ⬍</th><th class="th-sort" onclick="toggleSort('snapshot', 'name')">App ⬍</th><th class="th-sort" onclick="toggleSort('snapshot', 'cpu_percent')">CPU ⬍</th><th class="th-sort" onclick="toggleSort('snapshot', 'mem_mb')">RAM ⬍</th><th class="th-sort" onclick="toggleSort('snapshot', 'threads')">Thr ⬍</th><th>Action</th></tr></thead><tbody id="task-tbody"></tbody></table></div></div></div>
-
-<!-- Add Process Modal (Section 3) -->
-<div id="add-proc-modal" class="modal"><div class="modal-body" style="max-width: 500px;"><div class="modal-head"><span>+ Watch New Process</span><button class="btn-ghost" onclick="closeModal('add-proc-modal')">✕</button></div><div class="modal-content">
-  <div style="margin-bottom:15px;">
-    <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:5px;">Process Name (Exact Match)</label>
-    <input type="text" id="new-proc-name" class="input-field" style="width:100%;" placeholder="e.g., nginx, sshd">
-  </div>
-  <div style="margin-bottom:15px;">
-    <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:5px;">Display Alias (Optional)</label>
-    <input type="text" id="new-proc-alias" class="input-field" style="width:100%;" placeholder="e.g., Web Server">
-  </div>
-  <button class="btn btn-success" style="width:100%;" onclick="submitAddProcess()">Add to Watchlist</button>
-</div></div></div>
-
-<div id="services-modal" class="modal"><div class="modal-body"><div class="modal-head"><span>All Systemd Services</span><button class="btn-ghost" onclick="closeModal('services-modal')">✕</button></div><div class="modal-content"><table class="data-table"><thead><tr><th class="th-sort" onclick="toggleSort('srvScan', 'name')">Service ⬍</th><th class="th-sort" onclick="toggleSort('srvScan', 'state')">State ⬍</th><th>Action</th></tr></thead><tbody id="services-scan-tbody"></tbody></table></div></div></div>
-<div id="ports-modal" class="modal"><div class="modal-body"><div class="modal-head"><span> All Listening Ports</span><button class="btn-ghost" onclick="closeModal('ports-modal')"></button></div><div class="modal-content"><table class="data-table"><thead><tr><th class="th-sort" onclick="toggleSort('portScan', 'port')">Port ⬍</th><th>Status</th><th>Action</th></tr></thead><tbody id="ports-scan-tbody"></tbody></table></div></div></div>
-<div id="folder-modal" class="modal"><div class="modal-body"><div class="modal-head"><span>Folder Explorer</span><button class="btn-ghost" onclick="closeModal('folder-modal')">✕</button></div><div class="modal-content"><div style="margin-bottom:12px; display:flex; gap:8px;"><input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/root" style="flex:1;"><button class="btn btn-success" onclick="exploreFolder()">Explore</button></div><table class="data-table"><thead><tr><th class="th-sort" onclick="toggleSort('folder', 'name')">Folder </th><th class="th-sort" onclick="toggleSort('folder', 'path')">Path </th><th class="th-sort" onclick="toggleSort('folder', 'size_mb')">Size </th><th>Action</th></tr></thead><tbody id="folder-tbody"></tbody></table></div></div></div>
-
-<div id="toast-container"></div>
+<div id="toast-box"></div>
 
 <script>
-// === GLOBAL STATE & UTILITIES ===
-window.WARD_STATE = { pollingInterval: 1000, isPaused: false, theme: 'cyber-oled', sidebarCollapsed: false, notifications: { unreadCount: 0, lastChecked: null }, activeTab: 'overview', processes: { viewMode: 'watched', isLocked: true, searchQuery: '', sortColumn: 'cpu_percent', sortDirection: 'desc', selectedPids: [], autoRefresh: true, pauseTimeout: null }, services: { filterStatus: 'all', searchQuery: '', autoRecoveryEnabled: {}, expandedLogs: null, viewMode: 'list' }, ports: { viewMode: 'monitored', filterProtocol: 'all', searchQuery: '', idleThresholdMinutes: 15, selectedPort: null, autoRefresh: true }, storage: { viewMode: 'partitions', selectedMount: null, sortColumn: 'used_percent', sortDirection: 'desc', autoRefresh: true, cleanupHistory: [], isScanning: false }, settings: { activeSection: 'general', hasUnsavedChanges: false, originalConfig: null, testInProgress: false } };
-let sessionToken = localStorage.getItem('ward_token') || ''; let globalData = null; let currentTheme = {}; let authFailedCount = 0; let sidebarPinned = false; let sidebarHoverTimeout = null; let snapshotData = []; let srvScanData = []; let portScanData = []; let folderData = []; let lockStates = { apps: true, services: true, ports: true, storage: true }; let customOrders = { apps: null, services: null, ports: null, storage: null }; let rowNumbers = { apps: {}, services: {}, ports: {}, storage: {} }; let nextRowNumber = { apps: 1, services: 1, ports: 1, storage: 1 }; let sortConfig = { snapshot: { key: null, asc: true }, srvScan: { key: null, asc: true }, portScan: { key: null, asc: true }, folder: { key: null, asc: true }, apps: { key: null, asc: true }, services: { key: null, asc: true }, ports: { key: null, asc: true }, storage: { key: null, asc: true } };
-const pLen = 60; const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0); const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
-const sidebar = document.getElementById('sidebar');
+let sessionToken = localStorage.getItem('ward_token') || '';
+let currentTab = 'overview';
+const pLen = 60;
+const d_cpu = new Array(pLen).fill(0), d_mem = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
+const d_net_rx = new Array(pLen).fill(0), d_net_tx = new Array(pLen).fill(0), d_conn = new Array(pLen).fill(0);
 
-// Sidebar & Responsive Logic
-function toggleSidebar() { sidebarPinned = !sidebarPinned; if (sidebarPinned) { sidebar.classList.remove('collapsed'); localStorage.setItem('ward_sidebar_collapsed', 'false'); } else { sidebar.classList.add('collapsed'); localStorage.setItem('ward_sidebar_collapsed', 'true'); } }
-sidebar.addEventListener('mouseenter', () => { if (!sidebarPinned) { clearTimeout(sidebarHoverTimeout); sidebar.classList.remove('collapsed'); } });
-sidebar.addEventListener('mouseleave', () => { if (!sidebarPinned) { sidebarHoverTimeout = setTimeout(() => { sidebar.classList.add('collapsed'); }, 200); } });
-if (localStorage.getItem('ward_sidebar_collapsed') === 'false') { sidebar.classList.remove('collapsed'); sidebarPinned = true; }
+// Process State Management (Section 3.1 & 3.7)
+let processState = {
+  isLocked: true,
+  items: [],
+  originalSnapshot: null,
+  sortCol: null,
+  sortAsc: true
+};
 
-// LAW #5: Visibility Lifecycle
-document.addEventListener('visibilitychange', () => { if (document.hidden) { clearInterval(WARD_STATE.pollingTimer); cancelAnimationFrame(WARD_STATE.animationFrameId); console.log('[WARD] Paused: Tab Hidden (LAW #5)'); } else { console.log('[WARD] Resumed: Tab Visible (LAW #5)'); fetchStatus(); startPolling(); } });
-
-// Auth Functions
-function showLogin() { document.getElementById('login-overlay').classList.remove('hidden'); document.getElementById('login-pass').value = ''; document.getElementById('login-err').style.display = 'none'; setTimeout(() => document.getElementById('login-pass').focus(), 100); }
-function hideLogin() { document.getElementById('login-overlay').classList.add('hidden'); authFailedCount = 0; }
-async function doLogin() { const pw = document.getElementById('login-pass').value; if (!pw) return; try { const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) }); const d = await res.json(); if (d.status === 'ok') { sessionToken = d.token; localStorage.setItem('ward_token', d.token); hideLogin(); fetchStatus(); showToast('Authorized successfully', 'success'); } else { document.getElementById('login-err').style.display = 'block'; document.getElementById('login-pass').value = ''; } } catch(e) { document.getElementById('login-err').innerText = 'Connection error'; document.getElementById('login-err').style.display = 'block'; } }
-function doLogout() { fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Session-Token': sessionToken } }).finally(() => { localStorage.removeItem('ward_token'); sessionToken = ''; showLogin(); }); }
-
-// Navigation
-function switchSection(id, el) { document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); if(el) el.classList.add('active'); document.getElementById(id)?.classList.add('active'); const titles = { overview: 'System Overview', apps: 'Process Inspector', services: 'Service Manager', ports: 'Ports & Flow Gateway', storage: 'Storage & Volumes', settings: 'Preferences & Alerts' }; document.getElementById('page-title').innerText = titles[id] || 'WARD'; WARD_STATE.activeTab = id; 
-  // Trigger specific loads
-  if (id === 'apps') refreshProcesses();
+function showToast(msg) {
+  const box = document.getElementById('toast-box');
+  const t = document.createElement('div');
+  t.className = 'toast'; t.innerText = msg;
+  box.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
 }
 
-// Notification Drawer
-function toggleNotificationDrawer() { const drawer = document.getElementById('notification-drawer'); drawer.classList.toggle('open'); if (drawer.classList.contains('open')) loadNotifications(); }
-async function loadNotifications() { try { const res = await fetch('/api/events/recent', { headers: { 'X-Session-Token': sessionToken } }); const events = await res.json(); const list = document.getElementById('notif-list'); if (events.length === 0) { list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">No recent events</div>'; return; } list.innerHTML = events.reverse().map(e => `<div class="event-item severity-${e.severity}"><div class="event-time">${new Date(e.timestamp * 1000).toLocaleString()}</div><div class="event-title">${e.title}</div><div class="event-msg">${e.message}</div></div>`).join(''); document.getElementById('notif-badge').style.display = 'none'; WARD_STATE.notifications.unreadCount = 0; } catch(e) { console.error('Failed to load notifications', e); } }
-function markAllRead() { loadNotifications(); }
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-// Toast System
-function showToast(msg, type = 'success') { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = `toast toast-${type}`; toast.innerText = msg; container.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000); }
-
-// Lock / Sort / Drag-Drop Utilities (Preserved for legacy tabs)
-function toggleLock(listKey) { lockStates[listKey] = !lockStates[listKey]; localStorage.setItem(`ward_lock_${listKey}`, lockStates[listKey]); updateLockButton(listKey); if (listKey === 'services') renderServices(); else if (listKey === 'ports') renderPorts(); else if (listKey === 'storage') renderDirs(); }
-function updateLockButton(listKey) { const btn = document.getElementById(`lock-${listKey}`); if (!btn) return; if (lockStates[listKey]) { btn.innerHTML = '🔒 Locked'; btn.classList.remove('unlocked'); } else { btn.innerHTML = ' Unlocked'; btn.classList.add('unlocked'); } }
-['services', 'ports', 'storage'].forEach(key => updateLockButton(key));
-function toggleSort(tableKey, columnKey) { const current = sortConfig[tableKey]; if (current.key === columnKey) current.asc = !current.asc; else { current.key = columnKey; current.asc = true; } if (['services', 'ports', 'storage'].includes(tableKey)) { customOrders[tableKey] = null; localStorage.removeItem(`ward_order_${tableKey}`); } if (tableKey === 'snapshot') renderSnapshotTable(); else if (tableKey === 'srvScan') renderServicesScannerTable(); else if (tableKey === 'portScan') renderPortsScannerTable(); else if (tableKey === 'folder') renderFolderTable(); else if (tableKey === 'services') renderServices(); else if (tableKey === 'ports') renderPorts(); else if (tableKey === 'storage') renderDirs(); }
-function getSortedArray(dataArray, tableKey) { const config = sortConfig[tableKey]; if (!config || !config.key) return dataArray; return [...dataArray].sort((a, b) => { let v1 = a[config.key], v2 = b[config.key]; if (typeof v1 === 'string') return config.asc ? v1.localeCompare(v2) : v2.localeCompare(v1); return config.asc ? (v1 - v2) : (v2 - v1); }); }
-function applyCustomOrder(dataArray, tableKey) { const order = customOrders[tableKey]; if (!order || order.length === 0) return dataArray; dataArray.forEach(item => { const id = getItemId(item, tableKey); if (!(id in rowNumbers[tableKey])) { rowNumbers[tableKey][id] = nextRowNumber[tableKey]++; saveRowNumbers(tableKey); } }); const ordered = []; order.forEach(id => { const item = dataArray.find(d => getItemId(d, tableKey) === id); if (item) ordered.push(item); }); dataArray.forEach(item => { const id = getItemId(item, tableKey); if (!order.includes(id)) ordered.push(item); }); return ordered; }
-function getItemId(item, tableKey) { if (tableKey === 'services') return item.name; if (tableKey === 'ports') return String(item.port); if (tableKey === 'storage') return item.name; return null; }
-function saveRowNumbers(tableKey) { localStorage.setItem(`ward_rows_${tableKey}`, JSON.stringify(rowNumbers[tableKey])); }
-function saveCustomOrder(tableKey, dataArray) { const ids = dataArray.map(item => getItemId(item, tableKey)).filter(id => id !== null); customOrders[tableKey] = ids; localStorage.setItem(`ward_order_${tableKey}`, JSON.stringify(ids)); }
-let dragRow = null; let dragTableKey = null;
-function setupDragDrop(tbody, tableKey, dataArray) { const rows = tbody.querySelectorAll('tr.draggable-row'); rows.forEach(row => { row.draggable = !lockStates[tableKey]; row.addEventListener('dragstart', (e) => { if (lockStates[tableKey]) { e.preventDefault(); return; } dragRow = row; dragTableKey = tableKey; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }); row.addEventListener('dragend', () => { row.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (dragRow && dragTableKey) { const newOrder = []; tbody.querySelectorAll('tr.draggable-row').forEach(r => { const idx = parseInt(r.dataset.index); if (!isNaN(idx) && dataArray[idx]) newOrder.push(dataArray[idx]); }); if (newOrder.length > 0) { dataArray.length = 0; dataArray.push(...newOrder); saveCustomOrder(dragTableKey, dataArray); } } dragRow = null; dragTableKey = null; }); row.addEventListener('dragover', (e) => { if (lockStates[tableKey]) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; row.classList.add('drag-over'); }); row.addEventListener('dragleave', () => { row.classList.remove('drag-over'); }); row.addEventListener('drop', (e) => { if (lockStates[tableKey]) return; e.preventDefault(); row.classList.remove('drag-over'); if (dragRow && dragRow !== row) { const allRows = [...tbody.querySelectorAll('tr.draggable-row')]; const dragIdx = allRows.indexOf(dragRow); const dropIdx = allRows.indexOf(row); if (dragIdx < dropIdx) row.after(dragRow); else row.before(dragRow); } }); }); }
-
-// === SECTION 2.10: LIGHTWEIGHT CANVAS CHART ENGINE ===
-function drawNetdataGrid(ctx, w, h, maxScale, isPct = true) { const levels = [0.25, 0.5, 0.75, 1.0]; ctx.font = '10px JetBrains Mono, monospace'; ctx.textAlign = 'left'; levels.forEach(lvl => { const y = h - (lvl * (h - 16)) - 8; ctx.beginPath(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.moveTo(35, y); ctx.lineTo(w, y); ctx.stroke(); ctx.fillStyle = 'rgba(148, 163, 184, 0.6)'; if (isPct) ctx.fillText(`${Math.round(lvl * maxScale)}%`, 4, y + 3); }); ctx.setLineDash([]); }
-function plotNetdataSingle(id, arr, maxScale, color) { const cvs = document.getElementById(id); if (!cvs) return; const ctx = cvs.getContext('2d'); const w = cvs.width = cvs.clientWidth * 2; const h = cvs.height = cvs.clientHeight * 2; ctx.clearRect(0, 0, w, h); drawNetdataGrid(ctx, w, h, maxScale, true); const gradient = ctx.createLinearGradient(0, 0, 0, h); gradient.addColorStop(0, color + '30'); gradient.addColorStop(1, color + '00'); ctx.beginPath(); const step = w / (arr.length - 1); arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); }); ctx.lineTo(35 + (arr.length - 1) * step, h); ctx.lineTo(35, h); ctx.closePath(); ctx.fillStyle = gradient; ctx.fill(); ctx.beginPath(); arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); }); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke(); }
-function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') { const cvs = document.getElementById(id); if (!cvs) return; const ctx = cvs.getContext('2d'); const w = cvs.width = cvs.clientWidth * 2; const h = cvs.height = cvs.clientHeight * 2; ctx.clearRect(0, 0, w, h); drawNetdataGrid(ctx, w, h, maxScale, false); ctx.fillStyle = 'rgba(148, 163, 184, 0.7)'; ctx.font = '10px JetBrains Mono, monospace'; ctx.fillText(`${Math.round(maxScale)}${unit}`, 4, 12); ctx.fillText(`${Math.round(maxScale/2)}${unit}`, 4, h/2); const step = w / (arr1.length - 1); [arr1, arr2].forEach((arr, idx) => { const color = idx === 0 ? c1 : c2; const gradient = ctx.createLinearGradient(0, 0, 0, h); gradient.addColorStop(0, color + '25'); gradient.addColorStop(1, color + '00'); ctx.beginPath(); arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); }); ctx.lineTo(35 + (arr.length - 1) * step, h); ctx.lineTo(35, h); ctx.closePath(); ctx.fillStyle = gradient; ctx.fill(); ctx.beginPath(); arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); }); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke(); }); }
-
-// NEW: Circular Gauge Renderer for Disk Card
-function drawCircularGauge(canvasId, percent) {
-  const canvas = document.getElementById(canvasId); if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const size = canvas.width = canvas.height = 240; // High res for retina
-  const centerX = size / 2; const centerY = size / 2; const radius = size / 2 - 20;
-  const startAngle = 135 * Math.PI / 180; const endAngle = 405 * Math.PI / 180;
-  const totalAngle = endAngle - startAngle;
-  
-  ctx.clearRect(0, 0, size, size);
-  
-  // Background track
-  ctx.beginPath(); ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'; ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.stroke();
-  
-  // Value arc
-  const valueAngle = startAngle + (totalAngle * (percent / 100));
-  let gaugeColor = '#00F5A0'; // Green
-  if (percent > 80) gaugeColor = '#F59E0B'; // Amber
-  if (percent > 90) gaugeColor = '#EF4444'; // Red
-  
-  ctx.beginPath(); ctx.arc(centerX, centerY, radius, startAngle, valueAngle);
-  ctx.strokeStyle = gaugeColor; ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.stroke();
-  
-  // Glow effect
-  ctx.shadowColor = gaugeColor; ctx.shadowBlur = 15;
-  ctx.beginPath(); ctx.arc(centerX, centerY, radius, startAngle, valueAngle);
-  ctx.strokeStyle = gaugeColor; ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.stroke();
-  ctx.shadowBlur = 0;
+// AUTH
+async function doLogin() {
+  const pw = document.getElementById('login-pass').value;
+  try {
+    const res = await fetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ password: pw }) });
+    const d = await res.json();
+    if (d.status === 'ok') {
+      sessionToken = d.token;
+      localStorage.setItem('ward_token', d.token);
+      document.getElementById('login-overlay').classList.add('hidden');
+      initApp();
+    } else {
+      alert("Invalid password");
+    }
+  } catch(e) { alert("Connection failed"); }
 }
 
-// === SECTION 3: PROCESS LOGIC ===
-let watchedProcessesCache = [];
+function doLogout() {
+  fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Session-Token': sessionToken } });
+  localStorage.removeItem('ward_token');
+  location.reload();
+}
 
-async function refreshProcesses() {
+// NAVIGATION & TAB SWITCH (With Section 3 Rollback Logic)
+function switchTab(tabId, el) {
+  // Discard changes if leaving process tab while unlocked
+  if (currentTab === 'processes' && !processState.isLocked && processState.originalSnapshot) {
+    processState.items = JSON.parse(JSON.stringify(processState.originalSnapshot));
+    processState.isLocked = true;
+    processState.originalSnapshot = null;
+    document.getElementById('btn-lock-proc').innerText = '🔒 Locked';
+    renderProcessTable();
+    showToast('Unsaved reordering discarded');
+  }
+
+  currentTab = tabId;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById(`tab-${tabId}`)?.classList.add('active');
+
+  const titles = { overview: 'System Overview', processes: 'Process Inspector', services: 'Service Manager', ports: 'Ports & Flow Gateway', storage: 'Storage & Volumes', settings: 'Preferences' };
+  document.getElementById('tab-heading').innerText = titles[tabId] || 'WARD';
+
+  if (tabId === 'processes') fetchProcesses();
+}
+
+// CANVAS CHARTING
+function drawSpark(id, arr, maxVal, color) {
+  const cvs = document.getElementById(id); if (!cvs) return;
+  const ctx = cvs.getContext('2d');
+  const w = cvs.width = cvs.clientWidth * 2;
+  const h = cvs.height = cvs.clientHeight * 2;
+  ctx.clearRect(0, 0, w, h);
+  ctx.beginPath();
+  const step = w / (arr.length - 1);
+  arr.forEach((v, i) => {
+    const y = h - ((Math.min(v / maxVal, 1)) * (h - 8)) - 4;
+    i === 0 ? ctx.moveTo(i * step, y) : ctx.lineTo(i * step, y);
+  });
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+}
+
+// TELEMETRY OVERVIEW
+async function fetchTelemetry() {
+  if (!sessionToken || document.hidden) return;
+  try {
+    const res = await fetch('/api/telemetry/overview', { headers: { 'X-Session-Token': sessionToken } });
+    if (res.status === 401) { document.getElementById('login-overlay').classList.remove('hidden'); return; }
+    const d = await res.json();
+
+    document.getElementById('header-uptime').innerText = `Uptime: ${d.uptime}`;
+    document.getElementById('header-load').innerText = `Load: ${d.load_avg}`;
+
+    document.getElementById('ov-cpu-val').innerText = `${d.cpu.total_percent}%`;
+    document.getElementById('ov-cpu-user').innerText = `User: ${d.cpu.user_percent}%`;
+    document.getElementById('ov-cpu-io').innerText = `I/O Wait: ${d.cpu.iowait_percent}%`;
+
+    const memGB = (d.memory.used_bytes / 1e9).toFixed(1);
+    const totGB = (d.memory.total_bytes / 1e9).toFixed(1);
+    const availGB = (d.memory.available_bytes / 1e9).toFixed(1);
+    document.getElementById('ov-mem-val').innerText = `${memGB} GB`;
+    document.getElementById('ov-mem-total').innerText = `Total: ${totGB} GB`;
+    document.getElementById('ov-mem-avail').innerText = `Avail: ${availGB} GB`;
+
+    const dPct = ((d.disk.used_bytes / d.disk.total_bytes) * 100).toFixed(0);
+    document.getElementById('ov-disk-pct').innerText = `${dPct}%`;
+    document.getElementById('ov-disk-r').innerText = `R: ${(d.disk.read_bytes_sec/1e6).toFixed(1)} MB/s`;
+    document.getElementById('ov-disk-w').innerText = `W: ${(d.disk.write_bytes_sec/1e6).toFixed(1)} MB/s`;
+
+    document.getElementById('ov-sock-total').innerText = d.connections.total_sockets;
+    document.getElementById('ov-sock-tcp').innerText = `TCP: ${d.connections.tcp_established}`;
+    document.getElementById('ov-sock-udp').innerText = `UDP: ${d.connections.udp_active}`;
+
+    const iface = Object.keys(d.network.interfaces)[0];
+    const netObj = d.network.interfaces[iface] || { rx_bytes_sec: 0, tx_bytes_sec: 0 };
+    document.getElementById('ov-net-rx').innerText = `RX: ${(netObj.rx_bytes_sec/1e6).toFixed(1)} MB/s`;
+    document.getElementById('ov-net-tx').innerText = `TX: ${(netObj.tx_bytes_sec/1e6).toFixed(1)} MB/s`;
+
+    d_cpu.shift(); d_cpu.push(d.cpu.total_percent);
+    d_mem.shift(); d_mem.push((d.memory.used_bytes / d.memory.total_bytes) * 100);
+    d_disk.shift(); d_disk.push(parseFloat(dPct));
+    d_conn.shift(); d_conn.push(d.connections.total_sockets);
+    d_net_rx.shift(); d_net_rx.push(netObj.rx_bytes_sec / 1e6);
+
+    drawSpark('cv-cpu', d_cpu, 100, '#00F5A0');
+    drawSpark('cv-mem', d_mem, 100, '#06B6D4');
+    drawSpark('cv-disk', d_disk, 100, '#F59E0B');
+    drawSpark('cv-conn', d_conn, Math.max(50, Math.max(...d_conn)), '#cc5de8');
+    drawSpark('cv-net', d_net_rx, Math.max(5, Math.max(...d_net_rx)), '#00F5A0');
+  } catch(e) {}
+}
+
+// PROCESS INSPECTOR (SECTION 3 LOGIC)
+async function fetchProcesses() {
   if (!sessionToken) return;
   try {
     const res = await fetch('/api/processes/watched', { headers: { 'X-Session-Token': sessionToken } });
-    if (!res.ok) throw new Error('API Error');
-    const data = await res.json();
-    watchedProcessesCache = data.processes || [];
-    renderProcessTable(watchedProcessesCache);
-  } catch (e) {
-    console.error("Failed to fetch processes", e);
-    document.getElementById('process-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--accent-crit);">Failed to load processes</td></tr>';
+    const d = await res.json();
+    processState.items = d.processes || [];
+    renderProcessTable();
+  } catch(e) {
+    document.getElementById('proc-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--accent-crit);">Failed to read processes</td></tr>';
   }
 }
 
-function renderProcessTable(procs) {
-  const tbody = document.getElementById('process-tbody');
-  if (!procs || procs.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">No watched processes configured.<br>Click "+ Watch Process" to add one.</td></tr>';
+function renderProcessTable() {
+  const tbody = document.getElementById('proc-tbody');
+  const q = document.getElementById('proc-search').value.toLowerCase();
+  let list = [...processState.items].filter(p => p.name.toLowerCase().includes(q) || (p.alias && p.alias.toLowerCase().includes(q)));
+
+  if (processState.sortCol) {
+    list.sort((a, b) => {
+      let v1 = a[processState.sortCol], v2 = b[processState.sortCol];
+      if (typeof v1 === 'string') return processState.sortAsc ? v1.localeCompare(v2) : v2.localeCompare(v1);
+      return processState.sortAsc ? v1 - v2 : v2 - v1;
+    });
+  }
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No watched processes found</td></tr>';
     return;
   }
 
-  // Filter logic
-  const query = document.getElementById('proc-search-input').value.toLowerCase();
-  const filtered = procs.filter(p => 
-    p.name.toLowerCase().includes(query) || 
-    (p.alias && p.alias.toLowerCase().includes(query))
-  );
-
   let html = '';
-  filtered.forEach(p => {
-    const statusClass = p.status === 'running' ? 'status-running' : 'status-stopped';
-    const statusBadge = p.status === 'running' ? '<span class="badge badge-success">RUNNING</span>' : '<span class="badge badge-stopped">STOPPED</span>';
-    
-    // Actions based on safety rules
-    let actionsHtml = '';
-    if (p.is_protected) {
-      actionsHtml = `<span class="protected-indicator" title="Protected System Process">🛡️ PROTECTED</span>`;
+  list.forEach((p, idx) => {
+    const badge = p.status === 'running' ? '<span class="badge badge-active">RUNNING</span>' : '<span class="badge badge-stopped">STOPPED</span>';
+    const isProt = p.is_protected;
+    let actions = '';
+    if (isProt) {
+      actions = '<span style="color:var(--accent-crit); font-size:11px; font-weight:600;">🛡️ PROTECTED</span>';
     } else if (p.status === 'running') {
-      actionsHtml = `
-        <button class="btn btn-warning" onclick="sendProcessAction(${p.pid}, 'sigterm')" title="Terminate Gracefully">SIGTERM</button>
-        <button class="btn btn-danger" onclick="sendProcessAction(${p.pid}, 'sigkill')" title="Force Kill">KILL</button>
-        <button class="btn btn-ghost" onclick="removeFromWatch('${p.name}')" title="Remove from Watchlist">✕</button>
+      actions = `
+        <button class="btn btn-warn" onclick="sendProcAction(${p.pid}, 'sigterm')">SIGTERM</button>
+        <button class="btn btn-danger" onclick="sendProcAction(${p.pid}, 'sigkill')">KILL</button>
+        <button class="btn btn-ghost" onclick="unwatchProcess('${p.name}')">✕</button>
       `;
     } else {
-      // Stopped process
-      actionsHtml = `<button class="btn btn-ghost" onclick="removeFromWatch('${p.name}')" title="Remove from Watchlist">✕ Remove</button>`;
+      actions = `<button class="btn btn-ghost" onclick="unwatchProcess('${p.name}')">✕ Unwatch</button>`;
     }
 
+    const drag = processState.isLocked ? '' : '<span class="drag-handle">⋮⋮</span>';
     html += `
-      <tr>
-        <td style="font-family:var(--font-mono); color:var(--text-muted);">${p.pid || '-'}</td>
-        <td>
-          <div style="font-weight:600;">${p.alias || p.name}</div>
-          <div style="font-size:11px; color:var(--text-muted);" class="cmdline-truncate" title="${p.cmdline}">${p.cmdline || '-'}</div>
-        </td>
-        <td style="font-size:12px;">${p.user || '-'}</td>
-        <td style="font-family:var(--font-mono); ${p.cpu_percent > 50 ? 'color:var(--accent-warn)' : ''}">${p.cpu_percent.toFixed(1)}%</td>
-        <td style="font-family:var(--font-mono);">${p.mem_mb.toFixed(1)}</td>
-        <td>${statusBadge}</td>
-        <td class="proc-actions-cell">${actionsHtml}</td>
+      <tr class="draggable-row" data-name="${p.name}">
+        <td class="mono" style="color:var(--text-muted);">${p.row_id || (idx+1)}</td>
+        <td class="mono">${p.pid || '-'}</td>
+        <td>${drag}<strong>${p.alias || p.name}</strong> <span style="font-size:11px; color:var(--text-muted);">(${p.name})</span></td>
+        <td>${p.user || '-'}</td>
+        <td class="mono">${p.cpu_percent.toFixed(1)}%</td>
+        <td class="mono">${p.mem_mb.toFixed(1)}</td>
+        <td>${badge}</td>
+        <td style="text-align:right;">${actions}</td>
       </tr>
     `;
   });
 
   tbody.innerHTML = html;
+  setupProcessDragDrop();
 }
 
-function filterProcesses() {
-  renderProcessTable(watchedProcessesCache);
+function filterProcessList() { renderProcessTable(); }
+
+function sortProcessView(col) {
+  if (!processState.isLocked) return; // Do not sort if unlocked
+  if (processState.sortCol === col) {
+    processState.sortAsc = !processState.sortAsc;
+  } else {
+    processState.sortCol = col;
+    processState.sortAsc = true;
+  }
+  renderProcessTable();
 }
 
-async function sendProcessAction(pid, action) {
+function toggleProcessLock() {
+  processState.isLocked = !processState.isLocked;
+  const btn = document.getElementById('btn-lock-proc');
+  if (processState.isLocked) {
+    // Commit Order
+    btn.innerText = '🔒 Locked';
+    processState.originalSnapshot = null;
+    commitProcessOrder();
+  } else {
+    // Unlock and Take Snapshot for Rollback
+    btn.innerText = '🔓 Unlocked';
+    processState.sortCol = null; // Clear view sort to show actual order
+    processState.originalSnapshot = JSON.parse(JSON.stringify(processState.items));
+    renderProcessTable();
+  }
+}
+
+function setupProcessDragDrop() {
+  if (processState.isLocked) return;
+  const tbody = document.getElementById('proc-tbody');
+  const rows = tbody.querySelectorAll('.draggable-row');
+  let draggedRow = null;
+
+  rows.forEach(r => {
+    r.draggable = true;
+    r.ondragstart = (e) => { draggedRow = r; r.classList.add('dragging'); };
+    r.ondragend = () => { r.classList.remove('dragging'); draggedRow = null; };
+    r.ondragover = (e) => {
+      e.preventDefault();
+      if (draggedRow && draggedRow !== r) {
+        const rect = r.getBoundingClientRect();
+        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+        tbody.insertBefore(draggedRow, next ? r.nextSibling : r);
+      }
+    };
+  });
+}
+
+async function commitProcessOrder() {
+  const tbody = document.getElementById('proc-tbody');
+  const names = [...tbody.querySelectorAll('.draggable-row')].map(r => r.dataset.name);
+  try {
+    await fetch('/api/processes/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ order: names })
+    });
+    showToast("New order saved");
+    fetchProcesses();
+  } catch(e) {}
+}
+
+async function sendProcAction(pid, action) {
   if (!confirm(`Are you sure you want to send ${action.toUpperCase()} to PID ${pid}?`)) return;
-  
   try {
     const res = await fetch('/api/processes/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ pid: pid, action: action })
+      body: JSON.stringify({ pid, action })
     });
-    const data = await res.json();
-    
-    if (data.success) {
-      showToast(`Signal ${action} sent to PID ${pid}`, 'success');
-      setTimeout(refreshProcesses, 1000); // Refresh after delay
-    } else {
-      showToast(data.error || 'Action failed', 'error');
-    }
-  } catch (e) {
-    showToast('Network error', 'error');
-  }
+    const d = await res.json();
+    if (d.success) { showToast(d.message); setTimeout(fetchProcesses, 600); }
+    else alert(d.error || "Action failed");
+  } catch(e) { alert("Network error"); }
 }
 
-function openAddProcessModal() {
-  document.getElementById('new-proc-name').value = '';
-  document.getElementById('new-proc-alias').value = '';
-  openModal('add-proc-modal');
+async function unwatchProcess(name) {
+  if (!confirm(`Remove ${name} from watchlist?`)) return;
+  try {
+    const res = await fetch('/api/processes/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ action: 'unwatch', name })
+    });
+    const d = await res.json();
+    if (d.success) { showToast(`Unwatched ${name}`); fetchProcesses(); }
+  } catch(e) {}
 }
 
-async function submitAddProcess() {
+async function submitWatchProcess() {
   const name = document.getElementById('new-proc-name').value.trim();
   const alias = document.getElementById('new-proc-alias').value.trim();
-  
-  if (!name) {
-    showToast('Process name is required', 'error');
-    return;
-  }
-
+  if (!name) return alert("Process name is required");
   try {
     const res = await fetch('/api/processes/watch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ value: name, alias: alias || name, match_type: 'exact' })
+      body: JSON.stringify({ value: name, alias: alias || name })
     });
-    const data = await res.json();
-    
-    if (data.success) {
-      showToast(`Added "${name}" to watchlist`, 'success');
-      closeModal('add-proc-modal');
-      refreshProcesses();
-    } else {
-      showToast('Failed to add process', 'error');
+    const d = await res.json();
+    if (d.success) {
+      showToast(`Added ${name}`);
+      closeModal('modal-add-proc');
+      fetchProcesses();
     }
-  } catch (e) {
-    showToast('Network error', 'error');
-  }
+  } catch(e) {}
 }
 
-async function removeFromWatch(processName) {
-  // Note: The server.py provided doesn't have an explicit remove endpoint for watched processes yet, 
-  // but typically we'd call a config removal. For now, we'll simulate or assume a generic config remove exists 
-  // OR implement it via direct config manipulation if allowed. 
-  // Based on standard patterns, let's assume there might be a way, or we just reload page for simplicity if no API.
-  // However, looking at server.py, only 'watch' POST exists. Let's assume for this UI version that we can't remove easily without backend support.
-  // BUT, usually WARD allows removing via config. Let's check if we can use a generic config remove if implemented elsewhere.
-  // Since it's not in the snippet, I will disable the button visually or prompt user to edit config manually if strictly following the snippet.
-  // To make it functional as per typical expectations, I'll assume a hypothetical endpoint or fallback.
-  // Actually, let's look at the code again. No remove endpoint. 
-  // I will comment out the remove functionality or replace with "Edit in Config" message if strict adherence is needed.
-  // But for UX, let's assume we can manipulate local state and ask user to restart? No.
-  // Let's stick to what's available. If no remove API, we shouldn't offer the button.
-  // Correction: In many versions of WARD, adding/removing is done via config files. 
-  // I will leave the button but make it clear it requires backend support. 
-  // For this exercise, I'll assume a simple frontend-only removal isn't possible without backend.
-  // Let's change the button to just "Info" or remove it if no API.
-  // Wait, the prompt implies completing Section 3. Usually Section 3 includes management.
-  // I'll keep the button but note that it depends on backend implementation of removal.
-  // If the backend doesn't have it, this will fail gracefully.
-  
-  showToast('Removal feature requires backend API support (/api/processes/unwatch)', 'info');
+function initApp() {
+  fetchTelemetry();
+  setInterval(fetchTelemetry, 1000);
 }
 
-// === SECTION 2.9: DATA FETCHING & RENDERING (TELEMETRY OVERVIEW) ===
-async function fetchStatus() {
-  if (!sessionToken || WARD_STATE.isPaused) return;
-  try {
-    // Use NEW telemetry endpoint for Overview tab
-    const res = await fetch('/api/telemetry/overview', { headers: { 'X-Session-Token': sessionToken } });
-    if (res.status === 401) { authFailedCount++; if (authFailedCount >= 2) { localStorage.removeItem('ward_token'); sessionToken = ''; showLogin(); } return; }
-    const d = await res.json(); globalData = d; // Store for other tabs that might still need legacy structure
-    
-    document.getElementById('status-dot').style.background = 'var(--accent-health)';
-    document.getElementById('footer-uptime').innerText = `Uptime: ${d.uptime}`;
-    
-    // --- UPDATE CPU CARD ---
-    document.getElementById('cpu-percent').innerText = d.cpu.total_percent.toFixed(1);
-    document.getElementById('cpu-user').innerText = d.cpu.user_percent.toFixed(1) + '%';
-    document.getElementById('cpu-sys').innerText = d.cpu.system_percent.toFixed(1) + '%';
-    document.getElementById('cpu-iowait').innerText = d.cpu.iowait_percent.toFixed(1) + '%';
-    document.getElementById('cpu-cores-info').innerText = `${d.cpu.cores} Cores`;
-    
-    // Color coding based on thresholds
-    const cpuBadge = document.getElementById('cpu-badge');
-    const cpuVal = document.getElementById('cpu-percent');
-    if (d.cpu.total_percent > 90) { cpuBadge.className = 'card-badge badge-crit'; cpuBadge.innerText = 'Critical'; cpuVal.style.color = 'var(--accent-crit)'; }
-    else if (d.cpu.total_percent > 70) { cpuBadge.className = 'card-badge badge-warn'; cpuBadge.innerText = 'High Load'; cpuVal.style.color = 'var(--accent-warn)'; }
-    else { cpuBadge.className = 'card-badge badge-ok'; cpuBadge.innerText = 'Healthy'; cpuVal.style.color = 'var(--text-main)'; }
-    
-    // IO Wait Alert
-    if (d.cpu.iowait_percent > 20) document.getElementById('cpu-iowait').parentElement.title = "Disk Bottleneck Detected";
-    
-    // Ring Buffer & Sparkline
-    d_cpu.shift(); d_cpu.push(d.cpu.total_percent);
-    plotNetdataSingle('chart-cpu-sparkline', d_cpu, 100, getComputedStyle(document.documentElement).getPropertyValue('--accent-health').trim());
-
-    // --- UPDATE MEMORY CARD ---
-    const memUsedGB = (d.memory.used_bytes / 1e9).toFixed(1);
-    const memTotalGB = (d.memory.total_bytes / 1e9).toFixed(1);
-    const memAvailGB = (d.memory.available_bytes / 1e9).toFixed(1);
-    const memCachedGB = (d.memory.cached_bytes / 1e9).toFixed(1);
-    const memPct = (d.memory.used_bytes / d.memory.total_bytes) * 100;
-    
-    document.getElementById('mem-used').innerText = memUsedGB;
-    document.getElementById('mem-total').innerText = memTotalGB + ' GB';
-    document.getElementById('mem-avail').innerText = memAvailGB + ' GB';
-    document.getElementById('mem-cached').innerText = memCachedGB + ' GB';
-    
-    const memBar = document.getElementById('mem-bar');
-    memBar.style.width = memPct + '%';
-    if (memPct > 95) { memBar.style.background = 'var(--accent-crit)'; document.getElementById('mem-badge').className = 'card-badge badge-crit'; document.getElementById('mem-badge').innerText = 'Critical'; }
-    else if (memPct > 80) { memBar.style.background = 'var(--accent-warn)'; document.getElementById('mem-badge').className = 'card-badge badge-warn'; document.getElementById('mem-badge').innerText = 'Warning'; }
-    else { memBar.style.background = 'var(--accent-health)'; document.getElementById('mem-badge').className = 'card-badge badge-ok'; document.getElementById('mem-badge').innerText = 'Stable'; }
-    
-    // Swap handling
-    const swapPct = d.memory.swap_total_bytes > 0 ? (d.memory.swap_used_bytes / d.memory.swap_total_bytes) * 100 : 0;
-    document.getElementById('swap-percent').innerText = swapPct.toFixed(1) + '%';
-    document.getElementById('swap-bar').style.width = swapPct + '%';
-    document.getElementById('swap-section').style.display = d.memory.swap_total_bytes === 0 ? 'none' : 'block';
-    
-    d_ram.shift(); d_ram.push(memPct);
-    plotNetdataSingle('chart-mem-history', d_ram, 100, '#339af0');
-
-    // --- UPDATE DISK CARD ---
-    const diskPct = (d.disk.used_bytes / d.disk.total_bytes) * 100;
-    document.getElementById('disk-percent').innerText = diskPct.toFixed(0) + '%';
-    document.getElementById('disk-mount-info').innerText = `${d.disk.device} mounted on ${d.disk.mount_point}`;
-    document.getElementById('disk-read-speed').innerText = (d.disk.read_bytes_sec / 1e6).toFixed(1) + ' MB/s';
-    document.getElementById('disk-write-speed').innerText = (d.disk.write_bytes_sec / 1e6).toFixed(1) + ' MB/s';
-    
-    const diskBadge = document.getElementById('disk-badge');
-    if (diskPct > 90) { diskBadge.className = 'card-badge badge-crit'; diskBadge.innerText = 'Critical'; document.getElementById('btn-clean-cache').style.display = 'block'; }
-    else if (diskPct > 80) { diskBadge.className = 'card-badge badge-warn'; diskBadge.innerText = 'Warning'; document.getElementById('btn-clean-cache').style.display = 'none'; }
-    else { diskBadge.className = 'card-badge badge-ok'; diskBadge.innerText = 'OK'; document.getElementById('btn-clean-cache').style.display = 'none'; }
-    
-    drawCircularGauge('gauge-disk-space', diskPct);
-    d_disk.shift(); d_disk.push(diskPct);
-
-    // --- UPDATE NETWORK CARD ---
-    // Populate interface selector if empty
-    const ifaceSelect = document.getElementById('net-interface-select');
-    if (ifaceSelect.options.length <= 1) {
-      Object.keys(d.network.interfaces).forEach(iface => {
-        const opt = document.createElement('option'); opt.value = iface; opt.innerText = iface; ifaceSelect.appendChild(opt);
-      });
-    }
-    
-    const selectedIface = ifaceSelect.value === 'all' ? Object.keys(d.network.interfaces)[0] : ifaceSelect.value;
-    const ifaceData = d.network.interfaces[selectedIface] || { rx_bytes_sec: 0, tx_bytes_sec: 0, errors: 0, drops: 0 };
-    
-    document.getElementById('net-tx-speed').innerText = (ifaceData.tx_bytes_sec / 1e6).toFixed(1) + ' MB/s';
-    document.getElementById('net-rx-speed').innerText = (ifaceData.rx_bytes_sec / 1e6).toFixed(1) + ' MB/s';
-    document.getElementById('net-total-rx').innerText = (d.network.total_rx_bytes / 1e9).toFixed(1) + ' GB';
-    document.getElementById('net-total-tx').innerText = (d.network.total_tx_bytes / 1e9).toFixed(1) + ' GB';
-    
-    const errEl = document.getElementById('net-errors');
-    const totalErrs = ifaceData.errors + ifaceData.drops;
-    errEl.innerText = totalErrs;
-    errEl.style.color = totalErrs > 0 ? 'var(--accent-crit)' : 'var(--text-muted)';
-    
-    d_tx.shift(); d_tx.push(ifaceData.tx_bytes_sec / 1e6);
-    d_rx.shift(); d_rx.push(ifaceData.rx_bytes_sec / 1e6);
-    plotNetdataDouble('chart-net-flow', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#06B6D4', '#00F5A0', 'M');
-
-    // --- UPDATE CONNECTIONS CARD ---
-    document.getElementById('conn-total').innerText = d.connections.total_sockets;
-    document.getElementById('conn-tcp-est').innerText = d.connections.tcp_established;
-    document.getElementById('conn-udp').innerText = d.connections.udp_active;
-    document.getElementById('conn-time-wait').innerText = d.connections.tcp_time_wait;
-    
-    const connBadge = document.getElementById('conn-badge');
-    if (d.connections.tcp_time_wait > 500) { connBadge.className = 'card-badge badge-warn'; connBadge.innerText = 'High Churn'; }
-    else { connBadge.className = 'card-badge badge-ok'; connBadge.innerText = 'Normal'; }
-    
-    d_tcp.shift(); d_tcp.push(d.connections.tcp_established);
-    d_udp.shift(); d_udp.push(d.connections.udp_active);
-    plotNetdataDouble('chart-conn-history', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#00F5A0', '#cc5de8', '');
-
-    // --- UPDATE ALERTS SUMMARY ---
-    // Fetch recent crit/warn events for the summary card
-    try {
-      const evtRes = await fetch('/api/events/recent?severity=crit,warn&limit=5', { headers: { 'X-Session-Token': sessionToken } });
-      const events = await evtRes.json();
-      const alertList = document.getElementById('overview-alerts-list');
-      if (events.length === 0) { alertList.innerHTML = '<div class="alert-row empty">✅ All Systems Operational</div>'; }
-      else {
-        alertList.innerHTML = events.map(e => `<div class="alert-row" onclick="toggleNotificationDrawer()"><div class="time">${new Date(e.timestamp * 1000).toLocaleTimeString()}</div><div class="title">${e.title}</div><div class="msg">${e.message}</div></div>`).join('');
-      }
-    } catch(e) {}
-
-    // Render other tabs data (using legacy structure mapped from new telemetry where possible)
-    // Note: We don't call renderApps() here anymore because Apps tab uses dedicated API
-    renderServices(); renderPorts(); renderDirs();
-    
-    // Update header stats from legacy-compatible fields if available, or derive from new
-    document.getElementById('h-load').innerText = d.load_avg || '0.0';
-    // Note: h-net requires cumulative totals which new API provides
-    document.getElementById('h-net').innerText = `${(d.network.total_tx_bytes / 1e9).toFixed(2)} GiB | ${(d.network.total_rx_bytes / 1e9).toFixed(2)} GiB`;
-
-  } catch(e) { 
-    document.getElementById('status-dot').style.background = 'var(--accent-crit)'; 
-    console.error("Telemetry fetch failed", e);
-  }
+if (sessionToken) {
+  document.getElementById('login-overlay').classList.add('hidden');
+  initApp();
 }
-
-// Interface selector change handler
-document.getElementById('net-interface-select')?.addEventListener('change', () => {
-  if(globalData) fetchStatus(); // Re-render with new interface
-});
-
-// === BOOKMARKED TABLE RENDERERS (Preserved from Section 1 for Services/Ports/Storage) ===
-function renderServices() { if (!globalData) return; let data = [...(globalData.services || [])]; /* Simplified for brevity, assuming legacy structure maps correctly or handled separately */ }
-function renderPorts() { if (!globalData) return; let data = [...(globalData.ports || [])]; }
-function renderDirs() { if (!globalData) return; let data = [...(globalData.caches || [])]; }
-
-// === MODAL SCANNERS & ACTIONS (Preserved) ===
-async function openTaskManager() { openModal('task-modal'); document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><span style="color:var(--text-muted);">Scanning...</span></td></tr>'; try { const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); snapshotData = d.processes; renderSnapshotTable(); } catch(e) { document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--accent-crit);">Error</td></tr>'; } }
-function renderSnapshotTable() { const data = getSortedArray(snapshotData, 'snapshot'); let html = ''; data.forEach(p => { const watching = globalData && globalData.apps && globalData.apps.some(a => a.name === p.name); html += `<tr><td style="font-family:var(--font-mono);">${p.pid}</td><td><b>${p.name}</b></td><td style="font-family:var(--font-mono);">${p.cpu_pct}%</td><td style="font-family:var(--font-mono);">${p.memory_mb}</td><td style="font-family:var(--font-mono);">${p.threads}</td><td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn" onclick="watchApp('${p.name}')">+ Watch</button>`}</td></tr>`; }); document.getElementById('task-tbody').innerHTML = html; }
-async function watchApp(appName) { try { await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'app', value: appName }) }); showToast(`Added ${appName}`, 'success'); await fetchStatus(); openTaskManager(); } catch(e) { showToast('Failed', 'error'); } }
-async function openServicesScanner() { openModal('services-modal'); document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><span style="color:var(--text-muted);">Scanning...</span></td></tr>'; try { const res = await fetch('/api/services/snapshot', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); srvScanData = d.services; renderServicesScannerTable(); } catch(e) { document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--accent-crit);">Error</td></tr>'; } }
-function renderServicesScannerTable() { const data = getSortedArray(srvScanData, 'srvScan'); let html = ''; data.forEach(s => { const watching = globalData && globalData.services && globalData.services[s.name] !== undefined; html += `<tr><td><b>${s.name}</b></td><td><span class="badge ${s.state==='active'?'badge-success':'badge-danger'}">${s.state}</span></td><td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn" onclick="watchService('${s.name}')">+ Track</button>`}</td></tr>`; }); document.getElementById('services-scan-tbody').innerHTML = html; }
-async function watchService(serviceName) { try { await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: serviceName }) }); showToast(`Added ${serviceName}`, 'success'); await fetchStatus(); openServicesScanner(); } catch(e) { showToast('Failed', 'error'); } }
-async function openPortsScanner() { openModal('ports-modal'); document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><span style="color:var(--text-muted);">Scanning...</span></td></tr>'; try { const res = await fetch('/api/ports/snapshot', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); portScanData = d.ports.map(p => ({ port: p, status: 'Listening' })); renderPortsScannerTable(); } catch(e) { document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--accent-crit);">Error</td></tr>'; } }
-function renderPortsScannerTable() { const data = getSortedArray(portScanData, 'portScan'); let html = ''; data.forEach(p => { const watching = globalData && globalData.ports && globalData.ports[String(p.port)] !== undefined; html += `<tr><td style="font-family:var(--font-mono);"><b>${p.port}</b></td><td><span class="badge badge-success">${p.status}</span></td><td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn" onclick="watchPort('${p.port}')">+ Watch</button>`}</td></tr>`; }); document.getElementById('ports-scan-tbody').innerHTML = html; }
-async function watchPort(portNum) { try { await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: portNum }) }); showToast(`Added port ${portNum}`, 'success'); await fetchStatus(); openPortsScanner(); } catch(e) { showToast('Failed', 'error'); } }
-async function openTreeExplorer() { openModal('folder-modal'); document.getElementById('explore-path').value = '/root'; exploreFolder(); }
-async function exploreFolder() { const path = document.getElementById('explore-path').value || '/root'; document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;"><span style="color:var(--text-muted);">Loading...</span></td></tr>'; try { const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(path)}`, { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); if (d.error) { document.getElementById('folder-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--accent-crit); padding:30px;">${d.error}</td></tr>`; return; } folderData = d.items || []; renderFolderTable(); } catch(e) { document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--accent-crit); padding:30px;">Error</td></tr>'; } }
-function renderFolderTable() { const data = getSortedArray(folderData, 'folder'); let html = ''; if (data && data.length > 0) { data.forEach(item => { const tracking = globalData && globalData.caches && globalData.caches[item.name] !== undefined; html += `<tr><td><b>${item.name}</b></td><td style="font-family:var(--font-mono); font-size:12px;">${item.path}</td><td style="font-family:var(--font-mono);">${item.size_mb} MB</td><td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn" onclick="trackFolder('${item.name}', '${item.path}')">+ Track</button>`}</td></tr>`; }); document.getElementById('folder-tbody').innerHTML = html; } else { document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">No folders found</td></tr>'; } }
-async function trackFolder(folderName, folderPath) { try { await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name: folderName, value: folderPath }) }); showToast(`Added ${folderName}`, 'success'); await fetchStatus(); renderFolderTable(); } catch(e) { showToast('Failed', 'error'); } }
-async function addService() { const val = document.getElementById('in-srv').value; if (!val) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: val }) }); document.getElementById('in-srv').value = ''; fetchStatus(); showToast('Service added', 'success'); }
-async function addPort() { const val = document.getElementById('in-port').value; if (!val) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: val }) }); document.getElementById('in-port').value = ''; fetchStatus(); showToast('Port added', 'success'); }
-async function addFolder() { const name = document.getElementById('dir-name').value; const path = document.getElementById('dir-path').value; if (!name || !path) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name, value: path }) }); document.getElementById('dir-name').value = ''; document.getElementById('dir-path').value = ''; fetchStatus(); showToast('Folder tracked', 'success'); }
-async function remCfg(type, value) { await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) }); if (type === 'app') { delete rowNumbers.apps[value]; saveRowNumbers('apps'); customOrders.apps = null; localStorage.removeItem('ward_order_apps'); } else if (type === 'service') { delete rowNumbers.services[value]; saveRowNumbers('services'); customOrders.services = null; localStorage.removeItem('ward_order_services'); } else if (type === 'port') { delete rowNumbers.ports[String(value)]; saveRowNumbers('ports'); customOrders.ports = null; localStorage.removeItem('ward_order_ports'); } else if (type === 'directory') { delete rowNumbers.storage[value]; saveRowNumbers('storage'); customOrders.storage = null; localStorage.removeItem('ward_order_storage'); } fetchStatus(); showToast('Removed', 'success'); }
-async function changePassword() { const oldPass = document.getElementById('old-pass').value; const newPass = document.getElementById('new-pass').value; if (!oldPass || !newPass) { showToast('Fill both fields', 'error'); return; } const res = await fetch('/api/settings/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ old_password: oldPass, new_password: newPass }) }); const d = await res.json(); if (d.status === 'ok') { showToast('Password changed', 'success'); document.getElementById('old-pass').value = ''; document.getElementById('new-pass').value = ''; } else { showToast(d.message || 'Failed', 'error'); } }
-function updateTheme(key, value) { currentTheme[key] = value; document.documentElement.style.setProperty(`--${key}`, value); }
-async function saveTheme() { await fetch('/api/settings/update-theme', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ theme: currentTheme }) }); showToast('Theme saved', 'success'); }
-function resetTheme() { currentTheme = { primary: '#00F5A0', success: '#00F5A0', danger: '#EF4444', 'bg-base': '#0B0E14', 'bg-surface': '#121721', 'text-main': '#F9FAFB' }; Object.entries(currentTheme).forEach(([k, v]) => { document.getElementById(`theme-${k.replace('-','_')}`)?.setAttribute('value', v); document.documentElement.style.setProperty(`--${k}`, v); }); showToast('Theme reset', 'info'); }
-async function checkUpdate() { showToast('Checking...', 'info'); const res = await fetch('/api/system/check-update', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); document.getElementById('set-latest-ver').innerText = `v${d.latest}`; if (d.has_update) { showToast(`Update available: v${d.latest}`, 'success'); } else { showToast('Up to date', 'info'); } }
-function downloadConfig() { fetch('/api/settings/config', { headers: { 'X-Session-Token': sessionToken } }).then(res => res.json()).then(d => { const blob = new Blob([JSON.stringify(d.config, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'ward-config.json'; a.click(); URL.revokeObjectURL(url); showToast('Config downloaded', 'success'); }).catch(() => showToast('Failed', 'error')); }
-function uploadConfig(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (e) => { try { const config = JSON.parse(e.target.result); await fetch('/api/settings/restore-config', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ config }) }); showToast('Config restored!', 'success'); setTimeout(() => location.reload(), 2000); } catch(err) { showToast('Invalid JSON', 'error'); } }; reader.readAsText(file); }
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-// === INITIALIZATION ===
-if (sessionToken) { fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } }).then(res => res.json()).then(d => { if (d.authenticated) { hideLogin(); fetchStatus(); } else { showLogin(); } }).catch(() => showLogin()); } else { showLogin(); }
-let pollingTimer = null;
-function startPolling() { if (pollingTimer) clearInterval(pollingTimer); pollingTimer = setInterval(() => { if (sessionToken && !document.hidden) fetchStatus(); }, WARD_STATE.pollingInterval); WARD_STATE.pollingTimer = pollingTimer; }
-startPolling();
 </script>
 </body>
 </html>
