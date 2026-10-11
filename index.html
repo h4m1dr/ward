@@ -26,14 +26,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-sans); background: var(--bg-base); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
 
-/* LOGIN */
 #login-overlay { position: fixed; inset: 0; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 10000; }
 #login-overlay.hidden { display: none; }
 .login-box { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 12px; padding: 36px; width: 340px; text-align: center; }
-.login-box input { width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 11px 14px; border-radius: 8px; margin-bottom: 14px; }
-.login-box button { width: 100%; background: var(--accent-health); color: #000; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.login-box input { width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 11px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; }
+.login-box button { width: 100%; background: var(--accent-health); color: #000; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
 
-/* SIDEBAR */
 .sidebar { width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border-dim); display: flex; flex-direction: column; flex-shrink: 0; }
 .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-dim); display: flex; align-items: center; gap: 12px; }
 .sidebar-title { font-size: 18px; font-weight: 700; color: var(--accent-health); }
@@ -42,7 +40,6 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .nav-item:hover { background: var(--bg-surface-hover); color: var(--text-main); }
 .nav-item.active { background: rgba(0, 245, 160, 0.1); color: var(--accent-health); border-left-color: var(--accent-health); font-weight: 600; }
 
-/* MOBILE NAV */
 #mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--bg-surface); border-top: 1px solid var(--border-dim); z-index: 1000; justify-content: space-around; align-items: center; }
 @media (max-width: 768px) {
   body { padding-bottom: 65px; }
@@ -50,36 +47,39 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
   #mobile-bottom-nav { display: flex; }
 }
 
-/* MAIN CONTENT */
 .main-content { flex: 1; overflow-y: auto; padding: 24px 28px; }
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-dim); }
 .header-left { display: flex; align-items: center; gap: 14px; }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-health); box-shadow: 0 0 8px var(--accent-health); animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-health); box-shadow: 0 0 8px var(--accent-health); }
 .header-title { font-size: 20px; font-weight: 700; }
 .header-right { display: flex; gap: 16px; align-items: center; font-size: 13px; color: var(--text-muted); }
-.logout-btn { background: transparent; border: 1px solid var(--border-dim); color: var(--text-muted); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-.logout-btn:hover { color: var(--accent-crit); border-color: var(--accent-crit); }
 
 .content-section { display: none; }
 .content-section.active { display: block; animation: fadeIn 0.2s; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-/* OVERVIEW GRID */
-#overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+/* Overview Grid */
+#overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 1200px) { #overview-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { #overview-grid { grid-template-columns: 1fr; } }
 .metric-card { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; padding: 18px; }
+.metric-card.wide { grid-column: span 2; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.card-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.card-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
 .card-val { font-size: 26px; font-weight: 700; font-family: var(--font-mono); margin: 6px 0; }
-.card-sub { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); display: flex; justify-content: space-between; margin-top: 8px; }
-.chart-box { width: 100%; height: 60px; margin-top: 10px; }
+.card-sub { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); display: flex; justify-content: space-between; }
+.chart-box { width: 100%; height: 80px; margin-top: 10px; }
 .chart-box canvas { width: 100%; height: 100%; }
 
-/* PROCESS TABLE */
+.gauge-wrap { position: relative; width: 100px; height: 100px; margin: 0 auto 10px; }
+.gauge-wrap canvas { width: 100%; height: 100%; }
+.gauge-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+
+/* Tables & Controls */
 .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
 .search-box { flex: 1; min-width: 200px; }
 .search-box input { width: 100%; background: var(--bg-surface); border: 1px solid var(--border-dim); color: var(--text-main); padding: 8px 12px; border-radius: 6px; font-size: 13px; }
-.data-table { width: 100%; border-collapse: collapse; background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; overflow: hidden; }
+.data-table { width: 100%; border-collapse: collapse; background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; overflow: hidden; margin-top: 12px; }
 .data-table th, .data-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-dim); font-size: 13px; }
 .data-table th { background: rgba(0,0,0,0.2); color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; cursor: pointer; user-select: none; }
 .data-table th:hover { color: var(--accent-health); }
@@ -90,16 +90,15 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: var(--font-mono); }
 .badge-active { background: rgba(0,245,160,0.15); color: var(--accent-health); }
 .badge-stopped { background: rgba(148,163,184,0.15); color: var(--text-muted); }
-.btn { background: var(--accent-health); color: #000; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: filter 0.2s; }
-.btn:hover { filter: brightness(0.9); }
+.badge-down { background: rgba(239,68,68,0.15); color: var(--accent-crit); }
+.btn { background: var(--accent-health); color: #000; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
 .btn-danger { background: transparent; color: var(--accent-crit); border: 1px solid var(--accent-crit); }
 .btn-danger:hover { background: var(--accent-crit); color: #fff; }
 .btn-warn { background: transparent; color: var(--accent-warn); border: 1px solid var(--accent-warn); }
 .btn-warn:hover { background: var(--accent-warn); color: #000; }
 .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-dim); }
-.btn-ghost:hover { border-color: var(--text-muted); color: var(--text-main); }
+.input-field { background: var(--bg-surface); border: 1px solid var(--border-dim); color: var(--text-main); padding: 7px 11px; border-radius: 6px; font-size: 13px; }
 
-/* MODAL */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center; }
 .modal.active { display: flex; }
 .modal-card { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 10px; width: 440px; padding: 24px; }
@@ -107,10 +106,8 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
 .form-group input { width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 8px 12px; border-radius: 6px; }
 
-/* TOAST */
 #toast-box { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
-.toast { padding: 10px 16px; border-radius: 6px; background: var(--accent-health); color: #000; font-weight: 600; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.3s; }
-@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast { padding: 10px 16px; border-radius: 6px; background: var(--accent-health); color: #000; font-weight: 600; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 </style>
 </head>
 <body>
@@ -140,7 +137,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
   <div class="nav-item" onclick="switchTab('processes', this)">⚡</div>
   <div class="nav-item" onclick="switchTab('services', this)">⚙️</div>
   <div class="nav-item" onclick="switchTab('ports', this)">🔌</div>
-  <div class="nav-item" onclick="switchTab('settings', this)">🔧</div>
+  <div class="nav-item" onclick="switchTab('storage', this)">💾</div>
 </div>
 
 <div class="main-content">
@@ -152,11 +149,11 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     <div class="header-right">
       <span id="header-uptime">Uptime: -</span>
       <span id="header-load">Load: -</span>
-      <button class="logout-btn" onclick="doLogout()">Logout</button>
+      <button class="btn btn-ghost" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
-  <!-- TAB: OVERVIEW -->
+  <!-- TAB: OVERVIEW (SMART CARDS) -->
   <div id="tab-overview" class="content-section active">
     <div id="overview-grid">
       <div class="metric-card">
@@ -172,10 +169,12 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
         <div class="chart-box"><canvas id="cv-mem"></canvas></div>
       </div>
       <div class="metric-card">
-        <div class="card-header"><span class="card-title">Storage I/O</span></div>
-        <div class="card-val" id="ov-disk-pct">0%</div>
+        <div class="card-header"><span class="card-title">Storage Space</span></div>
+        <div class="gauge-wrap">
+          <canvas id="cv-gauge"></canvas>
+          <div class="gauge-text" id="ov-disk-pct">0%</div>
+        </div>
         <div class="card-sub"><span id="ov-disk-r">R: 0 MB/s</span><span id="ov-disk-w">W: 0 MB/s</span></div>
-        <div class="chart-box"><canvas id="cv-disk"></canvas></div>
       </div>
       <div class="metric-card">
         <div class="card-header"><span class="card-title">Sockets</span></div>
@@ -183,7 +182,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
         <div class="card-sub"><span id="ov-sock-tcp">TCP: 0</span><span id="ov-sock-udp">UDP: 0</span></div>
         <div class="chart-box"><canvas id="cv-conn"></canvas></div>
       </div>
-      <div class="metric-card" style="grid-column: span 2;">
+      <div class="metric-card wide">
         <div class="card-header"><span class="card-title">Network Traffic</span></div>
         <div class="card-sub"><span id="ov-net-rx">RX: 0 MB/s</span><span id="ov-net-tx">TX: 0 MB/s</span></div>
         <div class="chart-box"><canvas id="cv-net"></canvas></div>
@@ -191,11 +190,11 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     </div>
   </div>
 
-  <!-- TAB: PROCESSES (SECTION 3) -->
+  <!-- TAB: PROCESSES (SECTION 3 COMPLETE) -->
   <div id="tab-processes" class="content-section">
     <div class="toolbar">
       <div class="search-box">
-        <input type="text" id="proc-search" placeholder="Search processes..." onkeyup="filterProcessList()">
+        <input type="text" id="proc-search" placeholder="Search processes..." onkeyup="renderProcessTable()">
       </div>
       <button class="btn btn-ghost" id="btn-lock-proc" onclick="toggleProcessLock()">🔒 Locked</button>
       <button class="btn" onclick="openModal('modal-add-proc')">+ Watch Process</button>
@@ -221,11 +220,51 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     </table>
   </div>
 
-  <!-- PLACEHOLDER TABS -->
-  <div id="tab-services" class="content-section"><p style="color:var(--text-muted); padding:20px;">Services Manager coming in Section 4.</p></div>
-  <div id="tab-ports" class="content-section"><p style="color:var(--text-muted); padding:20px;">Ports & Flow Gateway coming in Section 5.</p></div>
-  <div id="tab-storage" class="content-section"><p style="color:var(--text-muted); padding:20px;">Storage & Volumes coming in Section 6.</p></div>
-  <div id="tab-settings" class="content-section"><p style="color:var(--text-muted); padding:20px;">Settings coming in Section 7.</p></div>
+  <!-- TAB: SERVICES (LIVE PRESERVED) -->
+  <div id="tab-services" class="content-section">
+    <div class="toolbar">
+      <input type="text" id="in-srv" class="input-field" placeholder="Service name (e.g., nginx)">
+      <button class="btn" onclick="addService()">+ Track Service</button>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Service</th><th>Status</th><th style="text-align:right;">Action</th></tr></thead>
+      <tbody id="srv-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- TAB: PORTS (LIVE PRESERVED) -->
+  <div id="tab-ports" class="content-section">
+    <div class="toolbar">
+      <input type="number" id="in-port" class="input-field" placeholder="Port number (e.g., 443)">
+      <button class="btn" onclick="addPort()">+ Watch Port</button>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Port</th><th>Status</th><th style="text-align:right;">Action</th></tr></thead>
+      <tbody id="port-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- TAB: STORAGE (LIVE PRESERVED) -->
+  <div id="tab-storage" class="content-section">
+    <div class="toolbar">
+      <input type="text" id="dir-name" class="input-field" placeholder="Label">
+      <input type="text" id="dir-path" class="input-field" placeholder="/var/log">
+      <button class="btn" onclick="addFolder()">+ Track Folder</button>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Label</th><th>Path</th><th>Size</th><th style="text-align:right;">Action</th></tr></thead>
+      <tbody id="dir-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- TAB: SETTINGS -->
+  <div id="tab-settings" class="content-section">
+    <div class="metric-card" style="max-width:500px;">
+      <h3 style="margin-bottom:12px;">Configuration</h3>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">System port: 7654. Managed via systemd service.</p>
+      <button class="btn btn-danger" onclick="doLogout()">End Active Session</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL: ADD PROCESS -->
@@ -238,7 +277,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     </div>
     <div class="form-group">
       <label>Display Alias (Optional)</label>
-      <input type="text" id="new-proc-alias" placeholder="e.g., Primary Web Proxy">
+      <input type="text" id="new-proc-alias" placeholder="e.g., Main Proxy Engine">
     </div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-proc')">Cancel</button>
@@ -252,11 +291,10 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 <script>
 let sessionToken = localStorage.getItem('ward_token') || '';
 let currentTab = 'overview';
+let globalTelemetry = null;
 const pLen = 60;
-const d_cpu = new Array(pLen).fill(0), d_mem = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
-const d_net_rx = new Array(pLen).fill(0), d_net_tx = new Array(pLen).fill(0), d_conn = new Array(pLen).fill(0);
+const d_cpu = new Array(pLen).fill(0), d_mem = new Array(pLen).fill(0), d_conn = new Array(pLen).fill(0), d_net_rx = new Array(pLen).fill(0);
 
-// Process State
 let processState = {
   isLocked: true,
   items: [],
@@ -276,11 +314,10 @@ function showToast(msg) {
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-// AUTH
 async function doLogin() {
   const pw = document.getElementById('login-pass').value;
   try {
-    const res = await fetch('/api/auth/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ password: pw }) });
+    const res = await fetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ password: pw }) });
     const d = await res.json();
     if (d.status === 'ok') {
       sessionToken = d.token;
@@ -294,14 +331,11 @@ async function doLogin() {
 }
 
 function doLogout() {
-  fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Session-Token': sessionToken } });
   localStorage.removeItem('ward_token');
   location.reload();
 }
 
-// NAVIGATION
 function switchTab(tabId, el) {
-  // Rollback logic for Processes
   if (currentTab === 'processes' && !processState.isLocked && processState.originalSnapshot) {
     processState.items = JSON.parse(JSON.stringify(processState.originalSnapshot));
     processState.isLocked = true;
@@ -317,57 +351,68 @@ function switchTab(tabId, el) {
   if (el) el.classList.add('active');
   document.getElementById(`tab-${tabId}`)?.classList.add('active');
 
-  const titles = { overview: 'System Overview', processes: 'Process Inspector', services: 'Service Manager', ports: 'Ports & Flow', storage: 'Storage', settings: 'Settings' };
+  const titles = { overview: 'System Overview', processes: 'Process Inspector', services: 'Services', ports: 'Ports', storage: 'Storage', settings: 'Settings' };
   document.getElementById('tab-heading').innerText = titles[tabId] || 'WARD';
 
   if (tabId === 'processes') fetchProcesses();
 }
 
-// CHARTING
+// CANVAS DRAWING (LAW #5 & #3 Compliant)
 function drawSpark(id, arr, maxVal, color) {
   const cvs = document.getElementById(id); if (!cvs) return;
   const ctx = cvs.getContext('2d');
   const w = cvs.width = cvs.clientWidth * 2;
   const h = cvs.height = cvs.clientHeight * 2;
   ctx.clearRect(0, 0, w, h);
-  
-  // Gradient Fill
+
   const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, color + '40');
+  grad.addColorStop(0, color + '35');
   grad.addColorStop(1, color + '00');
-  
+
   ctx.beginPath();
   const step = w / (arr.length - 1);
   arr.forEach((v, i) => {
     const y = h - ((Math.min(v / maxVal, 1)) * (h - 8)) - 4;
     i === 0 ? ctx.moveTo(i * step, y) : ctx.lineTo(i * step, y);
   });
-  
-  // Stroke Line
   ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
-  
-  // Fill Area
   ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
   ctx.fillStyle = grad; ctx.fill();
 }
 
-// TELEMETRY
+function drawGauge(id, pct) {
+  const cvs = document.getElementById(id); if (!cvs) return;
+  const ctx = cvs.getContext('2d');
+  const size = cvs.width = cvs.height = 200;
+  ctx.clearRect(0, 0, size, size);
+
+  const cx = size / 2, cy = size / 2, r = size / 2 - 16;
+  const start = 135 * Math.PI / 180, end = 405 * Math.PI / 180;
+
+  ctx.beginPath(); ctx.arc(cx, cy, r, start, end);
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.stroke();
+
+  const valAngle = start + (end - start) * (pct / 100);
+  ctx.beginPath(); ctx.arc(cx, cy, r, start, valAngle);
+  ctx.strokeStyle = pct > 90 ? '#EF4444' : (pct > 80 ? '#F59E0B' : '#00F5A0');
+  ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.stroke();
+}
+
 async function fetchTelemetry() {
   if (!sessionToken || document.hidden) return;
   try {
     const res = await fetch('/api/telemetry/overview', { headers: { 'X-Session-Token': sessionToken } });
     if (res.status === 401) { document.getElementById('login-overlay').classList.remove('hidden'); return; }
     const d = await res.json();
+    globalTelemetry = d;
 
     document.getElementById('header-uptime').innerText = `Uptime: ${d.uptime}`;
     document.getElementById('header-load').innerText = `Load: ${d.load_avg}`;
 
-    // CPU
     document.getElementById('ov-cpu-val').innerText = `${d.cpu.total_percent}%`;
     document.getElementById('ov-cpu-user').innerText = `User: ${d.cpu.user_percent}%`;
     document.getElementById('ov-cpu-io').innerText = `I/O Wait: ${d.cpu.iowait_percent}%`;
-    
-    // MEM
+
     const memGB = (d.memory.used_bytes / 1e9).toFixed(1);
     const totGB = (d.memory.total_bytes / 1e9).toFixed(1);
     const availGB = (d.memory.available_bytes / 1e9).toFixed(1);
@@ -375,46 +420,43 @@ async function fetchTelemetry() {
     document.getElementById('ov-mem-total').innerText = `Total: ${totGB} GB`;
     document.getElementById('ov-mem-avail').innerText = `Avail: ${availGB} GB`;
 
-    // DISK
     const dPct = ((d.disk.used_bytes / d.disk.total_bytes) * 100).toFixed(0);
     document.getElementById('ov-disk-pct').innerText = `${dPct}%`;
     document.getElementById('ov-disk-r').innerText = `R: ${(d.disk.read_bytes_sec/1e6).toFixed(1)} MB/s`;
     document.getElementById('ov-disk-w').innerText = `W: ${(d.disk.write_bytes_sec/1e6).toFixed(1)} MB/s`;
+    drawGauge('cv-gauge', parseFloat(dPct));
 
-    // SOCKETS
     document.getElementById('ov-sock-total').innerText = d.connections.total_sockets;
     document.getElementById('ov-sock-tcp').innerText = `TCP: ${d.connections.tcp_established}`;
     document.getElementById('ov-sock-udp').innerText = `UDP: ${d.connections.udp_active}`;
 
-    // NET
-    const ifaceKeys = Object.keys(d.network.interfaces);
-    let rxSpeed = 0, txSpeed = 0;
-    if(ifaceKeys.length > 0) {
-        const netObj = d.network.interfaces[ifaceKeys[0]];
-        rxSpeed = netObj.rx_bytes_sec / 1e6;
-        txSpeed = netObj.tx_bytes_sec / 1e6;
+    const ifaces = Object.keys(d.network.interfaces);
+    let rxSpd = 0, txSpd = 0;
+    if (ifaces.length > 0) {
+      const net = d.network.interfaces[ifaces[0]];
+      rxSpd = net.rx_bytes_sec / 1e6;
+      txSpd = net.tx_bytes_sec / 1e6;
     }
-    document.getElementById('ov-net-rx').innerText = `RX: ${rxSpeed.toFixed(1)} MB/s`;
-    document.getElementById('ov-net-tx').innerText = `TX: ${txSpeed.toFixed(1)} MB/s`;
+    document.getElementById('ov-net-rx').innerText = `RX: ${rxSpd.toFixed(1)} MB/s`;
+    document.getElementById('ov-net-tx').innerText = `TX: ${txSpd.toFixed(1)} MB/s`;
 
-    // Update Charts Data
     d_cpu.shift(); d_cpu.push(d.cpu.total_percent);
     d_mem.shift(); d_mem.push((d.memory.used_bytes / d.memory.total_bytes) * 100);
-    d_disk.shift(); d_disk.push(parseFloat(dPct));
     d_conn.shift(); d_conn.push(d.connections.total_sockets);
-    d_net_rx.shift(); d_net_rx.push(rxSpeed);
-    d_net_tx.shift(); d_net_tx.push(txSpeed);
+    d_net_rx.shift(); d_net_rx.push(rxSpd);
 
     drawSpark('cv-cpu', d_cpu, 100, '#00F5A0');
     drawSpark('cv-mem', d_mem, 100, '#06B6D4');
-    drawSpark('cv-disk', d_disk, 100, '#F59E0B');
     drawSpark('cv-conn', d_conn, Math.max(50, Math.max(...d_conn)), '#cc5de8');
     drawSpark('cv-net', d_net_rx, Math.max(5, Math.max(...d_net_rx)), '#00F5A0');
 
-  } catch(e) { console.error(e); }
+    renderServices(d.services);
+    renderPorts(d.ports);
+    renderStorage(d.caches);
+  } catch(e) {}
 }
 
-// PROCESS INSPECTOR
+// PROCESS INSPECTOR (SECTION 3)
 async function fetchProcesses() {
   if (!sessionToken) return;
   try {
@@ -422,9 +464,7 @@ async function fetchProcesses() {
     const d = await res.json();
     processState.items = d.processes || [];
     renderProcessTable();
-  } catch(e) {
-    document.getElementById('proc-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--accent-crit);">Failed to read processes</td></tr>';
-  }
+  } catch(e) {}
 }
 
 function renderProcessTable() {
@@ -441,28 +481,27 @@ function renderProcessTable() {
   }
 
   if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No watched processes found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No watched processes</td></tr>';
     return;
   }
 
   let html = '';
   list.forEach((p, idx) => {
     const badge = p.status === 'running' ? '<span class="badge badge-active">RUNNING</span>' : '<span class="badge badge-stopped">STOPPED</span>';
-    const isProt = p.is_protected;
     let actions = '';
-    if (isProt) {
-      actions = '<span style="color:var(--accent-crit); font-size:11px; font-weight:600;">🛡️ PROTECTED</span>';
+    if (p.is_protected) {
+      actions = '<span style="color:var(--accent-crit); font-weight:600; font-size:11px;">🛡️ PROTECTED</span>';
     } else if (p.status === 'running') {
       actions = `
-        <button class="btn btn-warn" onclick="sendProcAction(${p.pid}, 'sigterm')" title="Graceful Terminate">SIGTERM</button>
-        <button class="btn btn-danger" onclick="sendProcAction(${p.pid}, 'sigkill')" title="Force Kill">KILL</button>
-        <button class="btn btn-ghost" onclick="unwatchProcess('${p.name}')" title="Remove from Watchlist">✕</button>
+        <button class="btn btn-warn" onclick="sendProcAction(${p.pid}, 'sigterm')">SIGTERM</button>
+        <button class="btn btn-danger" onclick="sendProcAction(${p.pid}, 'sigkill')">KILL</button>
+        <button class="btn btn-ghost" onclick="unwatchProcess('${p.name}')">✕</button>
       `;
     } else {
-      actions = `<button class="btn btn-ghost" onclick="unwatchProcess('${p.name}')">✕ Unwatch</button>`;
+      actions = `<button class="btn btn-ghost" onclick="unwatchProcess('${p.name}')">✕ Remove</button>`;
     }
 
-    const drag = processState.isLocked ? '' : '<span class="drag-handle">⋮</span>';
+    const drag = processState.isLocked ? '' : '<span class="drag-handle">⋮⋮</span>';
     html += `
       <tr class="draggable-row" data-name="${p.name}">
         <td class="mono" style="color:var(--text-muted);">${p.row_id || (idx+1)}</td>
@@ -481,16 +520,10 @@ function renderProcessTable() {
   setupProcessDragDrop();
 }
 
-function filterProcessList() { renderProcessTable(); }
-
 function sortProcessView(col) {
-  if (!processState.isLocked) return; 
-  if (processState.sortCol === col) {
-    processState.sortAsc = !processState.sortAsc;
-  } else {
-    processState.sortCol = col;
-    processState.sortAsc = true;
-  }
+  if (!processState.isLocked) return;
+  if (processState.sortCol === col) processState.sortAsc = !processState.sortAsc;
+  else { processState.sortCol = col; processState.sortAsc = true; }
   renderProcessTable();
 }
 
@@ -503,7 +536,7 @@ function toggleProcessLock() {
     commitProcessOrder();
   } else {
     btn.innerText = '🔓 Unlocked';
-    processState.sortCol = null; 
+    processState.sortCol = null;
     processState.originalSnapshot = JSON.parse(JSON.stringify(processState.items));
     renderProcessTable();
   }
@@ -512,27 +545,24 @@ function toggleProcessLock() {
 function setupProcessDragDrop() {
   if (processState.isLocked) return;
   const tbody = document.getElementById('proc-tbody');
-  const rows = tbody.querySelectorAll('.draggable-row');
-  let draggedRow = null;
-
-  rows.forEach(r => {
+  let dragged = null;
+  tbody.querySelectorAll('.draggable-row').forEach(r => {
     r.draggable = true;
-    r.ondragstart = (e) => { draggedRow = r; r.classList.add('dragging'); };
-    r.ondragend = () => { r.classList.remove('dragging'); draggedRow = null; };
+    r.ondragstart = () => { dragged = r; r.classList.add('dragging'); };
+    r.ondragend = () => { r.classList.remove('dragging'); dragged = null; };
     r.ondragover = (e) => {
       e.preventDefault();
-      if (draggedRow && draggedRow !== r) {
+      if (dragged && dragged !== r) {
         const rect = r.getBoundingClientRect();
         const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-        tbody.insertBefore(draggedRow, next ? r.nextSibling : r);
+        tbody.insertBefore(dragged, next ? r.nextSibling : r);
       }
     };
   });
 }
 
 async function commitProcessOrder() {
-  const tbody = document.getElementById('proc-tbody');
-  const names = [...tbody.querySelectorAll('.draggable-row')].map(r => r.dataset.name);
+  const names = [...document.querySelectorAll('#proc-tbody .draggable-row')].map(r => r.dataset.name);
   try {
     await fetch('/api/processes/reorder', {
       method: 'POST',
@@ -545,7 +575,7 @@ async function commitProcessOrder() {
 }
 
 async function sendProcAction(pid, action) {
-  if (!confirm(`Are you sure you want to send ${action.toUpperCase()} to PID ${pid}?`)) return;
+  if (!confirm(`Send ${action.toUpperCase()} to PID ${pid}?`)) return;
   try {
     const res = await fetch('/api/processes/action', {
       method: 'POST',
@@ -555,7 +585,7 @@ async function sendProcAction(pid, action) {
     const d = await res.json();
     if (d.success) { showToast(d.message); setTimeout(fetchProcesses, 600); }
     else alert(d.error || "Action failed");
-  } catch(e) { alert("Network error"); }
+  } catch(e) {}
 }
 
 async function unwatchProcess(name) {
@@ -567,7 +597,7 @@ async function unwatchProcess(name) {
       body: JSON.stringify({ action: 'unwatch', name })
     });
     const d = await res.json();
-    if (d.success) { showToast(`Unwatched ${name}`); fetchProcesses(); }
+    if (d.success) { showToast(`Removed ${name}`); fetchProcesses(); }
   } catch(e) {}
 }
 
@@ -583,11 +613,73 @@ async function submitWatchProcess() {
     });
     const d = await res.json();
     if (d.success) {
-      showToast(`Added ${name}`);
+      showToast(`Watching ${name}`);
       closeModal('modal-add-proc');
       fetchProcesses();
     }
   } catch(e) {}
+}
+
+// LIVE RENDERERS FOR OTHER TABS
+function renderServices(map) {
+  if (!map) return;
+  const tbody = document.getElementById('srv-tbody');
+  tbody.innerHTML = Object.entries(map).map(([k, v]) => `
+    <tr>
+      <td><strong>${k}</strong></td>
+      <td><span class="badge ${v==='Running'?'badge-active':'badge-down'}">${v}</span></td>
+      <td style="text-align:right;"><button class="btn btn-danger" onclick="remItem('service', '${k}')">Remove</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderPorts(map) {
+  if (!map) return;
+  const tbody = document.getElementById('port-tbody');
+  tbody.innerHTML = Object.entries(map).map(([k, v]) => `
+    <tr>
+      <td class="mono"><strong>Port ${k}</strong></td>
+      <td><span class="badge ${v==='Listening'?'badge-active':'badge-down'}">${v}</span></td>
+      <td style="text-align:right;"><button class="btn btn-danger" onclick="remItem('port', '${k}')">Remove</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderStorage(map) {
+  if (!map) return;
+  const tbody = document.getElementById('dir-tbody');
+  tbody.innerHTML = Object.entries(map).map(([k, v]) => `
+    <tr>
+      <td><strong>${k}</strong></td>
+      <td class="mono" style="color:var(--text-muted);">${v.path}</td>
+      <td class="mono"><strong>${v.size_mb} MB</strong></td>
+      <td style="text-align:right;"><button class="btn btn-danger" onclick="remItem('directory', '${k}')">Remove</button></td>
+    </tr>
+  `).join('');
+}
+
+async function addService() {
+  const v = document.getElementById('in-srv').value.trim(); if (!v) return;
+  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: v }) });
+  document.getElementById('in-srv').value = ''; fetchTelemetry();
+}
+
+async function addPort() {
+  const v = document.getElementById('in-port').value.trim(); if (!v) return;
+  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: v }) });
+  document.getElementById('in-port').value = ''; fetchTelemetry();
+}
+
+async function addFolder() {
+  const n = document.getElementById('dir-name').value.trim();
+  const p = document.getElementById('dir-path').value.trim(); if (!n || !p) return;
+  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name: n, value: p }) });
+  document.getElementById('dir-name').value = ''; document.getElementById('dir-path').value = ''; fetchTelemetry();
+}
+
+async function remItem(type, val) {
+  await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value: val }) });
+  fetchTelemetry();
 }
 
 function initApp() {
