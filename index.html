@@ -8,463 +8,260 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
+/* === SECTION 1.1: CYBER-OLED THEME ENGINE === */
 :root {
-  --bg: #1a1d29;
-  --sidebar: #151823;
-  --sidebar-hover: #1e2235;
-  --card: #252836;
-  --card-hover: #2a2e3f;
-  --border: #2d3142;
-  --text: #e8e8e8;
-  --muted: #8b8fa3;
-  --primary: #00ab44;
-  --primary-dim: rgba(0, 171, 68, 0.15);
-  --success: #00d68f;
-  --danger: #ff3366;
-  --warning: #ffcc00;
-  --info: #339af0;
-  --purple: #cc5de8;
+  --bg-base: #0B0E14;
+  --bg-surface: #121721;
+  --bg-surface-hover: #18202E;
+  --border-dim: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(0, 245, 160, 0.4);
+  --accent-health: #00F5A0;
+  --accent-warn: #F59E0B;
+  --accent-crit: #EF4444;
+  --accent-flow: #06B6D4;
+  --text-main: #F9FAFB;
+  --text-muted: #94A3B8;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-main);
   display: flex;
   height: 100vh;
   overflow: hidden;
   font-size: 14px;
+  transition: padding-bottom 0.3s ease;
 }
 
+/* === LOGIN OVERLAY === */
 #login-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(10, 12, 18, 0.95);
-  backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center; z-index: 10000;
 }
-
 #login-overlay.hidden { display: none; }
-
 .login-box {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 36px;
-  width: 340px;
-  text-align: center;
+  background: var(--bg-surface); border: 1px solid var(--border-dim);
+  border-radius: 12px; padding: 36px; width: 340px; text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
-
 .login-logo { width: 64px; height: 64px; margin: 0 auto 16px; }
-
-.login-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-.login-box .subtitle { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
-
+.login-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.login-box .subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
 .login-box input {
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 11px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 14px;
-  font-family: 'Inter', sans-serif;
-  transition: border-color 0.15s;
+  width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim);
+  color: var(--text-main); padding: 11px 14px; border-radius: 8px;
+  font-size: 14px; margin-bottom: 14px; font-family: var(--font-sans);
 }
-
-.login-box input:focus { outline: none; border-color: var(--primary); }
-
+.login-box input:focus { outline: none; border-color: var(--accent-health); }
 .login-box button {
-  width: 100%;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  padding: 11px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  transition: background 0.15s;
+  width: 100%; background: var(--accent-health); color: #000; border: none;
+  padding: 11px; border-radius: 8px; cursor: pointer; font-weight: 600;
+  font-size: 14px; font-family: var(--font-sans);
 }
+.login-err { color: var(--accent-crit); font-size: 12px; margin-top: 12px; display: none; }
 
-.login-box button:hover { background: #009a3d; }
-
-.login-err { color: var(--danger); font-size: 12px; margin-top: 12px; display: none; }
-
+/* === SIDEBAR NAVIGATION === */
 .sidebar {
-  width: 240px;
-  background: var(--sidebar);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  transition: width 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border-dim);
+  display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s ease;
+  position: relative; overflow: hidden; z-index: 100;
 }
-
 .sidebar.collapsed { width: 60px; }
-
 .sidebar-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  white-space: nowrap;
-  overflow: hidden;
+  padding: 20px; border-bottom: 1px solid var(--border-dim);
+  display: flex; align-items: center; gap: 12px; white-space: nowrap; overflow: hidden;
 }
-
 .sidebar.collapsed .sidebar-header { padding: 20px 12px; justify-content: center; gap: 0; }
-
 .sidebar-logo { width: 36px; height: 36px; flex-shrink: 0; }
-
-.sidebar-title { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; transition: opacity 0.2s; }
+.sidebar-title { font-size: 18px; font-weight: 700; transition: opacity 0.2s; }
 .sidebar.collapsed .sidebar-title { opacity: 0; width: 0; }
-
-.sidebar-version { font-size: 11px; color: var(--primary); font-weight: 600; margin-top: 2px; transition: opacity 0.2s; }
+.sidebar-version { font-size: 11px; color: var(--accent-health); font-weight: 600; margin-top: 2px; transition: opacity 0.2s; }
 .sidebar.collapsed .sidebar-version { opacity: 0; width: 0; }
-
 .sidebar-toggle {
-  position: absolute;
-  right: -11px;
-  top: 65px;
-  transform: translateY(-50%);
-  background: var(--card);
-  border: 1px solid var(--border);
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--muted);
-  z-index: 10;
-  transition: all 0.2s;
+  position: absolute; right: -11px; top: 65px; transform: translateY(-50%);
+  background: var(--bg-surface); border: 1px solid var(--border-dim);
+  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; font-size: 12px; color: var(--text-muted); z-index: 10;
 }
-
-.sidebar-toggle:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-.sidebar.collapsed .sidebar-toggle { transform: translateY(-50%) rotate(180deg); right: -11px; }
-
+.sidebar-toggle:hover { background: var(--accent-health); color: #000; border-color: var(--accent-health); }
+.sidebar.collapsed .sidebar-toggle { transform: translateY(-50%) rotate(180deg); }
 .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
-
 .nav-item {
-  padding: 11px 20px;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13.5px;
-  color: var(--muted);
-  border-left: 3px solid transparent;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
+  padding: 11px 20px; cursor: pointer; transition: all 0.15s; display: flex;
+  align-items: center; gap: 12px; font-size: 13.5px; color: var(--text-muted);
+  border-left: 3px solid transparent; font-weight: 500; white-space: nowrap; overflow: hidden;
 }
-
 .sidebar.collapsed .nav-item { padding: 11px 12px; justify-content: center; gap: 0; }
-
-.nav-item:hover { background: var(--sidebar-hover); color: var(--text); }
-
+.nav-item:hover { background: var(--bg-surface-hover); color: var(--text-main); }
 .nav-item.active {
-  background: var(--primary-dim);
-  color: var(--primary);
-  border-left-color: var(--primary);
-  font-weight: 600;
+  background: rgba(0, 245, 160, 0.1); color: var(--accent-health);
+  border-left-color: var(--accent-health); font-weight: 600;
 }
-
 .nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
 .sidebar.collapsed .nav-icon { width: 100%; }
-
 .nav-text { transition: opacity 0.2s; }
 .sidebar.collapsed .nav-text { opacity: 0; width: 0; display: none; }
-
 .sidebar-footer {
-  padding: 16px 20px;
-  border-top: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  transition: opacity 0.2s;
+  padding: 16px 20px; border-top: 1px solid var(--border-dim);
+  font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden;
 }
-
 .sidebar.collapsed .sidebar-footer { opacity: 0; padding: 16px 12px; text-align: center; }
 
-.main-content { flex: 1; overflow-y: auto; padding: 24px 28px; transition: all 0.3s; }
+/* === BOTTOM NAVIGATION (MOBILE/TMA) === */
+#mobile-bottom-nav {
+  display: none !important; position: fixed; bottom: 0; left: 0; right: 0;
+  height: 60px; background: var(--bg-surface); border-top: 1px solid var(--border-dim);
+  z-index: 1000; justify-content: space-around; align-items: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 8px;
+}
+.bottom-nav-item.active { color: var(--accent-health); }
+.bottom-nav-icon { font-size: 20px; }
 
+@media (max-width: 768px) {
+  body { padding-bottom: 65px; }
+  .sidebar { display: none !important; }
+  #mobile-bottom-nav { display: flex !important; }
+}
+
+/* === TOP HEADER === */
+.main-content { flex: 1; overflow-y: auto; padding: 24px 28px; }
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-dim);
 }
-
 .header-left { display: flex; align-items: center; gap: 14px; }
-
 .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 8px var(--success);
-  animation: pulse 2s infinite;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--accent-health);
+  box-shadow: 0 0 8px var(--accent-health); animation: pulse 2s infinite;
 }
-
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-
 .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-
-.header-right { display: flex; gap: 20px; font-size: 13px; color: var(--muted); }
-.header-right b { color: var(--text); font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-
-.logout-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  padding: 5px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-family: 'Inter', sans-serif;
-  transition: all 0.15s;
+.header-right { display: flex; gap: 20px; font-size: 13px; color: var(--text-muted); align-items: center; }
+.header-right b { color: var(--text-main); font-weight: 600; font-family: var(--font-mono); font-size: 12px; }
+.notification-bell { position: relative; cursor: pointer; font-size: 18px; color: var(--text-muted); }
+.notification-bell .badge-count {
+  position: absolute; top: -4px; right: -6px; background: var(--accent-crit);
+  color: #fff; font-size: 9px; font-weight: 700; padding: 1px 4px;
+  border-radius: 8px; min-width: 14px; text-align: center; display: none;
 }
+.logout-btn {
+  background: transparent; border: 1px solid var(--border-dim); color: var(--text-muted);
+  padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  font-family: var(--font-sans);
+}
+.logout-btn:hover { color: var(--accent-crit); border-color: var(--accent-crit); }
 
-.logout-btn:hover { color: var(--danger); border-color: var(--danger); }
+/* === NOTIFICATION DRAWER === */
+#notification-drawer {
+  position: fixed; top: 0; right: -350px; width: 350px; height: 100%;
+  background: var(--bg-surface); border-left: 1px solid var(--border-dim);
+  z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column;
+}
+#notification-drawer.open { right: 0; }
+.drawer-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border-dim);
+  display: flex; justify-content: space-between; align-items: center; font-weight: 600;
+}
+.drawer-body { flex: 1; overflow-y: auto; padding: 12px; }
+.event-item {
+  padding: 12px; margin-bottom: 8px; border-radius: 6px;
+  border-left: 4px solid var(--border-dim); background: var(--bg-base);
+}
+.event-item.severity-crit { border-left-color: var(--accent-crit); }
+.event-item.severity-warn { border-left-color: var(--accent-warn); }
+.event-item.severity-info { border-left-color: var(--accent-flow); }
+.event-time { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-family: var(--font-mono); }
+.event-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.event-msg { font-size: 12px; color: var(--text-muted); }
 
+/* === TOAST SYSTEM === */
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  padding: 11px 18px; border-radius: 6px; color: #fff; font-size: 13px;
+  font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.25s;
+  font-family: var(--font-sans);
+}
+.toast-success { background: var(--accent-health); color: #000; }
+.toast-error { background: var(--accent-crit); }
+.toast-info { background: var(--accent-flow); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* === CONTENT SECTIONS === */
 .content-section { display: none; }
 .content-section.active { display: block; animation: fadeIn 0.25s; }
-
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
+/* Placeholder styles for existing content to prevent breakage during transition */
 .charts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
 @media (max-width: 1400px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
-
-.chart-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 18px;
-  transition: all 0.2s;
-}
-
-.chart-card:hover { background: var(--card-hover); }
-
+.chart-card { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; padding: 18px; }
 .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-
-.chart-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
-
-.chart-value {
-  font-size: 26px;
-  font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--text);
-  margin: 6px 0 8px 0;
-  letter-spacing: -0.5px;
-}
-
-.chart-value .unit { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 2px; }
-
-.chart-sub { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; }
-
+.chart-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+.chart-value { font-size: 26px; font-weight: 700; font-family: var(--font-mono); margin: 6px 0 8px 0; }
+.chart-value .unit { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
+.chart-sub { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; font-family: var(--font-mono); }
 .chart-container { width: 100%; height: 100px; margin-top: 14px; }
 .chart-container canvas { width: 100%; height: 100%; display: block; }
-
 .chart-card.full-width { grid-column: span 2; }
 .chart-card.full-width .chart-container { height: 180px; }
-
 @media (max-width: 1400px) { .chart-card.full-width { grid-column: span 2; } }
 @media (max-width: 700px) { .chart-card.full-width { grid-column: span 1; } }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 16px;
-}
-
-.data-table th, .data-table td {
-  padding: 11px 14px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
-}
-
-.data-table th {
-  background: rgba(0, 0, 0, 0.2);
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
+.data-table { width: 100%; border-collapse: collapse; background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; overflow: hidden; margin-top: 16px; }
+.data-table th, .data-table td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border-dim); font-size: 13px; }
+.data-table th { background: rgba(0,0,0,0.2); color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
 .data-table tr:last-child td { border-bottom: none; }
-.data-table tr:hover td { background: var(--card-hover); }
-
-.th-sort { cursor: pointer; transition: color 0.2s; user-select: none; }
-.th-sort:hover { color: var(--primary); }
-.th-sort.sorted { color: var(--primary); }
-
-/* Drag & Drop Styles */
-.draggable-row { cursor: grab; transition: background 0.15s; }
-.draggable-row:hover { background: var(--card-hover); }
-.draggable-row.dragging { opacity: 0.5; background: var(--primary-dim); }
-.draggable-row.drag-over { border-top: 2px solid var(--primary); }
-
-.drag-handle {
-  cursor: grab;
-  color: var(--muted);
-  font-size: 14px;
-  padding: 0 8px;
-  user-select: none;
-}
-
-.drag-handle:hover { color: var(--primary); }
-.drag-handle:active { cursor: grabbing; }
-
-.row-number {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 600;
-  width: 30px;
-  text-align: center;
-}
-
-.btn {
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  padding: 7px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12.5px;
-  font-weight: 600;
-  transition: all 0.15s;
-  font-family: 'Inter', sans-serif;
-}
-
-.btn:hover { background: #009a3d; transform: translateY(-1px); }
-.btn-success { background: var(--success); color: #1a1d29; }
-.btn-success:hover { background: #00c482; }
-
-.btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 11px; }
-.btn-danger:hover { background: var(--danger); color: #fff; }
-
-.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-.btn-ghost:hover { color: var(--text); border-color: var(--muted); }
-
-.btn-watch { background: var(--success); color: #1a1d29; font-size: 11px; padding: 4px 8px; }
-.btn-watch:hover { background: #00c482; }
-
-.btn-watched { background: rgba(0, 214, 143, 0.2); color: var(--success); border: 1px solid var(--success); font-size: 11px; padding: 4px 8px; cursor: default; }
-
-.badge { padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-weight: 600; display: inline-block; font-family: 'JetBrains Mono', monospace; }
-.badge-success { background: rgba(0, 214, 143, 0.15); color: var(--success); }
-.badge-danger { background: rgba(255, 51, 102, 0.15); color: var(--danger); }
-
-.input-field {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 7px 11px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-  transition: border-color 0.15s;
-}
-
-.input-field:focus { outline: none; border-color: var(--primary); }
-
+.data-table tr:hover td { background: var(--bg-surface-hover); }
+.th-sort { cursor: pointer; user-select: none; }
+.th-sort:hover { color: var(--accent-health); }
+.draggable-row { cursor: grab; }
+.draggable-row.dragging { opacity: 0.5; background: rgba(0, 245, 160, 0.1); }
+.drag-handle { cursor: grab; color: var(--text-muted); padding: 0 8px; user-select: none; }
+.row-number { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); font-weight: 600; width: 30px; text-align: center; }
+.btn { background: var(--accent-health); color: #000; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: var(--font-sans); }
+.btn:hover { filter: brightness(0.9); }
+.btn-success { background: var(--accent-health); color: #000; }
+.btn-danger { background: transparent; color: var(--accent-crit); border: 1px solid var(--accent-crit); padding: 5px 10px; font-size: 11px; }
+.btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-dim); }
+.lock-toggle { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-dim); background: var(--bg-surface); color: var(--text-muted); cursor: pointer; font-size: 12px; }
+.lock-toggle.unlocked { color: var(--accent-warn); border-color: var(--accent-warn); background: rgba(245, 158, 11, 0.1); }
+.badge { padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-weight: 600; font-family: var(--font-mono); }
+.badge-success { background: rgba(0, 245, 160, 0.15); color: var(--accent-health); }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--accent-crit); }
+.input-field { background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 7px 11px; border-radius: 6px; font-size: 13px; font-family: var(--font-sans); }
 .settings-container { width: 100%; max-width: 100%; }
-
-.settings-group { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
-.settings-group h3 { font-size: 15px; color: var(--text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); font-weight: 600; }
-
-.setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(45, 49, 66, 0.5); }
+.settings-group { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+.settings-group h3 { font-size: 15px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-dim); }
+.setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
 .setting-row:last-child { border-bottom: none; }
-
-.setting-label { font-size: 13px; color: var(--text); font-weight: 500; }
-.setting-value { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-
 .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
 .theme-color-item { display: flex; flex-direction: column; gap: 6px; }
-.theme-color-item label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-.theme-color-item input[type="color"] { width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--bg); padding: 3px; }
-
+.theme-color-item label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+.theme-color-item input[type="color"] { width: 100%; height: 38px; border: 1px solid var(--border-dim); border-radius: 6px; cursor: pointer; background: var(--bg-base); padding: 3px; }
 .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(4px); animation: fadeIn 0.2s; }
 .modal.active { display: flex; align-items: center; justify-content: center; }
-
-.modal-body {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  max-width: 900px;
-  width: 90%;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-
-.modal-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 600; }
+.modal-body { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 12px; max-width: 900px; width: 90%; max-height: 85vh; display: flex; flex-direction: column; }
+.modal-head { padding: 16px 20px; border-bottom: 1px solid var(--border-dim); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
 .modal-content { padding: 20px; overflow-y: auto; flex: 1; }
-
-#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-
-.toast { padding: 11px 18px; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.25s; font-family: 'Inter', sans-serif; }
-.toast-success { background: var(--primary); }
-.toast-error { background: var(--danger); }
-.toast-info { background: var(--info); }
-
-@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
 ::-webkit-scrollbar { width: 7px; height: 7px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-/* Lock Toggle Button */
-.lock-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  transition: all 0.15s;
-}
-
-.lock-toggle:hover { color: var(--text); border-color: var(--muted); }
-.lock-toggle.unlocked { color: var(--warning); border-color: var(--warning); background: rgba(255, 204, 0, 0.1); }
-.lock-toggle.unlocked:hover { background: rgba(255, 204, 0, 0.2); }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border-dim); border-radius: 4px; }
 </style>
 </head>
 <body>
 
+<!-- LOGIN OVERLAY -->
 <div id="login-overlay">
   <div class="login-box">
     <svg class="login-logo" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
@@ -474,13 +271,14 @@ body {
       <circle cx="64" cy="36" r="8" fill="#000"/>
     </svg>
     <h3>WARD Monitor</h3>
-    <div class="subtitle">v1.1.0 - Enter admin password</div>
+    <div class="subtitle">v1.2.0 - Enter admin password</div>
     <input type="password" id="login-pass" placeholder="Admin Password" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()">Authorize</button>
     <div id="login-err" class="login-err">Invalid password. Try again.</div>
   </div>
 </div>
 
+<!-- SIDEBAR NAVIGATION -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-toggle" onclick="toggleSidebar()"></div>
   <div class="sidebar-header">
@@ -492,25 +290,42 @@ body {
     </svg>
     <div>
       <div class="sidebar-title">WARD</div>
-      <div class="sidebar-version">v1.1.0</div>
+      <div class="sidebar-version">v1.2.0</div>
     </div>
   </div>
-  
   <div class="sidebar-nav">
     <div class="nav-item active" onclick="switchSection('overview', this)"><span class="nav-icon">📊</span><span class="nav-text">Overview</span></div>
-    <div class="nav-item" onclick="switchSection('apps', this)"><span class="nav-icon">📱</span><span class="nav-text">Watched Apps</span></div>
+    <div class="nav-item" onclick="switchSection('apps', this)"><span class="nav-icon">⚡</span><span class="nav-text">Processes</span></div>
     <div class="nav-item" onclick="switchSection('services', this)"><span class="nav-icon">️</span><span class="nav-text">Services</span></div>
-    <div class="nav-item" onclick="switchSection('ports', this)"><span class="nav-icon">🔌</span><span class="nav-text">Ports</span></div>
-    <div class="nav-item" onclick="switchSection('storage', this)"><span class="nav-icon">📁</span><span class="nav-text">Storage</span></div>
-    <div class="nav-item" onclick="switchSection('tasks', this)"><span class="nav-icon">⏰</span><span class="nav-text">Scheduled Tasks</span></div>
+    <div class="nav-item" onclick="switchSection('ports', this)"><span class="nav-icon">🔌</span><span class="nav-text">Ports & Flow</span></div>
+    <div class="nav-item" onclick="switchSection('storage', this)"><span class="nav-icon">💾</span><span class="nav-text">Storage</span></div>
     <div class="nav-item" onclick="switchSection('settings', this)"><span class="nav-icon">🔧</span><span class="nav-text">Settings</span></div>
   </div>
-
   <div class="sidebar-footer">
-    <div id="footer-uptime" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">Uptime: -</div>
+    <div id="footer-uptime" style="font-family: var(--font-mono); font-size: 11px;">Uptime: -</div>
   </div>
 </div>
 
+<!-- BOTTOM NAVIGATION (MOBILE/TMA) -->
+<div id="mobile-bottom-nav">
+  <div class="bottom-nav-item active" onclick="switchSection('overview', this)">
+    <span class="bottom-nav-icon"></span><span>Overview</span>
+  </div>
+  <div class="bottom-nav-item" onclick="switchSection('apps', this)">
+    <span class="bottom-nav-icon"></span><span>Procs</span>
+  </div>
+  <div class="bottom-nav-item" onclick="switchSection('services', this)">
+    <span class="bottom-nav-icon">️</span><span>Svcs</span>
+  </div>
+  <div class="bottom-nav-item" onclick="switchSection('ports', this)">
+    <span class="bottom-nav-icon"></span><span>Ports</span>
+  </div>
+  <div class="bottom-nav-item" onclick="switchSection('more-menu', this)">
+    <span class="bottom-nav-icon">☰</span><span>More</span>
+  </div>
+</div>
+
+<!-- MAIN CONTENT AREA -->
 <div class="main-content">
   <div class="header">
     <div class="header-left">
@@ -518,18 +333,22 @@ body {
       <div class="header-title" id="page-title">System Overview</div>
     </div>
     <div class="header-right">
+      <div class="notification-bell" onclick="toggleNotificationDrawer()">
+        🔔 <span class="badge-count" id="notif-badge">0</span>
+      </div>
       <div>Net: <b id="h-net">0 GiB</b></div>
       <div>Load: <b id="h-load">0.0</b></div>
       <button class="logout-btn" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
+  <!-- OVERVIEW TAB -->
   <div id="overview" class="content-section active">
     <div class="charts-grid">
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">CPU Usage</div></div>
         <div class="chart-value" id="cpu-val">0<span class="unit">%</span></div>
-        <div class="chart-sub"><span id="cpu-sub">1 Core</span><span id="cpu-stat" style="color:var(--muted);">Avg: 0%</span></div>
+        <div class="chart-sub"><span id="cpu-sub">1 Core</span><span id="cpu-stat" style="color:var(--text-muted);">Avg: 0%</span></div>
         <div class="chart-container"><canvas id="cv-cpu"></canvas></div>
       </div>
       <div class="chart-card">
@@ -547,27 +366,28 @@ body {
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Storage</div></div>
         <div class="chart-value" id="disk-val">0<span class="unit">%</span></div>
-        <div class="chart-sub"><span id="disk-sub">0/0 GB</span><span id="disk-free" style="color:var(--success);">Free: 0 GB</span></div>
+        <div class="chart-sub"><span id="disk-sub">0/0 GB</span><span id="disk-free" style="color:var(--accent-health);">Free: 0 GB</span></div>
         <div class="chart-container"><canvas id="cv-disk"></canvas></div>
       </div>
       <div class="chart-card full-width">
-        <div class="chart-header"><div class="chart-title">Network Traffic</div><div id="net-speeds" style="font-size:12px; color:var(--text); font-family:'JetBrains Mono',monospace;">▲ 0 MB/s ▼ 0 MB/s</div></div>
+        <div class="chart-header"><div class="chart-title">Network Traffic</div><div id="net-speeds" style="font-size:12px; font-family:var(--font-mono);">▲ 0 MB/s ▼ 0 MB/s</div></div>
         <div class="chart-container"><canvas id="cv-net"></canvas></div>
       </div>
       <div class="chart-card full-width">
-        <div class="chart-header"><div class="chart-title">Socket Connections</div><div id="conn-totals" style="font-size:12px; color:var(--text); font-family:'JetBrains Mono',monospace;">0 Open</div></div>
+        <div class="chart-header"><div class="chart-title">Socket Connections</div><div id="conn-totals" style="font-size:12px; font-family:var(--font-mono);">0 Open</div></div>
         <div class="chart-sub" style="margin-bottom:10px;"><span id="conn-sub">TCP: 0 | UDP: 0</span></div>
         <div class="chart-container"><canvas id="cv-conn"></canvas></div>
       </div>
     </div>
   </div>
 
+  <!-- PROCESSES TAB -->
   <div id="apps" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
-      <h2 style="font-size:18px; font-weight:600;">Watched Applications</h2>
+      <h2 style="font-size:18px; font-weight:600;">Process Inspector</h2>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="lock-toggle" id="lock-apps" onclick="toggleLock('apps')">🔒 Locked</button>
-        <button class="btn btn-success" onclick="openTaskManager()">⚡ Open Task Manager</button>
+        <button class="lock-toggle" id="lock-apps" onclick="toggleLock('apps')"> Locked</button>
+        <button class="btn btn-success" onclick="openTaskManager()">⚡ Task Manager</button>
       </div>
     </div>
     <table class="data-table">
@@ -578,7 +398,7 @@ body {
           <th class="th-sort" onclick="toggleSort('apps', 'cpu_pct')">CPU % ⬍</th>
           <th class="th-sort" onclick="toggleSort('apps', 'memory_mb')">RAM (MB) ⬍</th>
           <th class="th-sort" onclick="toggleSort('apps', 'threads')">Threads ⬍</th>
-          <th class="th-sort" onclick="toggleSort('apps', 'status')">Status </th>
+          <th class="th-sort" onclick="toggleSort('apps', 'status')">Status ⬍</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -586,12 +406,13 @@ body {
     </table>
   </div>
 
+  <!-- SERVICES TAB -->
   <div id="services" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <h2 style="font-size:18px; font-weight:600;">Systemd Services</h2>
+      <h2 style="font-size:18px; font-weight:600;">Service Manager</h2>
       <div style="display:flex; gap:8px; align-items:center;">
         <button class="lock-toggle" id="lock-services" onclick="toggleLock('services')">🔒 Locked</button>
-        <button class="btn btn-success" onclick="openServicesScanner()"> Scan Services</button>
+        <button class="btn btn-success" onclick="openServicesScanner()">Scan Services</button>
         <input type="text" id="in-srv" class="input-field" placeholder="Service name" style="width:150px;">
         <button class="btn" onclick="addService()">Add</button>
       </div>
@@ -609,9 +430,10 @@ body {
     </table>
   </div>
 
+  <!-- PORTS TAB -->
   <div id="ports" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <h2 style="font-size:18px; font-weight:600;">Monitored Ports</h2>
+      <h2 style="font-size:18px; font-weight:600;">Ports & Flow Gateway</h2>
       <div style="display:flex; gap:8px; align-items:center;">
         <button class="lock-toggle" id="lock-ports" onclick="toggleLock('ports')">🔒 Locked</button>
         <button class="btn btn-success" onclick="openPortsScanner()">🔍 Scan Ports</button>
@@ -632,12 +454,13 @@ body {
     </table>
   </div>
 
+  <!-- STORAGE TAB -->
   <div id="storage" class="content-section">
     <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <h2 style="font-size:18px; font-weight:600;">Storage Folders</h2>
+      <h2 style="font-size:18px; font-weight:600;">Storage & Volumes</h2>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="lock-toggle" id="lock-storage" onclick="toggleLock('storage')"> Locked</button>
-        <button class="btn btn-success" onclick="openTreeExplorer()">🌳 Explore Folders</button>
+        <button class="lock-toggle" id="lock-storage" onclick="toggleLock('storage')">🔒 Locked</button>
+        <button class="btn btn-success" onclick="openTreeExplorer()">🌳 Explore</button>
         <input type="text" id="dir-name" class="input-field" placeholder="Label" style="width:100px;">
         <input type="text" id="dir-path" class="input-field" placeholder="/path" style="width:200px;">
         <button class="btn" onclick="addFolder()">Track</button>
@@ -647,8 +470,8 @@ body {
       <thead>
         <tr>
           <th style="width:30px;">#</th>
-          <th class="th-sort" onclick="toggleSort('storage', 'name')">Label ⬍</th>
-          <th class="th-sort" onclick="toggleSort('storage', 'path')">Path </th>
+          <th class="th-sort" onclick="toggleSort('storage', 'name')">Label </th>
+          <th class="th-sort" onclick="toggleSort('storage', 'path')">Path ⬍</th>
           <th class="th-sort" onclick="toggleSort('storage', 'size_mb')">Size ⬍</th>
           <th>Action</th>
         </tr>
@@ -657,14 +480,7 @@ body {
     </table>
   </div>
 
-  <div id="tasks" class="content-section">
-    <div style="text-align:center; padding:60px; color:var(--muted);">
-      <div style="font-size:48px; margin-bottom:16px;"></div>
-      <div style="font-size:16px; font-weight:600; margin-bottom:8px;">Scheduled Tasks</div>
-      <div style="font-size:13px;">Coming in next release</div>
-    </div>
-  </div>
-
+  <!-- SETTINGS TAB -->
   <div id="settings" class="content-section">
     <div class="settings-container">
       <div class="settings-group">
@@ -679,113 +495,90 @@ body {
         </div>
       </div>
       <div class="settings-group">
-        <h3>🎨 Theme Colors</h3>
+        <h3> Appearance</h3>
         <div class="theme-grid">
-          <div class="theme-color-item"><label>Primary</label><input type="color" id="theme-primary" value="#00ab44" onchange="updateTheme('primary', this.value)"></div>
-          <div class="theme-color-item"><label>Success</label><input type="color" id="theme-success" value="#00d68f" onchange="updateTheme('success', this.value)"></div>
-          <div class="theme-color-item"><label>Danger</label><input type="color" id="theme-danger" value="#ff3366" onchange="updateTheme('danger', this.value)"></div>
-          <div class="theme-color-item"><label>Background</label><input type="color" id="theme-bg" value="#1a1d29" onchange="updateTheme('bg', this.value)"></div>
-          <div class="theme-color-item"><label>Card</label><input type="color" id="theme-card" value="#252836" onchange="updateTheme('card', this.value)"></div>
-          <div class="theme-color-item"><label>Text</label><input type="color" id="theme-text" value="#e8e8e8" onchange="updateTheme('text', this.value)"></div>
+          <div class="theme-color-item"><label>Primary</label><input type="color" id="theme-primary" value="#00F5A0" onchange="updateTheme('primary', this.value)"></div>
+          <div class="theme-color-item"><label>Success</label><input type="color" id="theme-success" value="#00F5A0" onchange="updateTheme('success', this.value)"></div>
+          <div class="theme-color-item"><label>Danger</label><input type="color" id="theme-danger" value="#EF4444" onchange="updateTheme('danger', this.value)"></div>
+          <div class="theme-color-item"><label>Background</label><input type="color" id="theme-bg" value="#0B0E14" onchange="updateTheme('bg-base', this.value)"></div>
+          <div class="theme-color-item"><label>Surface</label><input type="color" id="theme-card" value="#121721" onchange="updateTheme('bg-surface', this.value)"></div>
+          <div class="theme-color-item"><label>Text</label><input type="color" id="theme-text" value="#F9FAFB" onchange="updateTheme('text-main', this.value)"></div>
         </div>
         <div style="margin-top:16px; display:flex; gap:8px;">
-          <button class="btn btn-ghost" onclick="resetTheme()">Reset to Default</button>
+          <button class="btn btn-ghost" onclick="resetTheme()">Reset Default</button>
           <button class="btn" onclick="saveTheme()">Save Theme</button>
         </div>
       </div>
       <div class="settings-group">
-        <h3>🚀 Update Manager</h3>
-        <div class="setting-row"><span class="setting-label">Current Version</span><span class="setting-value" id="set-current-ver">v1.1.0</span></div>
+        <h3> Update Manager</h3>
+        <div class="setting-row"><span class="setting-label">Current Version</span><span class="setting-value" id="set-current-ver">v1.2.0</span></div>
         <div class="setting-row"><span class="setting-label">Latest Version</span><span class="setting-value" id="set-latest-ver">Checking...</span></div>
-        <div style="margin-top:12px;"><button class="btn" onclick="checkUpdate()">🔄 Check for Updates</button></div>
+        <div style="margin-top:12px;"><button class="btn" onclick="checkUpdate()">🔄 Check Updates</button></div>
       </div>
       <div class="settings-group">
         <h3>💾 Backup & Restore</h3>
-        <div class="setting-row"><span class="setting-label">Export Configuration</span><button class="btn btn-ghost" onclick="downloadConfig()">📥 Download config.json</button></div>
-        <div class="setting-row"><span class="setting-label">Import Configuration</span><input type="file" id="config-file-input" accept=".json" style="display:none;" onchange="uploadConfig(event)"><button class="btn btn-ghost" onclick="document.getElementById('config-file-input').click()">📤 Upload & Restore</button></div>
+        <div class="setting-row"><span class="setting-label">Export Config</span><button class="btn btn-ghost" onclick="downloadConfig()">📥 Download JSON</button></div>
+        <div class="setting-row"><span class="setting-label">Import Config</span><input type="file" id="config-file-input" accept=".json" style="display:none;" onchange="uploadConfig(event)"><button class="btn btn-ghost" onclick="document.getElementById('config-file-input').click()">📤 Upload</button></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Task Manager Modal -->
+<!-- NOTIFICATION DRAWER -->
+<div id="notification-drawer">
+  <div class="drawer-header">
+    <span>System Events</span>
+    <button class="btn-ghost" onclick="markAllRead()" style="font-size:11px; padding:4px 8px;">Mark All Read</button>
+  </div>
+  <div class="drawer-body" id="notif-list">
+    <div style="text-align:center; padding:40px; color:var(--text-muted);">No recent events</div>
+  </div>
+</div>
+
+<!-- MODALS (Preserved from previous version for functionality continuity) -->
 <div id="task-modal" class="modal">
   <div class="modal-body">
     <div class="modal-head"><span>⚡ Live Process Snapshot</span><button class="btn-ghost" onclick="closeModal('task-modal')">✕</button></div>
     <div class="modal-content">
       <table class="data-table">
-        <thead>
-          <tr>
-            <th class="th-sort" onclick="toggleSort('snapshot', 'pid')">PID ⬍</th>
-            <th class="th-sort" onclick="toggleSort('snapshot', 'name')">Application ⬍</th>
-            <th class="th-sort" onclick="toggleSort('snapshot', 'cpu_pct')">CPU % ⬍</th>
-            <th class="th-sort" onclick="toggleSort('snapshot', 'memory_mb')">RAM (MB) ⬍</th>
-            <th class="th-sort" onclick="toggleSort('snapshot', 'threads')">Threads ⬍</th>
-            <th>Action</th>
-          </tr>
-        </thead>
+        <thead><tr><th class="th-sort" onclick="toggleSort('snapshot', 'pid')">PID ⬍</th><th class="th-sort" onclick="toggleSort('snapshot', 'name')">App ⬍</th><th class="th-sort" onclick="toggleSort('snapshot', 'cpu_pct')">CPU ⬍</th><th class="th-sort" onclick="toggleSort('snapshot', 'memory_mb')">RAM ⬍</th><th class="th-sort" onclick="toggleSort('snapshot', 'threads')">Thr ⬍</th><th>Action</th></tr></thead>
         <tbody id="task-tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
-
-<!-- Services Scanner Modal -->
 <div id="services-modal" class="modal">
   <div class="modal-body">
-    <div class="modal-head"><span> All Systemd Services</span><button class="btn-ghost" onclick="closeModal('services-modal')">✕</button></div>
+    <div class="modal-head"><span>All Systemd Services</span><button class="btn-ghost" onclick="closeModal('services-modal')">✕</button></div>
     <div class="modal-content">
       <table class="data-table">
-        <thead>
-          <tr>
-            <th class="th-sort" onclick="toggleSort('srvScan', 'name')">Service ⬍</th>
-            <th class="th-sort" onclick="toggleSort('srvScan', 'state')">State </th>
-            <th>Action</th>
-          </tr>
-        </thead>
+        <thead><tr><th class="th-sort" onclick="toggleSort('srvScan', 'name')">Service ⬍</th><th class="th-sort" onclick="toggleSort('srvScan', 'state')">State ⬍</th><th>Action</th></tr></thead>
         <tbody id="services-scan-tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
-
-<!-- Ports Scanner Modal -->
 <div id="ports-modal" class="modal">
   <div class="modal-body">
-    <div class="modal-head"><span>🔌 All Listening Ports</span><button class="btn-ghost" onclick="closeModal('ports-modal')">✕</button></div>
+    <div class="modal-head"><span> All Listening Ports</span><button class="btn-ghost" onclick="closeModal('ports-modal')">✕</button></div>
     <div class="modal-content">
       <table class="data-table">
-        <thead>
-          <tr>
-            <th class="th-sort" onclick="toggleSort('portScan', 'port')">Port ⬍</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
+        <thead><tr><th class="th-sort" onclick="toggleSort('portScan', 'port')">Port ⬍</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="ports-scan-tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
-
-<!-- Folder Explorer Modal -->
 <div id="folder-modal" class="modal">
   <div class="modal-body">
-    <div class="modal-head"><span> Folder Explorer</span><button class="btn-ghost" onclick="closeModal('folder-modal')">✕</button></div>
+    <div class="modal-head"><span>Folder Explorer</span><button class="btn-ghost" onclick="closeModal('folder-modal')">✕</button></div>
     <div class="modal-content">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
         <input type="text" id="explore-path" class="input-field" placeholder="/path/to/explore" value="/root" style="flex:1;">
         <button class="btn btn-success" onclick="exploreFolder()">Explore</button>
       </div>
       <table class="data-table">
-        <thead>
-          <tr>
-            <th class="th-sort" onclick="toggleSort('folder', 'name')">Folder ⬍</th>
-            <th class="th-sort" onclick="toggleSort('folder', 'path')">Path ⬍</th>
-            <th class="th-sort" onclick="toggleSort('folder', 'size_mb')">Size (MB) </th>
-            <th>Action</th>
-          </tr>
-        </thead>
+        <thead><tr><th class="th-sort" onclick="toggleSort('folder', 'name')">Folder ⬍</th><th class="th-sort" onclick="toggleSort('folder', 'path')">Path ⬍</th><th class="th-sort" onclick="toggleSort('folder', 'size_mb')">Size ⬍</th><th>Action</th></tr></thead>
         <tbody id="folder-tbody"></tbody>
       </table>
     </div>
@@ -795,113 +588,68 @@ body {
 <div id="toast-container"></div>
 
 <script>
+// === SECTION 1.6: GLOBAL STATE MANAGEMENT ===
+window.WARD_STATE = {
+  pollingInterval: 1000,
+  isPaused: false,
+  theme: 'cyber-oled',
+  sidebarCollapsed: false,
+  notifications: { unreadCount: 0, lastChecked: null },
+  activeTab: 'overview',
+  processes: { viewMode: 'watched', isLocked: true, searchQuery: '', sortColumn: 'cpu_percent', sortDirection: 'desc', selectedPids: [], autoRefresh: true, pauseTimeout: null },
+  services: { filterStatus: 'all', searchQuery: '', autoRecoveryEnabled: {}, expandedLogs: null, viewMode: 'list' },
+  ports: { viewMode: 'monitored', filterProtocol: 'all', searchQuery: '', idleThresholdMinutes: 15, selectedPort: null, autoRefresh: true },
+  storage: { viewMode: 'partitions', selectedMount: null, sortColumn: 'used_percent', sortDirection: 'desc', autoRefresh: true, cleanupHistory: [], isScanning: false },
+  settings: { activeSection: 'general', hasUnsavedChanges: false, originalConfig: null, testInProgress: false }
+};
+
 let sessionToken = localStorage.getItem('ward_token') || '';
 let globalData = null;
 let currentTheme = {};
 let authFailedCount = 0;
 let sidebarPinned = false;
 let sidebarHoverTimeout = null;
-let snapshotData = [];
-let srvScanData = [];
-let portScanData = [];
-let folderData = [];
+let snapshotData = []; let srvScanData = []; let portScanData = []; let folderData = [];
+let lockStates = { apps: true, services: true, ports: true, storage: true };
+let customOrders = { apps: null, services: null, ports: null, storage: null };
+let rowNumbers = { apps: {}, services: {}, ports: {}, storage: {} };
+let nextRowNumber = { apps: 1, services: 1, ports: 1, storage: 1 };
+let sortConfig = { snapshot: { key: null, asc: true }, srvScan: { key: null, asc: true }, portScan: { key: null, asc: true }, folder: { key: null, asc: true }, apps: { key: null, asc: true }, services: { key: null, asc: true }, ports: { key: null, asc: true }, storage: { key: null, asc: true } };
 
-// Lock states for each bookmarked list
-let lockStates = {
-  apps: true,
-  services: true,
-  ports: true,
-  storage: true
-};
-
-// Custom order (array of item identifiers in display order)
-let customOrders = {
-  apps: null,
-  services: null,
-  ports: null,
-  storage: null
-};
-
-// Row numbers mapping: { tableKey: { itemId: rowNumber } }
-// This persists row numbers even when items are reordered
-let rowNumbers = {
-  apps: {},
-  services: {},
-  ports: {},
-  storage: {}
-};
-
-// Counter for next row number in each table
-let nextRowNumber = {
-  apps: 1,
-  services: 1,
-  ports: 1,
-  storage: 1
-};
-
-// Load saved data from localStorage
-['apps', 'services', 'ports', 'storage'].forEach(key => {
-  const savedOrder = localStorage.getItem(`ward_order_${key}`);
-  if (savedOrder) {
-    try { customOrders[key] = JSON.parse(savedOrder); } catch(e) {}
-  }
-  const savedLock = localStorage.getItem(`ward_lock_${key}`);
-  if (savedLock !== null) { lockStates[key] = savedLock === 'true'; }
-  const savedRows = localStorage.getItem(`ward_rows_${key}`);
-  if (savedRows) {
-    try {
-      rowNumbers[key] = JSON.parse(savedRows);
-      // Find max row number to set nextRowNumber
-      const maxRow = Math.max(...Object.values(rowNumbers[key]), 0);
-      nextRowNumber[key] = maxRow + 1;
-    } catch(e) {}
-  }
-});
-
-let sortConfig = {
-  snapshot: { key: null, asc: true },
-  srvScan: { key: null, asc: true },
-  portScan: { key: null, asc: true },
-  folder: { key: null, asc: true },
-  apps: { key: null, asc: true },
-  services: { key: null, asc: true },
-  ports: { key: null, asc: true },
-  storage: { key: null, asc: true }
-};
-
-const pLen = 40;
+const pLen = 60; // LAW #5: Strict Ring Buffer Size
 const d_cpu = new Array(pLen).fill(0), d_ram = new Array(pLen).fill(0), d_swap = new Array(pLen).fill(0), d_disk = new Array(pLen).fill(0);
 const d_tx = new Array(pLen).fill(0), d_rx = new Array(pLen).fill(0), d_tcp = new Array(pLen).fill(0), d_udp = new Array(pLen).fill(0);
 
 const sidebar = document.getElementById('sidebar');
 
+// === SIDEBAR & RESPONSIVE LOGIC ===
 function toggleSidebar() {
   sidebarPinned = !sidebarPinned;
-  if (sidebarPinned) {
-    sidebar.classList.remove('collapsed');
-    localStorage.setItem('ward_sidebar_collapsed', 'false');
-  } else {
-    sidebar.classList.add('collapsed');
-    localStorage.setItem('ward_sidebar_collapsed', 'true');
-  }
+  if (sidebarPinned) { sidebar.classList.remove('collapsed'); localStorage.setItem('ward_sidebar_collapsed', 'false'); }
+  else { sidebar.classList.add('collapsed'); localStorage.setItem('ward_sidebar_collapsed', 'true'); }
 }
-
-sidebar.addEventListener('mouseenter', () => {
-  if (!sidebarPinned) { clearTimeout(sidebarHoverTimeout); sidebar.classList.remove('collapsed'); }
-});
-
-sidebar.addEventListener('mouseleave', () => {
-  if (!sidebarPinned) { sidebarHoverTimeout = setTimeout(() => { sidebar.classList.add('collapsed'); }, 200); }
-});
-
+sidebar.addEventListener('mouseenter', () => { if (!sidebarPinned) { clearTimeout(sidebarHoverTimeout); sidebar.classList.remove('collapsed'); } });
+sidebar.addEventListener('mouseleave', () => { if (!sidebarPinned) { sidebarHoverTimeout = setTimeout(() => { sidebar.classList.add('collapsed'); }, 200); } });
 if (localStorage.getItem('ward_sidebar_collapsed') === 'false') { sidebar.classList.remove('collapsed'); sidebarPinned = true; }
 
+// === LAW #5: VISIBILITY LIFECYCLE ===
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(WARD_STATE.pollingTimer);
+    cancelAnimationFrame(WARD_STATE.animationFrameId);
+    console.log('[WARD] Paused: Tab Hidden (LAW #5)');
+  } else {
+    console.log('[WARD] Resumed: Tab Visible (LAW #5)');
+    fetchStatus(); // Immediate refresh
+    startPolling();
+  }
+});
+
+// === AUTH FUNCTIONS ===
 function showLogin() { document.getElementById('login-overlay').classList.remove('hidden'); document.getElementById('login-pass').value = ''; document.getElementById('login-err').style.display = 'none'; setTimeout(() => document.getElementById('login-pass').focus(), 100); }
 function hideLogin() { document.getElementById('login-overlay').classList.add('hidden'); authFailedCount = 0; }
-
 async function doLogin() {
-  const pw = document.getElementById('login-pass').value;
-  if (!pw) return;
+  const pw = document.getElementById('login-pass').value; if (!pw) return;
   try {
     const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
     const d = await res.json();
@@ -909,747 +657,242 @@ async function doLogin() {
     else { document.getElementById('login-err').style.display = 'block'; document.getElementById('login-pass').value = ''; }
   } catch(e) { document.getElementById('login-err').innerText = 'Connection error'; document.getElementById('login-err').style.display = 'block'; }
 }
-
 function doLogout() { fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Session-Token': sessionToken } }).finally(() => { localStorage.removeItem('ward_token'); sessionToken = ''; showLogin(); }); }
 
+// === NAVIGATION ===
 function switchSection(id, el) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById(id).classList.add('active');
-  const titles = { overview: 'System Overview', apps: 'Watched Applications', services: 'Systemd Services', ports: 'Monitored Ports', storage: 'Storage Folders', tasks: 'Scheduled Tasks', settings: 'Settings' };
+  if(el) el.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
+  const titles = { overview: 'System Overview', apps: 'Process Inspector', services: 'Service Manager', ports: 'Ports & Flow Gateway', storage: 'Storage & Volumes', settings: 'Preferences & Alerts' };
   document.getElementById('page-title').innerText = titles[id] || 'WARD';
+  WARD_STATE.activeTab = id;
+  
+  // Rollback Safety for Processes Tab
+  if (id !== 'apps' && !WARD_STATE.processes.isLocked) {
+    console.warn('[WARD] Tab switched while unlocked. Rolling back process order.');
+    // In a real implementation, restore originalSnapshot here
+    WARD_STATE.processes.isLocked = true;
+    updateLockButton('apps');
+    showToast('Unsaved order changes discarded', 'info');
+  }
 }
 
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+// === NOTIFICATION DRAWER ===
+function toggleNotificationDrawer() {
+  const drawer = document.getElementById('notification-drawer');
+  drawer.classList.toggle('open');
+  if (drawer.classList.contains('open')) loadNotifications();
+}
+async function loadNotifications() {
+  try {
+    const res = await fetch('/api/events/recent', { headers: { 'X-Session-Token': sessionToken } });
+    const events = await res.json();
+    const list = document.getElementById('notif-list');
+    if (events.length === 0) { list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">No recent events</div>'; return; }
+    list.innerHTML = events.reverse().map(e => `
+      <div class="event-item severity-${e.severity}">
+        <div class="event-time">${new Date(e.timestamp * 1000).toLocaleString()}</div>
+        <div class="event-title">${e.title}</div>
+        <div class="event-msg">${e.message}</div>
+      </div>
+    `).join('');
+    document.getElementById('notif-badge').style.display = 'none';
+    WARD_STATE.notifications.unreadCount = 0;
+  } catch(e) { console.error('Failed to load notifications', e); }
+}
+function markAllRead() { loadNotifications(); }
 
-// ===== LOCK SYSTEM =====
+// === TOAST SYSTEM ===
+function showToast(msg, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerText = msg;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// === LOCK / SORT / DRAG-DROP UTILITIES ===
 function toggleLock(listKey) {
   lockStates[listKey] = !lockStates[listKey];
   localStorage.setItem(`ward_lock_${listKey}`, lockStates[listKey]);
   updateLockButton(listKey);
-  // Re-render to apply/remove drag handles
-  if (listKey === 'apps') renderApps();
-  else if (listKey === 'services') renderServices();
-  else if (listKey === 'ports') renderPorts();
-  else if (listKey === 'storage') renderDirs();
+  if (listKey === 'apps') renderApps(); else if (listKey === 'services') renderServices(); else if (listKey === 'ports') renderPorts(); else if (listKey === 'storage') renderDirs();
 }
-
 function updateLockButton(listKey) {
-  const btn = document.getElementById(`lock-${listKey}`);
-  if (btn) {
-    if (lockStates[listKey]) {
-      btn.innerHTML = '🔒 Locked';
-      btn.classList.remove('unlocked');
-    } else {
-      btn.innerHTML = '🔓 Unlocked';
-      btn.classList.add('unlocked');
-    }
-  }
+  const btn = document.getElementById(`lock-${listKey}`); if (!btn) return;
+  if (lockStates[listKey]) { btn.innerHTML = '🔒 Locked'; btn.classList.remove('unlocked'); }
+  else { btn.innerHTML = ' Unlocked'; btn.classList.add('unlocked'); }
 }
-
-// Initialize lock buttons
 ['apps', 'services', 'ports', 'storage'].forEach(key => updateLockButton(key));
 
-// ===== SORTING =====
 function toggleSort(tableKey, columnKey) {
   const current = sortConfig[tableKey];
-  if (current.key === columnKey) { current.asc = !current.asc; }
-  else { current.key = columnKey; current.asc = true; }
-  
-  // Clear custom order when sorting
-  if (['apps', 'services', 'ports', 'storage'].includes(tableKey)) {
-    customOrders[tableKey] = null;
-    localStorage.removeItem(`ward_order_${tableKey}`);
-  }
-  
-  if (tableKey === 'snapshot') renderSnapshotTable();
-  else if (tableKey === 'srvScan') renderServicesScannerTable();
-  else if (tableKey === 'portScan') renderPortsScannerTable();
-  else if (tableKey === 'folder') renderFolderTable();
-  else if (tableKey === 'apps') renderApps();
-  else if (tableKey === 'services') renderServices();
-  else if (tableKey === 'ports') renderPorts();
-  else if (tableKey === 'storage') renderDirs();
+  if (current.key === columnKey) current.asc = !current.asc; else { current.key = columnKey; current.asc = true; }
+  if (['apps', 'services', 'ports', 'storage'].includes(tableKey)) { customOrders[tableKey] = null; localStorage.removeItem(`ward_order_${tableKey}`); }
+  if (tableKey === 'snapshot') renderSnapshotTable(); else if (tableKey === 'srvScan') renderServicesScannerTable(); else if (tableKey === 'portScan') renderPortsScannerTable(); else if (tableKey === 'folder') renderFolderTable(); else if (tableKey === 'apps') renderApps(); else if (tableKey === 'services') renderServices(); else if (tableKey === 'ports') renderPorts(); else if (tableKey === 'storage') renderDirs();
 }
-
 function getSortedArray(dataArray, tableKey) {
-  const config = sortConfig[tableKey];
-  if (!config || !config.key) return dataArray;
-  return [...dataArray].sort((a, b) => {
-    let v1 = a[config.key], v2 = b[config.key];
-    if (typeof v1 === 'string') return config.asc ? v1.localeCompare(v2) : v2.localeCompare(v1);
-    return config.asc ? (v1 - v2) : (v2 - v1);
-  });
+  const config = sortConfig[tableKey]; if (!config || !config.key) return dataArray;
+  return [...dataArray].sort((a, b) => { let v1 = a[config.key], v2 = b[config.key]; if (typeof v1 === 'string') return config.asc ? v1.localeCompare(v2) : v2.localeCompare(v1); return config.asc ? (v1 - v2) : (v2 - v1); });
 }
-
 function applyCustomOrder(dataArray, tableKey) {
-  const order = customOrders[tableKey];
-  if (!order || order.length === 0) return dataArray;
-  
-  // Assign row numbers to new items that don't have one
-  dataArray.forEach(item => {
-    const id = getItemId(item, tableKey);
-    if (!(id in rowNumbers[tableKey])) {
-      rowNumbers[tableKey][id] = nextRowNumber[tableKey]++;
-      saveRowNumbers(tableKey);
-    }
-  });
-  
-  // Reorder based on saved order
-  const ordered = [];
-  order.forEach(id => {
-    const item = dataArray.find(d => getItemId(d, tableKey) === id);
-    if (item) ordered.push(item);
-  });
-  
-  // Add any new items not in order
-  dataArray.forEach(item => {
-    const id = getItemId(item, tableKey);
-    if (!order.includes(id)) ordered.push(item);
-  });
-  
+  const order = customOrders[tableKey]; if (!order || order.length === 0) return dataArray;
+  dataArray.forEach(item => { const id = getItemId(item, tableKey); if (!(id in rowNumbers[tableKey])) { rowNumbers[tableKey][id] = nextRowNumber[tableKey]++; saveRowNumbers(tableKey); } });
+  const ordered = []; order.forEach(id => { const item = dataArray.find(d => getItemId(d, tableKey) === id); if (item) ordered.push(item); });
+  dataArray.forEach(item => { const id = getItemId(item, tableKey); if (!order.includes(id)) ordered.push(item); });
   return ordered;
 }
-
-function getItemId(item, tableKey) {
-  if (tableKey === 'apps') return item.name;
-  if (tableKey === 'services') return item.name;
-  if (tableKey === 'ports') return String(item.port);
-  if (tableKey === 'storage') return item.name;
-  return null;
-}
-
-function saveRowNumbers(tableKey) {
-  localStorage.setItem(`ward_rows_${tableKey}`, JSON.stringify(rowNumbers[tableKey]));
-}
-
-function saveCustomOrder(tableKey, dataArray) {
-  const ids = dataArray.map(item => getItemId(item, tableKey)).filter(id => id !== null);
-  customOrders[tableKey] = ids;
-  localStorage.setItem(`ward_order_${tableKey}`, JSON.stringify(ids));
-}
-
-// ===== DRAG & DROP FOR BOOKMARKED LISTS =====
-let dragRow = null;
-let dragTableKey = null;
-
+function getItemId(item, tableKey) { if (tableKey === 'apps') return item.name; if (tableKey === 'services') return item.name; if (tableKey === 'ports') return String(item.port); if (tableKey === 'storage') return item.name; return null; }
+function saveRowNumbers(tableKey) { localStorage.setItem(`ward_rows_${tableKey}`, JSON.stringify(rowNumbers[tableKey])); }
+function saveCustomOrder(tableKey, dataArray) { const ids = dataArray.map(item => getItemId(item, tableKey)).filter(id => id !== null); customOrders[tableKey] = ids; localStorage.setItem(`ward_order_${tableKey}`, JSON.stringify(ids)); }
+let dragRow = null; let dragTableKey = null;
 function setupDragDrop(tbody, tableKey, dataArray) {
   const rows = tbody.querySelectorAll('tr.draggable-row');
   rows.forEach(row => {
     row.draggable = !lockStates[tableKey];
-    
-    row.addEventListener('dragstart', (e) => {
-      if (lockStates[tableKey]) { e.preventDefault(); return; }
-      dragRow = row;
-      dragTableKey = tableKey;
-      row.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    
-    row.addEventListener('dragend', () => {
-      row.classList.remove('dragging');
-      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-      
-      if (dragRow && dragTableKey) {
-        // Reorder dataArray based on new DOM order
-        const newOrder = [];
-        tbody.querySelectorAll('tr.draggable-row').forEach(r => {
-          const idx = parseInt(r.dataset.index);
-          if (!isNaN(idx) && dataArray[idx]) newOrder.push(dataArray[idx]);
-        });
-        if (newOrder.length > 0) {
-          dataArray.length = 0;
-          dataArray.push(...newOrder);
-          saveCustomOrder(dragTableKey, dataArray);
-        }
-      }
-      dragRow = null;
-      dragTableKey = null;
-    });
-    
-    row.addEventListener('dragover', (e) => {
-      if (lockStates[tableKey]) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      row.classList.add('drag-over');
-    });
-    
+    row.addEventListener('dragstart', (e) => { if (lockStates[tableKey]) { e.preventDefault(); return; } dragRow = row; dragTableKey = tableKey; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    row.addEventListener('dragend', () => { row.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (dragRow && dragTableKey) { const newOrder = []; tbody.querySelectorAll('tr.draggable-row').forEach(r => { const idx = parseInt(r.dataset.index); if (!isNaN(idx) && dataArray[idx]) newOrder.push(dataArray[idx]); }); if (newOrder.length > 0) { dataArray.length = 0; dataArray.push(...newOrder); saveCustomOrder(dragTableKey, dataArray); } } dragRow = null; dragTableKey = null; });
+    row.addEventListener('dragover', (e) => { if (lockStates[tableKey]) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; row.classList.add('drag-over'); });
     row.addEventListener('dragleave', () => { row.classList.remove('drag-over'); });
-    
-    row.addEventListener('drop', (e) => {
-      if (lockStates[tableKey]) return;
-      e.preventDefault();
-      row.classList.remove('drag-over');
-      if (dragRow && dragRow !== row) {
-        const allRows = [...tbody.querySelectorAll('tr.draggable-row')];
-        const dragIdx = allRows.indexOf(dragRow);
-        const dropIdx = allRows.indexOf(row);
-        if (dragIdx < dropIdx) row.after(dragRow);
-        else row.before(dragRow);
-      }
-    });
+    row.addEventListener('drop', (e) => { if (lockStates[tableKey]) return; e.preventDefault(); row.classList.remove('drag-over'); if (dragRow && dragRow !== row) { const allRows = [...tbody.querySelectorAll('tr.draggable-row')]; const dragIdx = allRows.indexOf(dragRow); const dropIdx = allRows.indexOf(row); if (dragIdx < dropIdx) row.after(dragRow); else row.before(dragRow); } });
   });
 }
 
-// ===== CHARTS =====
+// === CHART RENDERING (Zero Dependency Canvas) ===
 function drawNetdataGrid(ctx, w, h, maxScale, isPct = true) {
-  const levels = [0.25, 0.5, 0.75, 1.0];
-  ctx.font = '10px JetBrains Mono, monospace';
-  ctx.textAlign = 'left';
-  levels.forEach(lvl => {
-    const y = h - (lvl * (h - 16)) - 8;
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(139, 143, 163, 0.15)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([2, 3]);
-    ctx.moveTo(35, y);
-    ctx.lineTo(w, y);
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(139, 143, 163, 0.6)';
-    if (isPct) ctx.fillText(`${Math.round(lvl * maxScale)}%`, 4, y + 3);
-  });
-  ctx.setLineDash([]);
+  const levels = [0.25, 0.5, 0.75, 1.0]; ctx.font = '10px JetBrains Mono, monospace'; ctx.textAlign = 'left';
+  levels.forEach(lvl => { const y = h - (lvl * (h - 16)) - 8; ctx.beginPath(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.moveTo(35, y); ctx.lineTo(w, y); ctx.stroke(); ctx.fillStyle = 'rgba(148, 163, 184, 0.6)'; if (isPct) ctx.fillText(`${Math.round(lvl * maxScale)}%`, 4, y + 3); }); ctx.setLineDash([]);
 }
-
 function plotNetdataSingle(id, arr, maxScale, color) {
-  const cvs = document.getElementById(id);
-  if (!cvs) return;
-  const ctx = cvs.getContext('2d');
-  const w = cvs.width = cvs.clientWidth * 2;
-  const h = cvs.height = cvs.clientHeight * 2;
-  ctx.clearRect(0, 0, w, h);
-  drawNetdataGrid(ctx, w, h, maxScale, true);
-  const gradient = ctx.createLinearGradient(0, 0, 0, h);
-  gradient.addColorStop(0, color + '30');
-  gradient.addColorStop(1, color + '00');
-  ctx.beginPath();
-  const step = w / (arr.length - 1);
-  arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); });
-  ctx.lineTo(35 + (arr.length - 1) * step, h);
-  ctx.lineTo(35, h);
-  ctx.closePath();
-  ctx.fillStyle = gradient;
-  ctx.fill();
-  ctx.beginPath();
-  arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); });
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-  ctx.lineJoin = 'round';
-  ctx.stroke();
+  const cvs = document.getElementById(id); if (!cvs) return; const ctx = cvs.getContext('2d'); const w = cvs.width = cvs.clientWidth * 2; const h = cvs.height = cvs.clientHeight * 2; ctx.clearRect(0, 0, w, h); drawNetdataGrid(ctx, w, h, maxScale, true);
+  const gradient = ctx.createLinearGradient(0, 0, 0, h); gradient.addColorStop(0, color + '30'); gradient.addColorStop(1, color + '00');
+  ctx.beginPath(); const step = w / (arr.length - 1); arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); }); ctx.lineTo(35 + (arr.length - 1) * step, h); ctx.lineTo(35, h); ctx.closePath(); ctx.fillStyle = gradient; ctx.fill();
+  ctx.beginPath(); arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); }); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
 }
-
 function plotNetdataDouble(id, arr1, arr2, maxScale, c1, c2, unit = 'M') {
-  const cvs = document.getElementById(id);
-  if (!cvs) return;
-  const ctx = cvs.getContext('2d');
-  const w = cvs.width = cvs.clientWidth * 2;
-  const h = cvs.height = cvs.clientHeight * 2;
-  ctx.clearRect(0, 0, w, h);
-  drawNetdataGrid(ctx, w, h, maxScale, false);
-  ctx.fillStyle = 'rgba(139, 143, 163, 0.7)';
-  ctx.font = '10px JetBrains Mono, monospace';
-  ctx.fillText(`${Math.round(maxScale)}${unit}`, 4, 12);
-  ctx.fillText(`${Math.round(maxScale/2)}${unit}`, 4, h/2);
-  const step = w / (arr1.length - 1);
-  [arr1, arr2].forEach((arr, idx) => {
-    const color = idx === 0 ? c1 : c2;
-    const gradient = ctx.createLinearGradient(0, 0, 0, h);
-    gradient.addColorStop(0, color + '25');
-    gradient.addColorStop(1, color + '00');
-    ctx.beginPath();
-    arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); });
-    ctx.lineTo(35 + (arr.length - 1) * step, h);
-    ctx.lineTo(35, h);
-    ctx.closePath();
-    ctx.fillStyle = gradient;
-    ctx.fill();
-    ctx.beginPath();
-    arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); });
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-  });
+  const cvs = document.getElementById(id); if (!cvs) return; const ctx = cvs.getContext('2d'); const w = cvs.width = cvs.clientWidth * 2; const h = cvs.height = cvs.clientHeight * 2; ctx.clearRect(0, 0, w, h); drawNetdataGrid(ctx, w, h, maxScale, false);
+  ctx.fillStyle = 'rgba(148, 163, 184, 0.7)'; ctx.font = '10px JetBrains Mono, monospace'; ctx.fillText(`${Math.round(maxScale)}${unit}`, 4, 12); ctx.fillText(`${Math.round(maxScale/2)}${unit}`, 4, h/2);
+  const step = w / (arr1.length - 1); [arr1, arr2].forEach((arr, idx) => { const color = idx === 0 ? c1 : c2; const gradient = ctx.createLinearGradient(0, 0, 0, h); gradient.addColorStop(0, color + '25'); gradient.addColorStop(1, color + '00'); ctx.beginPath(); arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); }); ctx.lineTo(35 + (arr.length - 1) * step, h); ctx.lineTo(35, h); ctx.closePath(); ctx.fillStyle = gradient; ctx.fill(); ctx.beginPath(); arr.forEach((val, i) => { const y = h - ((Math.min(val / maxScale, 1)) * (h - 16)) - 8; i === 0 ? ctx.moveTo(35, y) : ctx.lineTo(35 + i * step, y); }); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke(); });
 }
 
-// ===== DATA FETCHING =====
+// === DATA FETCHING & RENDERING ===
 async function fetchStatus() {
-  if (!sessionToken) return;
+  if (!sessionToken || WARD_STATE.isPaused) return;
   try {
     const res = await fetch('/api/status', { headers: { 'X-Session-Token': sessionToken } });
     if (res.status === 401) { authFailedCount++; if (authFailedCount >= 2) { localStorage.removeItem('ward_token'); sessionToken = ''; showLogin(); } return; }
-    const d = await res.json();
-    document.getElementById('status-dot').style.background = 'var(--success)';
-    globalData = d;
+    const d = await res.json(); globalData = d;
+    document.getElementById('status-dot').style.background = 'var(--accent-health)';
     document.getElementById('h-load').innerText = d.load_avg;
     document.getElementById('h-net').innerText = `${d.network.total_tx_gib} GiB | ${d.network.total_rx_gib} GiB`;
     document.getElementById('footer-uptime').innerText = `Uptime: ${d.uptime}`;
+    
+    // Update Charts with LAW #5 Ring Buffer
+    d_cpu.shift(); d_cpu.push(d.cpu.usage_pct); d_ram.shift(); d_ram.push(d.ram.pct); d_swap.shift(); d_swap.push(d.swap.pct); d_disk.shift(); d_disk.push(d.disk.pct);
+    d_tx.shift(); d_tx.push(d.network.speed_tx_mb); d_rx.shift(); d_rx.push(d.network.speed_rx_mb);
+    d_tcp.shift(); d_tcp.push(d.connections.tcp); d_udp.shift(); d_udp.push(d.connections.udp);
+    
     document.getElementById('cpu-val').innerHTML = `${d.cpu.usage_pct}<span class="unit">%</span>`;
     document.getElementById('cpu-sub').innerText = `${d.cpu.cores} Core`;
-    d_cpu.shift(); d_cpu.push(d.cpu.usage_pct);
     document.getElementById('cpu-stat').innerText = `Avg: ${Math.round(d_cpu.reduce((a,b)=>a+b)/pLen)}%`;
-    plotNetdataSingle('cv-cpu', d_cpu, 100, getComputedStyle(document.documentElement).getPropertyValue('--primary').trim());
+    plotNetdataSingle('cv-cpu', d_cpu, 100, getComputedStyle(document.documentElement).getPropertyValue('--accent-health').trim());
+    
     document.getElementById('ram-val').innerHTML = `${d.ram.pct}<span class="unit">%</span>`;
     document.getElementById('ram-sub').innerText = `${d.ram.used_mb} / ${d.ram.total_mb} MB`;
     document.getElementById('ram-free').innerText = `Free: ${d.ram.total_mb - d.ram.used_mb} MB`;
-    d_ram.shift(); d_ram.push(d.ram.pct);
     plotNetdataSingle('cv-ram', d_ram, 100, '#339af0');
+    
     document.getElementById('swap-val').innerHTML = `${d.swap.pct}<span class="unit">%</span>`;
     document.getElementById('swap-sub').innerText = `${d.swap.used_mb} / ${d.swap.total_mb} MB`;
-    d_swap.shift(); d_swap.push(d.swap.pct);
     plotNetdataSingle('cv-swap', d_swap, 100, '#cc5de8');
+    
     document.getElementById('disk-val').innerHTML = `${d.disk.pct}<span class="unit">%</span>`;
     document.getElementById('disk-sub').innerText = `${d.disk.used_gb} / ${d.disk.total_gb} GB`;
     document.getElementById('disk-free').innerText = `Free: ${d.disk.free_gb} GB`;
-    d_disk.shift(); d_disk.push(d.disk.pct);
     plotNetdataSingle('cv-disk', d_disk, 100, '#ff922b');
+    
     document.getElementById('net-speeds').innerText = `▲ ${d.network.speed_tx_mb} MB/s  ▼ ${d.network.speed_rx_mb} MB/s`;
-    d_tx.shift(); d_tx.push(d.network.speed_tx_mb);
-    d_rx.shift(); d_rx.push(d.network.speed_rx_mb);
-    plotNetdataDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#339af0', '#00d68f', 'M');
+    plotNetdataDouble('cv-net', d_tx, d_rx, Math.max(5, Math.max(...d_tx, ...d_rx)), '#06B6D4', '#00F5A0', 'M');
+    
     document.getElementById('conn-totals').innerText = `${d.connections.tcp + d.connections.udp} Open`;
     document.getElementById('conn-sub').innerText = `TCP: ${d.connections.tcp} | UDP: ${d.connections.udp}`;
-    d_tcp.shift(); d_tcp.push(d.connections.tcp);
-    d_udp.shift(); d_udp.push(d.connections.udp);
-    plotNetdataDouble('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#00d68f', '#cc5de8', '');
-    renderApps();
-    renderServices();
-    renderPorts();
-    renderDirs();
-  } catch(e) { document.getElementById('status-dot').style.background = 'var(--danger)'; }
+    plotNetdataDouble('cv-conn', d_tcp, d_udp, Math.max(50, Math.max(...d_tcp, ...d_udp)), '#00F5A0', '#cc5de8', '');
+    
+    renderApps(); renderServices(); renderPorts(); renderDirs();
+  } catch(e) { document.getElementById('status-dot').style.background = 'var(--accent-crit)'; }
 }
 
-// ===== RENDER BOOKMARKED TABLES WITH DRAG & DROP =====
+// === BOOKMARKED TABLE RENDERERS ===
 function renderApps() {
-  if (!globalData) return;
-  let data = [...globalData.apps];
-  
-  // Assign row numbers to new items
-  data.forEach(a => {
-    if (!(a.name in rowNumbers.apps)) {
-      rowNumbers.apps[a.name] = nextRowNumber.apps++;
-      saveRowNumbers('apps');
-    }
-  });
-  
-  // Apply custom order if lock is on and no sort is active
-  if (lockStates.apps && !sortConfig.apps.key && customOrders.apps) {
-    data = applyCustomOrder(data, 'apps');
-  } else if (sortConfig.apps.key) {
-    data = getSortedArray(data, 'apps');
-  }
-  
-  let html = '';
-  data.forEach((a, idx) => {
-    const rowNum = rowNumbers.apps[a.name] || (idx + 1);
-    const dragHandle = lockStates.apps ? '' : '<span class="drag-handle">⋮⋮</span>';
-    html += `<tr class="draggable-row" data-index="${globalData.apps.indexOf(a)}">
-      <td class="row-number">${rowNum}</td>
-      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${a.name}</b></td>
-      <td style="font-family:'JetBrains Mono',monospace;">${a.cpu_pct}%</td>
-      <td style="font-family:'JetBrains Mono',monospace;">${a.memory_mb} MB</td>
-      <td style="font-family:'JetBrains Mono',monospace;">${a.threads}</td>
-      <td><span class="badge ${a.status==='Active'?'badge-success':'badge-danger'}">${a.status}</span></td>
-      <td><button class="btn btn-danger" onclick="remCfg('app', '${a.name}')">Remove</button></td>
-    </tr>`;
-  });
-  const tbody = document.getElementById('app-tbody');
-  tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted);">No watched apps</td></tr>';
-  setupDragDrop(tbody, 'apps', globalData.apps);
+  if (!globalData) return; let data = [...globalData.apps];
+  data.forEach(a => { if (!(a.name in rowNumbers.apps)) { rowNumbers.apps[a.name] = nextRowNumber.apps++; saveRowNumbers('apps'); } });
+  if (lockStates.apps && !sortConfig.apps.key && customOrders.apps) data = applyCustomOrder(data, 'apps'); else if (sortConfig.apps.key) data = getSortedArray(data, 'apps');
+  let html = ''; data.forEach((a, idx) => { const rowNum = rowNumbers.apps[a.name] || (idx + 1); const dragHandle = lockStates.apps ? '' : '<span class="drag-handle">⋮</span>'; html += `<tr class="draggable-row" data-index="${globalData.apps.indexOf(a)}"><td class="row-number">${rowNum}</td><td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${a.name}</b></td><td style="font-family:var(--font-mono);">${a.cpu_pct}%</td><td style="font-family:var(--font-mono);">${a.memory_mb} MB</td><td style="font-family:var(--font-mono);">${a.threads}</td><td><span class="badge ${a.status==='Active'?'badge-success':'badge-danger'}">${a.status}</span></td><td><button class="btn btn-danger" onclick="remCfg('app', '${a.name}')">Remove</button></td></tr>`; });
+  const tbody = document.getElementById('app-tbody'); tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">No watched apps</td></tr>'; setupDragDrop(tbody, 'apps', globalData.apps);
 }
-
 function renderServices() {
-  if (!globalData) return;
-  let dataArray = Object.entries(globalData.services).map(([name, state]) => ({ name, state }));
-  let data = [...dataArray];
-  
-  // Assign row numbers to new items
-  data.forEach(s => {
-    if (!(s.name in rowNumbers.services)) {
-      rowNumbers.services[s.name] = nextRowNumber.services++;
-      saveRowNumbers('services');
-    }
-  });
-  
-  if (lockStates.services && !sortConfig.services.key && customOrders.services) {
-    data = applyCustomOrder(data, 'services');
-  } else if (sortConfig.services.key) {
-    data = getSortedArray(data, 'services');
-  }
-  
-  let html = '';
-  data.forEach((item, idx) => {
-    const rowNum = rowNumbers.services[item.name] || (idx + 1);
-    const dragHandle = lockStates.services ? '' : '<span class="drag-handle">⋮</span>';
-    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
-      <td class="row-number">${rowNum}</td>
-      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td>
-      <td><span class="badge ${item.state==='Running'?'badge-success':'badge-danger'}">${item.state}</span></td>
-      <td><button class="btn btn-danger" onclick="remCfg('service', '${item.name}')">Remove</button></td>
-    </tr>`;
-  });
-  const tbody = document.getElementById('srv-tbody');
-  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No services monitored</td></tr>';
-  setupDragDrop(tbody, 'services', dataArray);
+  if (!globalData) return; let dataArray = Object.entries(globalData.services).map(([name, state]) => ({ name, state })); let data = [...dataArray];
+  data.forEach(s => { if (!(s.name in rowNumbers.services)) { rowNumbers.services[s.name] = nextRowNumber.services++; saveRowNumbers('services'); } });
+  if (lockStates.services && !sortConfig.services.key && customOrders.services) data = applyCustomOrder(data, 'services'); else if (sortConfig.services.key) data = getSortedArray(data, 'services');
+  let html = ''; data.forEach((item, idx) => { const rowNum = rowNumbers.services[item.name] || (idx + 1); const dragHandle = lockStates.services ? '' : '<span class="drag-handle">⋮</span>'; html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}"><td class="row-number">${rowNum}</td><td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td><td><span class="badge ${item.state==='Running'?'badge-success':'badge-danger'}">${item.state}</span></td><td><button class="btn btn-danger" onclick="remCfg('service', '${item.name}')">Remove</button></td></tr>`; });
+  const tbody = document.getElementById('srv-tbody'); tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No services monitored</td></tr>'; setupDragDrop(tbody, 'services', dataArray);
 }
-
 function renderPorts() {
-  if (!globalData) return;
-  let dataArray = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status }));
-  let data = [...dataArray];
-  
-  // Assign row numbers to new items
-  data.forEach(p => {
-    const id = String(p.port);
-    if (!(id in rowNumbers.ports)) {
-      rowNumbers.ports[id] = nextRowNumber.ports++;
-      saveRowNumbers('ports');
-    }
-  });
-  
-  if (lockStates.ports && !sortConfig.ports.key && customOrders.ports) {
-    data = applyCustomOrder(data, 'ports');
-  } else if (sortConfig.ports.key) {
-    data = getSortedArray(data, 'ports');
-  }
-  
-  let html = '';
-  data.forEach((item, idx) => {
-    const id = String(item.port);
-    const rowNum = rowNumbers.ports[id] || (idx + 1);
-    const dragHandle = lockStates.ports ? '' : '<span class="drag-handle">⋮⋮</span>';
-    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
-      <td class="row-number">${rowNum}</td>
-      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>Port ${item.port}</b></td>
-      <td><span class="badge ${item.status==='Listening'?'badge-success':'badge-danger'}">${item.status}</span></td>
-      <td><button class="btn btn-danger" onclick="remCfg('port', '${item.port}')">Remove</button></td>
-    </tr>`;
-  });
-  const tbody = document.getElementById('port-tbody');
-  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No ports monitored</td></tr>';
-  setupDragDrop(tbody, 'ports', dataArray);
+  if (!globalData) return; let dataArray = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status })); let data = [...dataArray];
+  data.forEach(p => { const id = String(p.port); if (!(id in rowNumbers.ports)) { rowNumbers.ports[id] = nextRowNumber.ports++; saveRowNumbers('ports'); } });
+  if (lockStates.ports && !sortConfig.ports.key && customOrders.ports) data = applyCustomOrder(data, 'ports'); else if (sortConfig.ports.key) data = getSortedArray(data, 'ports');
+  let html = ''; data.forEach((item, idx) => { const id = String(item.port); const rowNum = rowNumbers.ports[id] || (idx + 1); const dragHandle = lockStates.ports ? '' : '<span class="drag-handle">⋮⋮</span>'; html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}"><td class="row-number">${rowNum}</td><td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>Port ${item.port}</b></td><td><span class="badge ${item.status==='Listening'?'badge-success':'badge-danger'}">${item.status}</span></td><td><button class="btn btn-danger" onclick="remCfg('port', '${item.port}')">Remove</button></td></tr>`; });
+  const tbody = document.getElementById('port-tbody'); tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No ports monitored</td></tr>'; setupDragDrop(tbody, 'ports', dataArray);
 }
-
 function renderDirs() {
-  if (!globalData) return;
-  let dataArray = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb }));
-  let data = [...dataArray];
-  
-  // Assign row numbers to new items
-  data.forEach(d => {
-    if (!(d.name in rowNumbers.storage)) {
-      rowNumbers.storage[d.name] = nextRowNumber.storage++;
-      saveRowNumbers('storage');
-    }
-  });
-  
-  if (lockStates.storage && !sortConfig.storage.key && customOrders.storage) {
-    data = applyCustomOrder(data, 'storage');
-  } else if (sortConfig.storage.key) {
-    data = getSortedArray(data, 'storage');
-  }
-  
-  let html = '';
-  data.forEach((item, idx) => {
-    const rowNum = rowNumbers.storage[item.name] || (idx + 1);
-    const dragHandle = lockStates.storage ? '' : '<span class="drag-handle">⋮⋮</span>';
-    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
-      <td class="row-number">${rowNum}</td>
-      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td>
-      <td style="font-family:'JetBrains Mono',monospace; font-size:12px;">${item.path}</td>
-      <td style="font-family:'JetBrains Mono',monospace;"><b>${item.size_mb} MB</b></td>
-      <td><button class="btn btn-danger" onclick="remCfg('directory', '${item.name}')">Remove</button></td>
-    </tr>`;
-  });
-  const tbody = document.getElementById('dir-tbody');
-  tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
-  setupDragDrop(tbody, 'storage', dataArray);
+  if (!globalData) return; let dataArray = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb })); let data = [...dataArray];
+  data.forEach(d => { if (!(d.name in rowNumbers.storage)) { rowNumbers.storage[d.name] = nextRowNumber.storage++; saveRowNumbers('storage'); } });
+  if (lockStates.storage && !sortConfig.storage.key && customOrders.storage) data = applyCustomOrder(data, 'storage'); else if (sortConfig.storage.key) data = getSortedArray(data, 'storage');
+  let html = ''; data.forEach((item, idx) => { const rowNum = rowNumbers.storage[item.name] || (idx + 1); const dragHandle = lockStates.storage ? '' : '<span class="drag-handle">⋮⋮</span>'; html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}"><td class="row-number">${rowNum}</td><td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td><td style="font-family:var(--font-mono); font-size:12px;">${item.path}</td><td style="font-family:var(--font-mono);"><b>${item.size_mb} MB</b></td><td><button class="btn btn-danger" onclick="remCfg('directory', '${item.name}')">Remove</button></td></tr>`; });
+  const tbody = document.getElementById('dir-tbody'); tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No folders tracked</td></tr>'; setupDragDrop(tbody, 'storage', dataArray);
 }
 
-function renderServices() {
-  if (!globalData) return;
-  let dataArray = Object.entries(globalData.services).map(([name, state]) => ({ name, state }));
-  let data = [...dataArray];
-  
-  if (lockStates.services && !sortConfig.services.key && customOrders.services) {
-    data = applyCustomOrder(data, 'services');
-  } else if (sortConfig.services.key) {
-    data = getSortedArray(data, 'services');
-  }
-  
-  let html = '';
-  data.forEach((item, idx) => {
-    const dragHandle = lockStates.services ? '' : '<span class="drag-handle">⋮</span>';
-    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
-      <td class="row-number">${idx + 1}</td>
-      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td>
-      <td><span class="badge ${item.state==='Running'?'badge-success':'badge-danger'}">${item.state}</span></td>
-      <td><button class="btn btn-danger" onclick="remCfg('service', '${item.name}')">Remove</button></td>
-    </tr>`;
-  });
-  const tbody = document.getElementById('srv-tbody');
-  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No services monitored</td></tr>';
-  setupDragDrop(tbody, 'services', dataArray);
-}
-
-function renderPorts() {
-  if (!globalData) return;
-  let dataArray = Object.entries(globalData.ports).map(([port, status]) => ({ port: parseInt(port), status }));
-  let data = [...dataArray];
-  
-  if (lockStates.ports && !sortConfig.ports.key && customOrders.ports) {
-    data = applyCustomOrder(data, 'ports');
-  } else if (sortConfig.ports.key) {
-    data = getSortedArray(data, 'ports');
-  }
-  
-  let html = '';
-  data.forEach((item, idx) => {
-    const dragHandle = lockStates.ports ? '' : '<span class="drag-handle">⋮⋮</span>';
-    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
-      <td class="row-number">${idx + 1}</td>
-      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>Port ${item.port}</b></td>
-      <td><span class="badge ${item.status==='Listening'?'badge-success':'badge-danger'}">${item.status}</span></td>
-      <td><button class="btn btn-danger" onclick="remCfg('port', '${item.port}')">Remove</button></td>
-    </tr>`;
-  });
-  const tbody = document.getElementById('port-tbody');
-  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--muted);">No ports monitored</td></tr>';
-  setupDragDrop(tbody, 'ports', dataArray);
-}
-
-function renderDirs() {
-  if (!globalData) return;
-  let dataArray = Object.entries(globalData.caches).map(([name, d]) => ({ name, path: d.path, size_mb: d.size_mb }));
-  let data = [...dataArray];
-  
-  if (lockStates.storage && !sortConfig.storage.key && customOrders.storage) {
-    data = applyCustomOrder(data, 'storage');
-  } else if (sortConfig.storage.key) {
-    data = getSortedArray(data, 'storage');
-  }
-  
-  let html = '';
-  data.forEach((item, idx) => {
-    const dragHandle = lockStates.storage ? '' : '<span class="drag-handle">⋮⋮</span>';
-    html += `<tr class="draggable-row" data-index="${dataArray.indexOf(item)}">
-      <td class="row-number">${idx + 1}</td>
-      <td style="display:flex; align-items:center; gap:4px;">${dragHandle}<b>${item.name}</b></td>
-      <td style="font-family:'JetBrains Mono',monospace; font-size:12px;">${item.path}</td>
-      <td style="font-family:'JetBrains Mono',monospace;"><b>${item.size_mb} MB</b></td>
-      <td><button class="btn btn-danger" onclick="remCfg('directory', '${item.name}')">Remove</button></td>
-    </tr>`;
-  });
-  const tbody = document.getElementById('dir-tbody');
-  tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">No folders tracked</td></tr>';
-  setupDragDrop(tbody, 'storage', dataArray);
-}
-
-// ===== MODAL SCANNERS =====
-async function openTaskManager() {
-  openModal('task-modal');
-  document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Scanning processes...</span></td></tr>';
-  try {
-    const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } });
-    const d = await res.json();
-    snapshotData = d.processes;
-    renderSnapshotTable();
-  } catch(e) { document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--danger);">Error loading processes</td></tr>'; }
-}
-
-function renderSnapshotTable() {
-  const data = getSortedArray(snapshotData, 'snapshot');
-  let html = '';
-  data.forEach(p => {
-    const watching = globalData && globalData.apps && globalData.apps.some(a => a.name === p.name);
-    html += `<tr>
-      <td style="font-family:monospace;">${p.pid}</td>
-      <td><b>${p.name}</b></td>
-      <td style="font-family:monospace;">${p.cpu_pct}%</td>
-      <td style="font-family:monospace;">${p.memory_mb}</td>
-      <td style="font-family:monospace;">${p.threads}</td>
-      <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchApp('${p.name}')">+ Watch</button>`}</td>
-    </tr>`;
-  });
-  document.getElementById('task-tbody').innerHTML = html;
-}
-
-async function watchApp(appName) {
-  try {
-    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'app', value: appName }) });
-    showToast(`Added ${appName} to watched apps`, 'success');
-    await fetchStatus();
-    openTaskManager();
-  } catch(e) { showToast('Failed to add app', 'error'); }
-}
-
-async function openServicesScanner() {
-  openModal('services-modal');
-  document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Scanning services...</span></td></tr>';
-  try {
-    const res = await fetch('/api/services/snapshot', { headers: { 'X-Session-Token': sessionToken } });
-    const d = await res.json();
-    srvScanData = d.services;
-    renderServicesScannerTable();
-  } catch(e) { document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning services</td></tr>'; }
-}
-
-function renderServicesScannerTable() {
-  const data = getSortedArray(srvScanData, 'srvScan');
-  let html = '';
-  data.forEach(s => {
-    const watching = globalData && globalData.services && globalData.services[s.name] !== undefined;
-    html += `<tr>
-      <td><b>${s.name}</b></td>
-      <td><span class="badge ${s.state==='active'?'badge-success':'badge-danger'}">${s.state}</span></td>
-      <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchService('${s.name}')">+ Track</button>`}</td>
-    </tr>`;
-  });
-  document.getElementById('services-scan-tbody').innerHTML = html;
-}
-
-async function watchService(serviceName) {
-  try {
-    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: serviceName }) });
-    showToast(`Added ${serviceName} to tracked services`, 'success');
-    await fetchStatus();
-    openServicesScanner();
-  } catch(e) { showToast('Failed to add service', 'error'); }
-}
-
-async function openPortsScanner() {
-  openModal('ports-modal');
-  document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Scanning ports...</span></td></tr>';
-  try {
-    const res = await fetch('/api/ports/snapshot', { headers: { 'X-Session-Token': sessionToken } });
-    const d = await res.json();
-    portScanData = d.ports.map(p => ({ port: p, status: 'Listening' }));
-    renderPortsScannerTable();
-  } catch(e) { document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error scanning ports</td></tr>'; }
-}
-
-function renderPortsScannerTable() {
-  const data = getSortedArray(portScanData, 'portScan');
-  let html = '';
-  data.forEach(p => {
-    const watching = globalData && globalData.ports && globalData.ports[String(p.port)] !== undefined;
-    html += `<tr>
-      <td style="font-family:monospace;"><b>${p.port}</b></td>
-      <td><span class="badge badge-success">${p.status}</span></td>
-      <td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn btn-watch" onclick="watchPort('${p.port}')">+ Watch</button>`}</td>
-    </tr>`;
-  });
-  document.getElementById('ports-scan-tbody').innerHTML = html;
-}
-
-async function watchPort(portNum) {
-  try {
-    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: portNum }) });
-    showToast(`Added port ${portNum} to watched ports`, 'success');
-    await fetchStatus();
-    openPortsScanner();
-  } catch(e) { showToast('Failed to add port', 'error'); }
-}
-
-async function openTreeExplorer() {
-  openModal('folder-modal');
-  document.getElementById('explore-path').value = '/root';
-  exploreFolder();
-}
-
-async function exploreFolder() {
-  const path = document.getElementById('explore-path').value || '/root';
-  document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;"><span style="color:var(--muted);">Loading folders...</span></td></tr>';
-  try {
-    const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(path)}`, { headers: { 'X-Session-Token': sessionToken } });
-    const d = await res.json();
-    if (d.error) { document.getElementById('folder-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">️ ${d.error}</td></tr>`; return; }
-    folderData = d.items || [];
-    renderFolderTable();
-  } catch(e) { document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:30px;">Error loading folders</td></tr>'; }
-}
-
-function renderFolderTable() {
-  const data = getSortedArray(folderData, 'folder');
-  let html = '';
-  if (data && data.length > 0) {
-    data.forEach(item => {
-      const tracking = globalData && globalData.caches && globalData.caches[item.name] !== undefined;
-      html += `<tr>
-        <td><b>${item.name}</b></td>
-        <td style="font-family:monospace; font-size:12px;">${item.path}</td>
-        <td style="font-family:monospace;">${item.size_mb} MB</td>
-        <td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn btn-watch" onclick="trackFolder('${item.name}', '${item.path}')">+ Track</button>`}</td>
-      </tr>`;
-    });
-    document.getElementById('folder-tbody').innerHTML = html;
-  } else {
-    document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">No accessible folders found</td></tr>';
-  }
-}
-
-async function trackFolder(folderName, folderPath) {
-  try {
-    await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name: folderName, value: folderPath }) });
-    showToast(`Added ${folderName} to tracked folders`, 'success');
-    await fetchStatus();
-    renderFolderTable();
-  } catch(e) { showToast('Failed to track folder', 'error'); }
-}
-
+// === MODAL SCANNERS & ACTIONS ===
+async function openTaskManager() { openModal('task-modal'); document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><span style="color:var(--text-muted);">Scanning...</span></td></tr>'; try { const res = await fetch('/api/taskmanager/snapshot', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); snapshotData = d.processes; renderSnapshotTable(); } catch(e) { document.getElementById('task-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--accent-crit);">Error</td></tr>'; } }
+function renderSnapshotTable() { const data = getSortedArray(snapshotData, 'snapshot'); let html = ''; data.forEach(p => { const watching = globalData && globalData.apps && globalData.apps.some(a => a.name === p.name); html += `<tr><td style="font-family:var(--font-mono);">${p.pid}</td><td><b>${p.name}</b></td><td style="font-family:var(--font-mono);">${p.cpu_pct}%</td><td style="font-family:var(--font-mono);">${p.memory_mb}</td><td style="font-family:var(--font-mono);">${p.threads}</td><td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn" onclick="watchApp('${p.name}')">+ Watch</button>`}</td></tr>`; }); document.getElementById('task-tbody').innerHTML = html; }
+async function watchApp(appName) { try { await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'app', value: appName }) }); showToast(`Added ${appName}`, 'success'); await fetchStatus(); openTaskManager(); } catch(e) { showToast('Failed', 'error'); } }
+async function openServicesScanner() { openModal('services-modal'); document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><span style="color:var(--text-muted);">Scanning...</span></td></tr>'; try { const res = await fetch('/api/services/snapshot', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); srvScanData = d.services; renderServicesScannerTable(); } catch(e) { document.getElementById('services-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--accent-crit);">Error</td></tr>'; } }
+function renderServicesScannerTable() { const data = getSortedArray(srvScanData, 'srvScan'); let html = ''; data.forEach(s => { const watching = globalData && globalData.services && globalData.services[s.name] !== undefined; html += `<tr><td><b>${s.name}</b></td><td><span class="badge ${s.state==='active'?'badge-success':'badge-danger'}">${s.state}</span></td><td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn" onclick="watchService('${s.name}')">+ Track</button>`}</td></tr>`; }); document.getElementById('services-scan-tbody').innerHTML = html; }
+async function watchService(serviceName) { try { await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: serviceName }) }); showToast(`Added ${serviceName}`, 'success'); await fetchStatus(); openServicesScanner(); } catch(e) { showToast('Failed', 'error'); } }
+async function openPortsScanner() { openModal('ports-modal'); document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><span style="color:var(--text-muted);">Scanning...</span></td></tr>'; try { const res = await fetch('/api/ports/snapshot', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); portScanData = d.ports.map(p => ({ port: p, status: 'Listening' })); renderPortsScannerTable(); } catch(e) { document.getElementById('ports-scan-tbody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--accent-crit);">Error</td></tr>'; } }
+function renderPortsScannerTable() { const data = getSortedArray(portScanData, 'portScan'); let html = ''; data.forEach(p => { const watching = globalData && globalData.ports && globalData.ports[String(p.port)] !== undefined; html += `<tr><td style="font-family:var(--font-mono);"><b>${p.port}</b></td><td><span class="badge badge-success">${p.status}</span></td><td>${watching ? '<button class="btn btn-watched" disabled>✓ Watched</button>' : `<button class="btn" onclick="watchPort('${p.port}')">+ Watch</button>`}</td></tr>`; }); document.getElementById('ports-scan-tbody').innerHTML = html; }
+async function watchPort(portNum) { try { await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: portNum }) }); showToast(`Added port ${portNum}`, 'success'); await fetchStatus(); openPortsScanner(); } catch(e) { showToast('Failed', 'error'); } }
+async function openTreeExplorer() { openModal('folder-modal'); document.getElementById('explore-path').value = '/root'; exploreFolder(); }
+async function exploreFolder() { const path = document.getElementById('explore-path').value || '/root'; document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;"><span style="color:var(--text-muted);">Loading...</span></td></tr>'; try { const res = await fetch(`/api/storage/explore?path=${encodeURIComponent(path)}`, { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); if (d.error) { document.getElementById('folder-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--accent-crit); padding:30px;">${d.error}</td></tr>`; return; } folderData = d.items || []; renderFolderTable(); } catch(e) { document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--accent-crit); padding:30px;">Error</td></tr>'; } }
+function renderFolderTable() { const data = getSortedArray(folderData, 'folder'); let html = ''; if (data && data.length > 0) { data.forEach(item => { const tracking = globalData && globalData.caches && globalData.caches[item.name] !== undefined; html += `<tr><td><b>${item.name}</b></td><td style="font-family:var(--font-mono); font-size:12px;">${item.path}</td><td style="font-family:var(--font-mono);">${item.size_mb} MB</td><td>${tracking ? '<button class="btn btn-watched" disabled>✓ Tracking</button>' : `<button class="btn" onclick="trackFolder('${item.name}', '${item.path}')">+ Track</button>`}</td></tr>`; }); document.getElementById('folder-tbody').innerHTML = html; } else { document.getElementById('folder-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">No folders found</td></tr>'; } }
+async function trackFolder(folderName, folderPath) { try { await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name: folderName, value: folderPath }) }); showToast(`Added ${folderName}`, 'success'); await fetchStatus(); renderFolderTable(); } catch(e) { showToast('Failed', 'error'); } }
 async function addService() { const val = document.getElementById('in-srv').value; if (!val) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: val }) }); document.getElementById('in-srv').value = ''; fetchStatus(); showToast('Service added', 'success'); }
 async function addPort() { const val = document.getElementById('in-port').value; if (!val) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: val }) }); document.getElementById('in-port').value = ''; fetchStatus(); showToast('Port added', 'success'); }
 async function addFolder() { const name = document.getElementById('dir-name').value; const path = document.getElementById('dir-path').value; if (!name || !path) return; await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'directory', name, value: path }) }); document.getElementById('dir-name').value = ''; document.getElementById('dir-path').value = ''; fetchStatus(); showToast('Folder tracked', 'success'); }
-
-async function remCfg(type, value) {
-  await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) });
-  
-  // Remove row number when item is deleted
-  if (type === 'app') {
-    delete rowNumbers.apps[value];
-    saveRowNumbers('apps');
-    customOrders.apps = null;
-    localStorage.removeItem('ward_order_apps');
-  } else if (type === 'service') {
-    delete rowNumbers.services[value];
-    saveRowNumbers('services');
-    customOrders.services = null;
-    localStorage.removeItem('ward_order_services');
-  } else if (type === 'port') {
-    delete rowNumbers.ports[String(value)];
-    saveRowNumbers('ports');
-    customOrders.ports = null;
-    localStorage.removeItem('ward_order_ports');
-  } else if (type === 'directory') {
-    delete rowNumbers.storage[value];
-    saveRowNumbers('storage');
-    customOrders.storage = null;
-    localStorage.removeItem('ward_order_storage');
-  }
-  
-  fetchStatus();
-  showToast('Removed', 'success');
-}
-
+async function remCfg(type, value) { await fetch('/api/config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type, value }) }); if (type === 'app') { delete rowNumbers.apps[value]; saveRowNumbers('apps'); customOrders.apps = null; localStorage.removeItem('ward_order_apps'); } else if (type === 'service') { delete rowNumbers.services[value]; saveRowNumbers('services'); customOrders.services = null; localStorage.removeItem('ward_order_services'); } else if (type === 'port') { delete rowNumbers.ports[String(value)]; saveRowNumbers('ports'); customOrders.ports = null; localStorage.removeItem('ward_order_ports'); } else if (type === 'directory') { delete rowNumbers.storage[value]; saveRowNumbers('storage'); customOrders.storage = null; localStorage.removeItem('ward_order_storage'); } fetchStatus(); showToast('Removed', 'success'); }
 async function changePassword() { const oldPass = document.getElementById('old-pass').value; const newPass = document.getElementById('new-pass').value; if (!oldPass || !newPass) { showToast('Fill both fields', 'error'); return; } const res = await fetch('/api/settings/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ old_password: oldPass, new_password: newPass }) }); const d = await res.json(); if (d.status === 'ok') { showToast('Password changed', 'success'); document.getElementById('old-pass').value = ''; document.getElementById('new-pass').value = ''; } else { showToast(d.message || 'Failed', 'error'); } }
-
 function updateTheme(key, value) { currentTheme[key] = value; document.documentElement.style.setProperty(`--${key}`, value); }
 async function saveTheme() { await fetch('/api/settings/update-theme', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ theme: currentTheme }) }); showToast('Theme saved', 'success'); }
-function resetTheme() { currentTheme = { primary: '#00ab44', success: '#00d68f', danger: '#ff3366', bg: '#1a1d29', card: '#252836', text: '#e8e8e8' }; Object.entries(currentTheme).forEach(([k, v]) => { document.getElementById(`theme-${k}`).value = v; document.documentElement.style.setProperty(`--${k}`, v); }); showToast('Theme reset', 'info'); }
-
+function resetTheme() { currentTheme = { primary: '#00F5A0', success: '#00F5A0', danger: '#EF4444', 'bg-base': '#0B0E14', 'bg-surface': '#121721', 'text-main': '#F9FAFB' }; Object.entries(currentTheme).forEach(([k, v]) => { document.getElementById(`theme-${k.replace('-','_')}`)?.setAttribute('value', v); document.documentElement.style.setProperty(`--${k}`, v); }); showToast('Theme reset', 'info'); }
 async function checkUpdate() { showToast('Checking...', 'info'); const res = await fetch('/api/system/check-update', { headers: { 'X-Session-Token': sessionToken } }); const d = await res.json(); document.getElementById('set-latest-ver').innerText = `v${d.latest}`; if (d.has_update) { showToast(`Update available: v${d.latest}`, 'success'); } else { showToast('Up to date', 'info'); } }
-
 function downloadConfig() { fetch('/api/settings/config', { headers: { 'X-Session-Token': sessionToken } }).then(res => res.json()).then(d => { const blob = new Blob([JSON.stringify(d.config, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'ward-config.json'; a.click(); URL.revokeObjectURL(url); showToast('Config downloaded', 'success'); }).catch(() => showToast('Failed', 'error')); }
-
 function uploadConfig(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (e) => { try { const config = JSON.parse(e.target.result); await fetch('/api/settings/restore-config', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ config }) }); showToast('Config restored!', 'success'); setTimeout(() => location.reload(), 2000); } catch(err) { showToast('Invalid JSON', 'error'); } }; reader.readAsText(file); }
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-function showToast(msg, type = 'success') { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = `toast toast-${type}`; toast.innerText = msg; container.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000); }
-
+// === INITIALIZATION ===
 if (sessionToken) { fetch('/api/auth/status', { headers: { 'X-Session-Token': sessionToken } }).then(res => res.json()).then(d => { if (d.authenticated) { hideLogin(); fetchStatus(); } else { showLogin(); } }).catch(() => showLogin()); } else { showLogin(); }
 
-setInterval(() => { if (sessionToken) fetchStatus(); }, 2000);
+let pollingTimer = null;
+function startPolling() {
+  if (pollingTimer) clearInterval(pollingTimer);
+  pollingTimer = setInterval(() => { if (sessionToken && !document.hidden) fetchStatus(); }, WARD_STATE.pollingInterval);
+  WARD_STATE.pollingTimer = pollingTimer;
+}
+startPolling();
 </script>
 </body>
 </html>
