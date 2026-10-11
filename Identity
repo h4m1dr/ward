@@ -952,15 +952,6 @@ This section is now fully aligned with Core Safety Laws and UX requirements.
 *   **Mobile Ready:** Column hiding and swipe actions defined.
 
 
-بخش ۴ (Service Manager) بسیار جامع است، اما برای جلوگیری از **حلقه مرگ (Deadlock)** و همسویی با **قوانین ایمنی بخش ۹**، نیاز به ۲ اصلاحیه حیاتی دارد:
-
-1.  **LAW #1 Compliance (Self-Exclusion):** سرویس `ward.service` نباید در لیست قابل کنترل یا Auto-Recovery باشد.
-2.  **Async Safety in Guardian:** استفاده از `subprocess.run` داخل یک لوپ while بدون مدیریت خطای دقیق می‌تواند باعث هنگ کردن Thread شود.
-
-در ادامه، **نسخه نهایی و اصلاح‌شده بخش ۴** آماده شده است. این متن را جایگزین بخش ۴ فعلی در فایل `Identity.md` کنید:
-
----
-
 ## SECTION 4: SERVICE MANAGER (`#tab-services`)
 **Scope:** Lifecycle management of Systemd units. Transforms WARD from a passive monitor into an active control panel for server daemons (Nginx, Docker, Xray, etc.).
 
