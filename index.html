@@ -29,8 +29,8 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 #login-overlay { position: fixed; inset: 0; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 10000; }
 #login-overlay.hidden { display: none; }
 .login-box { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 12px; padding: 36px; width: 340px; text-align: center; }
-.login-box input { width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 11px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; }
-.login-box button { width: 100%; background: var(--accent-health); color: #000; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+.login-box input { width: 100%; background: var(--bg-base); border: 1px solid var(--border-dim); color: var(--text-main); padding: 11px 14px; border-radius: 8px; margin-bottom: 14px; }
+.login-box button { width: 100%; background: var(--accent-health); color: #000; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
 .sidebar { width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border-dim); display: flex; flex-direction: column; flex-shrink: 0; }
 .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-dim); display: flex; align-items: center; gap: 12px; }
@@ -58,7 +58,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .content-section.active { display: block; animation: fadeIn 0.2s; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Overview Grid */
+/* Cards & Overview */
 #overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 @media (max-width: 1200px) { #overview-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px) { #overview-grid { grid-template-columns: 1fr; } }
@@ -75,29 +75,51 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .gauge-wrap canvas { width: 100%; height: 100%; }
 .gauge-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
 
-/* Tables & Controls */
+/* Toolbars, Segmented Controls & Tables */
 .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
-.search-box { flex: 1; min-width: 200px; }
-.search-box input { width: 100%; background: var(--bg-surface); border: 1px solid var(--border-dim); color: var(--text-main); padding: 8px 12px; border-radius: 6px; font-size: 13px; }
-.data-table { width: 100%; border-collapse: collapse; background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+.segmented-control { display: flex; background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 6px; overflow: hidden; }
+.seg-btn { background: transparent; border: none; padding: 6px 12px; color: var(--text-muted); font-size: 12px; cursor: pointer; font-weight: 600; }
+.seg-btn.active { background: rgba(0, 245, 160, 0.15); color: var(--accent-health); }
+.search-box { flex: 1; min-width: 180px; }
+.search-box input { width: 100%; background: var(--bg-surface); border: 1px solid var(--border-dim); color: var(--text-main); padding: 7px 12px; border-radius: 6px; font-size: 13px; }
+
+.data-table { width: 100%; border-collapse: collapse; background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 8px; overflow: hidden; margin-top: 10px; }
 .data-table th, .data-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-dim); font-size: 13px; }
-.data-table th { background: rgba(0,0,0,0.2); color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; cursor: pointer; user-select: none; }
-.data-table th:hover { color: var(--accent-health); }
+.data-table th { background: rgba(0,0,0,0.2); color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; user-select: none; }
 .data-table tr.draggable-row { cursor: grab; }
 .data-table tr.dragging { opacity: 0.4; background: rgba(0,245,160,0.1); }
 .drag-handle { cursor: grab; color: var(--text-muted); margin-right: 6px; user-select: none; }
 .mono { font-family: var(--font-mono); }
+
+/* Status Badges & Buttons */
 .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: var(--font-mono); }
 .badge-active { background: rgba(0,245,160,0.15); color: var(--accent-health); }
-.badge-stopped { background: rgba(148,163,184,0.15); color: var(--text-muted); }
+.badge-idle { background: rgba(245,158,11,0.15); color: var(--accent-warn); }
 .badge-down { background: rgba(239,68,68,0.15); color: var(--accent-crit); }
+.badge-stopped { background: rgba(148,163,184,0.15); color: var(--text-muted); }
+
 .btn { background: var(--accent-health); color: #000; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
 .btn-danger { background: transparent; color: var(--accent-crit); border: 1px solid var(--accent-crit); }
 .btn-danger:hover { background: var(--accent-crit); color: #fff; }
 .btn-warn { background: transparent; color: var(--accent-warn); border: 1px solid var(--accent-warn); }
 .btn-warn:hover { background: var(--accent-warn); color: #000; }
 .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-dim); }
-.input-field { background: var(--bg-surface); border: 1px solid var(--border-dim); color: var(--text-main); padding: 7px 11px; border-radius: 6px; font-size: 13px; }
+
+/* Switch Toggle */
+.toggle-switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--border-dim); transition: .2s; border-radius: 18px; }
+.slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: #fff; transition: .2s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--accent-health); }
+input:checked + .slider:before { transform: translateX(16px); background-color: #000; }
+
+/* Log Viewer Drawer */
+.log-row td { background: #07090D; padding: 14px; }
+.log-box { font-family: var(--font-mono); font-size: 11px; color: #94A3B8; max-height: 220px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; }
+
+/* Web Gateways Grid */
+.gateway-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.gateway-card { background: var(--bg-surface); border: 1px solid var(--border-dim); border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
 
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center; }
 .modal.active { display: flex; }
@@ -126,7 +148,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     <div class="nav-item active" onclick="switchTab('overview', this)"><span>📊</span> Overview</div>
     <div class="nav-item" onclick="switchTab('processes', this)"><span>⚡</span> Processes</div>
     <div class="nav-item" onclick="switchTab('services', this)"><span>⚙️</span> Services</div>
-    <div class="nav-item" onclick="switchTab('ports', this)"><span>🔌</span> Ports</div>
+    <div class="nav-item" onclick="switchTab('ports', this)"><span>🔌</span> Ports & Flow</div>
     <div class="nav-item" onclick="switchTab('storage', this)"><span>💾</span> Storage</div>
     <div class="nav-item" onclick="switchTab('settings', this)"><span>🔧</span> Settings</div>
   </div>
@@ -153,7 +175,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     </div>
   </div>
 
-  <!-- TAB: OVERVIEW (SMART CARDS) -->
+  <!-- SECTION 2: OVERVIEW TAB -->
   <div id="tab-overview" class="content-section active">
     <div id="overview-grid">
       <div class="metric-card">
@@ -190,7 +212,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     </div>
   </div>
 
-  <!-- TAB: PROCESSES (SECTION 3 COMPLETE) -->
+  <!-- SECTION 3: PROCESSES TAB -->
   <div id="tab-processes" class="content-section">
     <div class="toolbar">
       <div class="search-box">
@@ -200,7 +222,6 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
       <button class="btn" onclick="openModal('modal-add-proc')">+ Watch Process</button>
       <button class="btn btn-ghost" onclick="fetchProcesses()">🔄 Refresh</button>
     </div>
-
     <table class="data-table">
       <thead>
         <tr>
@@ -214,41 +235,81 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
           <th style="text-align:right;">Actions</th>
         </tr>
       </thead>
-      <tbody id="proc-tbody">
-        <tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Loading processes...</td></tr>
-      </tbody>
+      <tbody id="proc-tbody"><tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Loading processes...</td></tr></tbody>
     </table>
   </div>
 
-  <!-- TAB: SERVICES (LIVE PRESERVED) -->
+  <!-- SECTION 4: SERVICES TAB -->
   <div id="tab-services" class="content-section">
     <div class="toolbar">
-      <input type="text" id="in-srv" class="input-field" placeholder="Service name (e.g., nginx)">
-      <button class="btn" onclick="addService()">+ Track Service</button>
+      <div class="segmented-control">
+        <button class="seg-btn active" onclick="setServiceFilter('all', this)">All</button>
+        <button class="seg-btn" onclick="setServiceFilter('active', this)">Active</button>
+        <button class="seg-btn" onclick="setServiceFilter('failed', this)">Failed</button>
+        <button class="seg-btn" onclick="setServiceFilter('inactive', this)">Inactive</button>
+      </div>
+      <div class="search-box">
+        <input type="text" id="srv-search" placeholder="Filter services..." onkeyup="renderServicesTable()">
+      </div>
+      <button class="btn btn-ghost" onclick="reloadDaemon()">🔄 daemon-reload</button>
+      <button class="btn" onclick="openModal('modal-add-srv')">+ Track Service</button>
     </div>
     <table class="data-table">
-      <thead><tr><th>Service</th><th>Status</th><th style="text-align:right;">Action</th></tr></thead>
-      <tbody id="srv-tbody"></tbody>
+      <thead>
+        <tr>
+          <th style="width:30px;"></th>
+          <th>Service Name</th>
+          <th>State</th>
+          <th>Sub State</th>
+          <th>Auto-Recover</th>
+          <th style="text-align:right;">Controls</th>
+        </tr>
+      </thead>
+      <tbody id="srv-tbody"><tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">Loading systemd units...</td></tr></tbody>
     </table>
   </div>
 
-  <!-- TAB: PORTS (LIVE PRESERVED) -->
+  <!-- SECTION 5: PORTS & FLOW TAB -->
   <div id="tab-ports" class="content-section">
-    <div class="toolbar">
-      <input type="number" id="in-port" class="input-field" placeholder="Port number (e.g., 443)">
-      <button class="btn" onclick="addPort()">+ Watch Port</button>
+    <!-- Web Gateway Telemetry (LAW #3) -->
+    <h3 style="font-size:13px; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Web Gateways (Nginx Domains)</h3>
+    <div class="gateway-grid" id="gateway-container">
+      <div class="gateway-card" style="color:var(--text-muted);">Scanning web domains...</div>
     </div>
+
+    <!-- Ports Toolbar -->
+    <div class="toolbar">
+      <div class="segmented-control">
+        <button class="seg-btn active" id="btn-port-monitored" onclick="setPortView('monitored', this)">⭐ Monitored</button>
+        <button class="seg-btn" id="btn-port-all" onclick="setPortView('all', this)">🌐 All Listening</button>
+      </div>
+      <div class="search-box">
+        <input type="text" id="port-search" placeholder="Filter ports or processes..." onkeyup="renderPortsTable()">
+      </div>
+      <button class="btn" onclick="openModal('modal-add-port')">+ Watch Port</button>
+      <button class="btn btn-ghost" onclick="fetchPortsData()">🔍 Scan Now</button>
+    </div>
+
     <table class="data-table">
-      <thead><tr><th>Port</th><th>Status</th><th style="text-align:right;">Action</th></tr></thead>
-      <tbody id="port-tbody"></tbody>
+      <thead>
+        <tr>
+          <th>Port</th>
+          <th>Proto</th>
+          <th>Owner Process</th>
+          <th>Active Conn</th>
+          <th>Status</th>
+          <th style="text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="port-tbody"><tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">Inspecting sockets...</td></tr></tbody>
     </table>
   </div>
 
-  <!-- TAB: STORAGE (LIVE PRESERVED) -->
+  <!-- STORAGE TAB -->
   <div id="tab-storage" class="content-section">
     <div class="toolbar">
-      <input type="text" id="dir-name" class="input-field" placeholder="Label">
-      <input type="text" id="dir-path" class="input-field" placeholder="/var/log">
+      <input type="text" id="dir-name" class="input-field" placeholder="Label" style="width:120px;">
+      <input type="text" id="dir-path" class="input-field" placeholder="/var/log" style="flex:1;">
       <button class="btn" onclick="addFolder()">+ Track Folder</button>
     </div>
     <table class="data-table">
@@ -257,31 +318,47 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     </table>
   </div>
 
-  <!-- TAB: SETTINGS -->
+  <!-- SETTINGS TAB -->
   <div id="tab-settings" class="content-section">
     <div class="metric-card" style="max-width:500px;">
-      <h3 style="margin-bottom:12px;">Configuration</h3>
-      <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">System port: 7654. Managed via systemd service.</p>
+      <h3 style="margin-bottom:12px;">Security & Sessions</h3>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Core Port: 7654. Telemetry interval: 1000ms.</p>
       <button class="btn btn-danger" onclick="doLogout()">End Active Session</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: ADD PROCESS -->
+<!-- MODALS -->
 <div id="modal-add-proc" class="modal">
   <div class="modal-card">
     <h3 style="margin-bottom:16px;">Watch New Process</h3>
-    <div class="form-group">
-      <label>Process Name (comm)</label>
-      <input type="text" id="new-proc-name" placeholder="e.g., nginx, xray, python3">
-    </div>
-    <div class="form-group">
-      <label>Display Alias (Optional)</label>
-      <input type="text" id="new-proc-alias" placeholder="e.g., Main Proxy Engine">
-    </div>
+    <div class="form-group"><label>Process Name</label><input type="text" id="new-proc-name" placeholder="e.g., nginx, xray, python3"></div>
+    <div class="form-group"><label>Display Alias</label><input type="text" id="new-proc-alias" placeholder="e.g., Main Proxy"></div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-proc')">Cancel</button>
-      <button class="btn" onclick="submitWatchProcess()">Save to Watchlist</button>
+      <button class="btn" onclick="submitWatchProcess()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-add-srv" class="modal">
+  <div class="modal-card">
+    <h3 style="margin-bottom:16px;">Track Systemd Service</h3>
+    <div class="form-group"><label>Unit Name</label><input type="text" id="new-srv-name" placeholder="e.g., redis.service"></div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-srv')">Cancel</button>
+      <button class="btn" onclick="submitAddService()">Track</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-add-port" class="modal">
+  <div class="modal-card">
+    <h3 style="margin-bottom:16px;">Watch Port</h3>
+    <div class="form-group"><label>Port Number</label><input type="number" id="new-port-num" placeholder="e.g., 443"></div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-port')">Cancel</button>
+      <button class="btn" onclick="submitWatchPort()">Watch</button>
     </div>
   </div>
 </div>
@@ -291,17 +368,12 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 <script>
 let sessionToken = localStorage.getItem('ward_token') || '';
 let currentTab = 'overview';
-let globalTelemetry = null;
 const pLen = 60;
 const d_cpu = new Array(pLen).fill(0), d_mem = new Array(pLen).fill(0), d_conn = new Array(pLen).fill(0), d_net_rx = new Array(pLen).fill(0);
 
-let processState = {
-  isLocked: true,
-  items: [],
-  originalSnapshot: null,
-  sortCol: null,
-  sortAsc: true
-};
+let processState = { isLocked: true, items: [], originalSnapshot: null, sortCol: null, sortAsc: true };
+let serviceState = { items: [], filter: 'all', activeLogUnit: null };
+let portState = { items: [], view: 'monitored' };
 
 function showToast(msg) {
   const box = document.getElementById('toast-box');
@@ -324,9 +396,7 @@ async function doLogin() {
       localStorage.setItem('ward_token', d.token);
       document.getElementById('login-overlay').classList.add('hidden');
       initApp();
-    } else {
-      alert("Invalid password");
-    }
+    } else alert("Invalid password");
   } catch(e) { alert("Connection failed"); }
 }
 
@@ -351,23 +421,22 @@ function switchTab(tabId, el) {
   if (el) el.classList.add('active');
   document.getElementById(`tab-${tabId}`)?.classList.add('active');
 
-  const titles = { overview: 'System Overview', processes: 'Process Inspector', services: 'Services', ports: 'Ports', storage: 'Storage', settings: 'Settings' };
+  const titles = { overview: 'System Overview', processes: 'Process Inspector', services: 'Service Manager', ports: 'Ports & Flow Gateway', storage: 'Storage', settings: 'Settings' };
   document.getElementById('tab-heading').innerText = titles[tabId] || 'WARD';
 
   if (tabId === 'processes') fetchProcesses();
+  if (tabId === 'services') fetchServices();
+  if (tabId === 'ports') fetchPortsData();
 }
 
-// CANVAS DRAWING (LAW #5 & #3 Compliant)
+// CANVAS UTILS
 function drawSpark(id, arr, maxVal, color) {
   const cvs = document.getElementById(id); if (!cvs) return;
   const ctx = cvs.getContext('2d');
-  const w = cvs.width = cvs.clientWidth * 2;
-  const h = cvs.height = cvs.clientHeight * 2;
+  const w = cvs.width = cvs.clientWidth * 2, h = cvs.height = cvs.clientHeight * 2;
   ctx.clearRect(0, 0, w, h);
-
   const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, color + '35');
-  grad.addColorStop(1, color + '00');
+  grad.addColorStop(0, color + '35'); grad.addColorStop(1, color + '00');
 
   ctx.beginPath();
   const step = w / (arr.length - 1);
@@ -385,7 +454,6 @@ function drawGauge(id, pct) {
   const ctx = cvs.getContext('2d');
   const size = cvs.width = cvs.height = 200;
   ctx.clearRect(0, 0, size, size);
-
   const cx = size / 2, cy = size / 2, r = size / 2 - 16;
   const start = 135 * Math.PI / 180, end = 405 * Math.PI / 180;
 
@@ -398,13 +466,13 @@ function drawGauge(id, pct) {
   ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.stroke();
 }
 
+// OVERVIEW
 async function fetchTelemetry() {
   if (!sessionToken || document.hidden) return;
   try {
     const res = await fetch('/api/telemetry/overview', { headers: { 'X-Session-Token': sessionToken } });
     if (res.status === 401) { document.getElementById('login-overlay').classList.remove('hidden'); return; }
     const d = await res.json();
-    globalTelemetry = d;
 
     document.getElementById('header-uptime').innerText = `Uptime: ${d.uptime}`;
     document.getElementById('header-load').innerText = `Load: ${d.load_avg}`;
@@ -450,13 +518,11 @@ async function fetchTelemetry() {
     drawSpark('cv-conn', d_conn, Math.max(50, Math.max(...d_conn)), '#cc5de8');
     drawSpark('cv-net', d_net_rx, Math.max(5, Math.max(...d_net_rx)), '#00F5A0');
 
-    renderServices(d.services);
-    renderPorts(d.ports);
     renderStorage(d.caches);
   } catch(e) {}
 }
 
-// PROCESS INSPECTOR (SECTION 3)
+// SECTION 3: PROCESS INSPECTOR
 async function fetchProcesses() {
   if (!sessionToken) return;
   try {
@@ -515,7 +581,6 @@ function renderProcessTable() {
       </tr>
     `;
   });
-
   tbody.innerHTML = html;
   setupProcessDragDrop();
 }
@@ -564,26 +629,18 @@ function setupProcessDragDrop() {
 async function commitProcessOrder() {
   const names = [...document.querySelectorAll('#proc-tbody .draggable-row')].map(r => r.dataset.name);
   try {
-    await fetch('/api/processes/reorder', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ order: names })
-    });
-    showToast("New order saved");
+    await fetch('/api/processes/reorder', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ order: names }) });
+    showToast("Order committed");
     fetchProcesses();
   } catch(e) {}
 }
 
 async function sendProcAction(pid, action) {
-  if (!confirm(`Send ${action.toUpperCase()} to PID ${pid}?`)) return;
+  if (!confirm(`Execute ${action.toUpperCase()} on PID ${pid}?`)) return;
   try {
-    const res = await fetch('/api/processes/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ pid, action })
-    });
+    const res = await fetch('/api/processes/action', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ pid, action }) });
     const d = await res.json();
-    if (d.success) { showToast(d.message); setTimeout(fetchProcesses, 600); }
+    if (d.success) { showToast(d.message); setTimeout(fetchProcesses, 500); }
     else alert(d.error || "Action failed");
   } catch(e) {}
 }
@@ -591,11 +648,7 @@ async function sendProcAction(pid, action) {
 async function unwatchProcess(name) {
   if (!confirm(`Remove ${name} from watchlist?`)) return;
   try {
-    const res = await fetch('/api/processes/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ action: 'unwatch', name })
-    });
+    const res = await fetch('/api/processes/action', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ action: 'unwatch', name }) });
     const d = await res.json();
     if (d.success) { showToast(`Removed ${name}`); fetchProcesses(); }
   } catch(e) {}
@@ -604,47 +657,278 @@ async function unwatchProcess(name) {
 async function submitWatchProcess() {
   const name = document.getElementById('new-proc-name').value.trim();
   const alias = document.getElementById('new-proc-alias').value.trim();
-  if (!name) return alert("Process name is required");
+  if (!name) return alert("Name is required");
   try {
-    const res = await fetch('/api/processes/watch', {
+    const res = await fetch('/api/processes/watch', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ value: name, alias: alias || name }) });
+    const d = await res.json();
+    if (d.success) { showToast(`Watched ${name}`); closeModal('modal-add-proc'); fetchProcesses(); }
+  } catch(e) {}
+}
+
+// SECTION 4: SERVICES MANAGER
+async function fetchServices() {
+  if (!sessionToken) return;
+  try {
+    const res = await fetch('/api/services/list', { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    serviceState.items = d.units || [];
+    renderServicesTable();
+  } catch(e) {}
+}
+
+function setServiceFilter(filter, el) {
+  serviceState.filter = filter;
+  el.parentElement.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderServicesTable();
+}
+
+function renderServicesTable() {
+  const tbody = document.getElementById('srv-tbody');
+  const q = document.getElementById('srv-search').value.toLowerCase();
+  let list = serviceState.items.filter(u => u.name.toLowerCase().includes(q) || u.description.toLowerCase().includes(q));
+
+  if (serviceState.filter !== 'all') {
+    list = list.filter(u => u.active_state === serviceState.filter);
+  }
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No services matching filter</td></tr>';
+    return;
+  }
+
+  let html = '';
+  list.forEach(u => {
+    const isAct = u.active_state === 'active';
+    const isProt = u.is_protected;
+    const dotColor = isAct ? 'var(--accent-health)' : (u.active_state === 'failed' ? 'var(--accent-crit)' : 'var(--text-muted)');
+
+    let controls = '';
+    if (isProt) {
+      controls = `<span style="color:var(--accent-crit); font-size:11px; font-weight:600;">🛡️ PROTECTED</span>`;
+    } else {
+      controls = `
+        <button class="btn btn-ghost" onclick="sendServiceAction('${u.name}', 'start')" ${isAct ? 'disabled style="opacity:0.3"' : ''}>▶</button>
+        <button class="btn btn-warn" onclick="sendServiceAction('${u.name}', 'restart')">🔄</button>
+        <button class="btn btn-danger" onclick="sendServiceAction('${u.name}', 'stop')" ${!isAct ? 'disabled style="opacity:0.3"' : ''}>⏹</button>
+      `;
+    }
+
+    const toggle = isProt ? '-' : `
+      <label class="toggle-switch">
+        <input type="checkbox" ${u.auto_recovery ? 'checked' : ''} onchange="toggleAutoRecovery('${u.name}', this.checked)">
+        <span class="slider"></span>
+      </label>
+    `;
+
+    html += `
+      <tr>
+        <td><div style="width:8px; height:8px; border-radius:50%; background:${dotColor};"></div></td>
+        <td>
+          <strong>${u.name}</strong>
+          <div style="font-size:11px; color:var(--text-muted);">${u.description || '-'}</div>
+        </td>
+        <td class="mono">${u.active_state}</td>
+        <td class="mono" style="color:var(--text-muted);">${u.sub_state}</td>
+        <td>${toggle}</td>
+        <td style="text-align:right;">
+          ${controls}
+          <button class="btn btn-ghost" onclick="toggleServiceLog('${u.name}')">📄</button>
+        </td>
+      </tr>
+      <tr id="log-row-${u.name}" class="log-row" style="display:none;">
+        <td colspan="6"><div class="log-box" id="log-content-${u.name}">Loading journal...</div></td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+async function sendServiceAction(unit, action) {
+  if (action === 'stop' && !confirm(`Stop ${unit}?`)) return;
+  try {
+    const res = await fetch('/api/services/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
-      body: JSON.stringify({ value: name, alias: alias || name })
+      body: JSON.stringify({ unit, action })
     });
     const d = await res.json();
-    if (d.success) {
-      showToast(`Watching ${name}`);
-      closeModal('modal-add-proc');
-      fetchProcesses();
+    if (d.success) { showToast(d.message); setTimeout(fetchServices, 600); }
+    else alert(d.error || "Action refused");
+  } catch(e) {}
+}
+
+async function toggleAutoRecovery(unit, checked) {
+  try {
+    await fetch('/api/services/configure', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ unit, auto_recovery: checked })
+    });
+    showToast(`Auto-recovery updated for ${unit}`);
+  } catch(e) {}
+}
+
+async function reloadDaemon() {
+  showToast("Executing daemon-reload...");
+  await fetch('/api/services/action', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+    body: JSON.stringify({ action: 'daemon-reload' })
+  });
+  showToast("Systemd reloaded");
+  fetchServices();
+}
+
+async function toggleServiceLog(unit) {
+  const row = document.getElementById(`log-row-${unit}`);
+  const content = document.getElementById(`log-content-${unit}`);
+  if (row.style.display !== 'none') {
+    row.style.display = 'none';
+    return;
+  }
+  row.style.display = 'table-row';
+  content.innerText = 'Streaming logs from journalctl...';
+  try {
+    const res = await fetch(`/api/services/logs/${encodeURIComponent(unit)}`, { headers: { 'X-Session-Token': sessionToken } });
+    content.innerText = await res.text();
+  } catch(e) { content.innerText = 'Failed to load logs.'; }
+}
+
+async function submitAddService() {
+  const unit = document.getElementById('new-srv-name').value.trim();
+  if (!unit) return;
+  await fetch('/api/services/configure', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+    body: JSON.stringify({ unit, watch: true })
+  });
+  closeModal('modal-add-srv');
+  fetchServices();
+  showToast(`Tracking ${unit}`);
+}
+
+// SECTION 5: PORTS & FLOW + WEB DOMAIN HEALTH
+async function fetchPortsData() {
+  if (!sessionToken) return;
+  try {
+    // 1. Fetch Ports Intelligence
+    const res = await fetch('/api/ports/list', { headers: { 'X-Session-Token': sessionToken } });
+    const d = await res.json();
+    portState.items = d.ports || [];
+    renderPortsTable();
+
+    // 2. Fetch Web Domain Health (Section 5.10)
+    const wRes = await fetch('/api/web/health', { headers: { 'X-Session-Token': sessionToken } });
+    const wData = await wRes.json();
+    renderGateways(wData.domains || []);
+  } catch(e) {}
+}
+
+function setPortView(view, el) {
+  portState.view = view;
+  el.parentElement.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderPortsTable();
+}
+
+function renderGateways(domains) {
+  const container = document.getElementById('gateway-container');
+  if (domains.length === 0) {
+    container.innerHTML = '<div class="gateway-card" style="color:var(--text-muted);">No domains configured</div>';
+    return;
+  }
+  container.innerHTML = domains.map(d => {
+    const color = d.state === 'healthy' ? 'var(--accent-health)' : (d.state === 'warn' ? 'var(--accent-warn)' : 'var(--accent-crit)');
+    const code = d.status_code ? `HTTP ${d.status_code}` : 'TIMEOUT/DOWN';
+    const lat = d.latency_ms ? `${d.latency_ms}ms` : '-';
+    return `
+      <div class="gateway-card">
+        <div>
+          <div style="font-weight:600; font-size:13px;">${d.url}</div>
+          <div style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">${lat}</div>
+        </div>
+        <span class="badge" style="background:rgba(255,255,255,0.06); color:${color};">${code}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderPortsTable() {
+  const tbody = document.getElementById('port-tbody');
+  const q = document.getElementById('port-search').value.toLowerCase();
+  let list = portState.items.filter(p => String(p.port).includes(q) || p.owner_name.toLowerCase().includes(q));
+
+  if (portState.view === 'monitored') {
+    list = list.filter(p => p.is_watched);
+  }
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No ports matching filter</td></tr>';
+    return;
+  }
+
+  let html = '';
+  list.forEach(p => {
+    let badgeClass = 'badge-down';
+    if (p.status === 'active') badgeClass = 'badge-active';
+    else if (p.status === 'idle') badgeClass = 'badge-idle';
+
+    const unwatchBtn = p.is_watched ? `<button class="btn btn-ghost" onclick="toggleWatchPort(${p.port}, false)" title="Unwatch">✕</button>` : '';
+
+    html += `
+      <tr>
+        <td class="mono" style="font-size:14px; font-weight:700;">${p.port}</td>
+        <td><span class="badge" style="background:rgba(255,255,255,0.05); color:var(--accent-flow);">${p.protocol}</span></td>
+        <td><strong>${p.owner_name}</strong> <span style="font-size:11px; color:var(--text-muted);">${p.owner_pid ? '(PID '+p.owner_pid+')' : ''}</span></td>
+        <td class="mono">${p.established_count} <span style="font-size:10px; color:var(--text-muted);">ESTAB</span></td>
+        <td><span class="badge ${badgeClass}">${p.status.toUpperCase()}</span></td>
+        <td style="text-align:right;">
+          <button class="btn btn-ghost" onclick="testLoopbackPort(${p.port})">🏓 Test</button>
+          ${unwatchBtn}
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+async function testLoopbackPort(port) {
+  showToast(`Probing 127.0.0.1:${port}...`);
+  try {
+    const res = await fetch('/api/ports/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+      body: JSON.stringify({ port })
+    });
+    const d = await res.json();
+    if (d.tcp_ok) {
+      const httpMsg = d.http_status ? ` (HTTP ${d.http_status})` : '';
+      showToast(`Port ${port} responded in ${d.latency_ms}ms${httpMsg}`);
+    } else {
+      alert(`Port ${port} refused connection (Closed).`);
     }
   } catch(e) {}
 }
 
-// LIVE RENDERERS FOR OTHER TABS
-function renderServices(map) {
-  if (!map) return;
-  const tbody = document.getElementById('srv-tbody');
-  tbody.innerHTML = Object.entries(map).map(([k, v]) => `
-    <tr>
-      <td><strong>${k}</strong></td>
-      <td><span class="badge ${v==='Running'?'badge-active':'badge-down'}">${v}</span></td>
-      <td style="text-align:right;"><button class="btn btn-danger" onclick="remItem('service', '${k}')">Remove</button></td>
-    </tr>
-  `).join('');
+async function toggleWatchPort(port, watch) {
+  await fetch('/api/ports/configure', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+    body: JSON.stringify({ port, watch })
+  });
+  fetchPortsData();
+  showToast(`Watch updated for port ${port}`);
 }
 
-function renderPorts(map) {
-  if (!map) return;
-  const tbody = document.getElementById('port-tbody');
-  tbody.innerHTML = Object.entries(map).map(([k, v]) => `
-    <tr>
-      <td class="mono"><strong>Port ${k}</strong></td>
-      <td><span class="badge ${v==='Listening'?'badge-active':'badge-down'}">${v}</span></td>
-      <td style="text-align:right;"><button class="btn btn-danger" onclick="remItem('port', '${k}')">Remove</button></td>
-    </tr>
-  `).join('');
+async function submitWatchPort() {
+  const p = parseInt(document.getElementById('new-port-num').value);
+  if (!p) return;
+  await toggleWatchPort(p, true);
+  closeModal('modal-add-port');
 }
 
+// STORAGE
 function renderStorage(map) {
   if (!map) return;
   const tbody = document.getElementById('dir-tbody');
@@ -656,18 +940,6 @@ function renderStorage(map) {
       <td style="text-align:right;"><button class="btn btn-danger" onclick="remItem('directory', '${k}')">Remove</button></td>
     </tr>
   `).join('');
-}
-
-async function addService() {
-  const v = document.getElementById('in-srv').value.trim(); if (!v) return;
-  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'service', value: v }) });
-  document.getElementById('in-srv').value = ''; fetchTelemetry();
-}
-
-async function addPort() {
-  const v = document.getElementById('in-port').value.trim(); if (!v) return;
-  await fetch('/api/config/add', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken }, body: JSON.stringify({ type: 'port', value: v }) });
-  document.getElementById('in-port').value = ''; fetchTelemetry();
 }
 
 async function addFolder() {
