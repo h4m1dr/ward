@@ -1623,3 +1623,5 @@ if __name__ == "__main__":
     server = HTTPServer(("127.0.0.1", port), RequestHandler)
     print(f"WARD Server running on port {port}")
     server.serve_forever()
+
+
